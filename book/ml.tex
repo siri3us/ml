@@ -1,0 +1,2938 @@
+\documentclass{book}
+\usepackage[english, russian]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=0.75in]{geometry}
+\usepackage{paralist}
+\usepackage{amsthm, amsmath, amsfonts, amssymb}
+%\usepackage{bbold}
+\usepackage{dsfont}
+\usepackage{mathtools}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{algorithm}
+\usepackage{algpseudocode} 
+\usepackage{multirow}
+\usepackage{comment}
+
+% Next goes different graphic related issues are discussed
+\usepackage{xcolor, colortbl}
+\usepackage{tikz}
+\usepackage{xifthen}
+\usetikzlibrary{arrows}
+\usetikzlibrary{positioning}
+\usepackage{pgf}
+\usepackage{pgfplots}
+
+\definecolor{grey1}{RGB}{192,192,192}
+\definecolor{lemonchiffon}{RGB}{255,250,205}
+\definecolor{yellowgreen}{RGB}{154,205,50}
+\definecolor{chocolate}{RGB}{210,105,30}
+\definecolor{purple}{RGB}{128,0,128}
+
+\usepackage{sectsty}
+%\subsectionfont{\color{blue}}
+\subsubsectionfont{\color{red}}  % sets colour of sections
+
+\usepackage{caption,subcaption}
+
+\usepackage{bm}
+
+\usepackage{indentfirst} % Отступ в начале chapter, section, subsection и т.д.
+
+\newtheorem{theorem}{Теорема}
+\numberwithin{theorem}{chapter}
+
+\newtheorem{statement}{Утверждение}
+\numberwithin{statement}{chapter}
+
+\newtheorem{lemma}{Лемма}
+\numberwithin{lemma}{chapter}
+
+\newtheorem{consequence}{Следствие}
+
+\theoremstyle{definition}
+\newtheorem{task}{Задание}
+\numberwithin{task}{chapter}
+
+\theoremstyle{remark}
+\newtheorem{example}{Пример}
+\numberwithin{example}{chapter}
+
+\newtheorem{assumption}{Предположение}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Определение}
+\numberwithin{definition}{chapter}
+
+\theoremstyle{remark}
+\newtheorem{note}{Замечание}
+\theoremstyle{remark}
+\newtheorem{lyrics}{Лирическое отступление}
+\numberwithin{lyrics}{section}
+
+%\renewenvironment{itemize}[1]{\begin{compactitem}#1}{\end{compactitem}}
+%\renewenvironment{enumerate}[1]{\begin{compactenum}#1}{\end{compactenum}}
+%\renewenvironment{description}[0]{\begin{compactdesc}}{\end{compactdesc}}
+
+\newcommand{\param}[1]{\textbf{#1}}
+\newcommand{\numberof}[1]{\#[\text{#1}]}
+\newcommand{\underquestion}[1]{\textbf{#1 (Check!)}}
+\newcommand{\TODO}[1]{\textbf{[TODO:#1]}}
+
+% Комманды для комментариев
+\newcommand{\ignore}[1]{}
+\newcommand{\hidden}[1]{}
+\newcommand{\translation}[1]{}
+
+\DeclareMathAlphabet{\mathbbold}{U}{bbold}{m}{n}
+
+
+\begin{document}
+\title{Лекции по Телекоммуникациям}
+\author{Иванов Александр \\ ИППИ РАН}
+\date{}
+\maketitle
+	
+\tableofcontents
+	
+\include{commands}
+
+
+\include{information}
+
+\chapter{Комплексное представление сигналов}
+\section{Спектр действительного сигнала}
+Спектр любого действительного сигнала удовлетворяет условию:
+\begin{equation}
+\notag
+X(-f) = X^*(f) \Leftrightarrow |X(-f)| = |X(f)|,\quad \angle X(-f) = \angle X^*(f). 
+\end{equation}
+Поэтому, действительный сигнал полностью определяется своим спектром в области положительных или отрицательных частот. Обозначим соответствующие положительные и отрицательные спектры как $X_+(f)$ и $X_-(f)$, соответственно.
+\begin{equation}
+X_+(f) = 
+\begin{cases}
+X(f), & f \ge 0, \\
+\frac{1}{2} X(0), & f = 0, \\
+0, & f < 0;
+\end{cases}
+\qquad\qquad 
+X_-(f) = 
+\begin{cases}
+0, & f > 0, \\
+\frac{1}{2} X(0), & f = 0, \\
+X(f), & f < 0.
+\end{cases}
+\end{equation}
+Очевидно, что $X_+(f) = U_+(f) X(f)$, $X_-(f) = U_-(f) X(f)$, $X(f) = X_-(f) + X_+(f)$, причем $X_+(-f) = X_-^*(f)$.
+
+\subsection{Носитель и ширина спектра}
+Далее введем понятие ширины спектра комплексного сигнала. В отличие от спектров действительных сигналов, спектр комплексных сигналов не является симметричным. Поэтому в данном случае мы не можем ограничиться одними только положительными или отрицательными частотами для описания сигнала.
+\begin{definition}
+\textbf{Носителем спектра} $X(f)$ комплексного сигнала $x(t)$ называется диапазон частот, в пределах которого спектр $X(f)$ отличен от нуля.
+\end{definition}
+\begin{definition}
+\label{def:comp_spectrum_width}
+\textbf{Шириной спектра} $X(f)$ комплексного сигнала $x(t)$ называется половина ширины его носителя. 
+\end{definition}
+В частном случае действительных сигналов ширина спектра определяется следующим образом:
+%\textbf{Ширина спектра} действительного сигнала $x(t)$ --- это минимальная частота $W \ge 0$, что спектр сигнала $x(t)$ в основном сосредоточен в диапазоне $[-W, +W]$. Этот диапазон является носителем спектра $X(f)$.
+%\end{definition}
+\begin{definition}
+\label{def:real_spectrum_width}
+\textbf{Шириной спектра действительного сигнала} $x(t)$ называется такая частота $W$, что спектр сигнала $x(t)$ существенно отличен от 0 только в области частот $|f| \le W$.
+\end{definition}
+Как можно заметить, новое определение ширины спектра, расширенное на случай комплексных сигналов, согласуется с определением для действительных сигналов: ширина спектра сигнала $x(t)$ по определению~\ref{def:comp_spectrum_width} и определению~\ref{def:real_spectrum_width} есть $W$.
+
+\subsection{Комплексные эквиваленты действительных сигналов}
+\begin{definition}
+$\Complex{x}(t)$ называется \textbf{комплексной эквивалентой} действительного сигнала $x(t)$, если 
+\begin{equation}
+x(t) = \Real{\Complex{x}(t)}.
+\end{equation}
+\end{definition}
+Каждый сигнал имеет множество комплексных эквивалент, определенных с точностью до мнимой части. В теории обработки сигналов среди множества комплексных эквивалент сигнала $x(t)$ особую роль играет понятие \textbf{положительная эквивалента} $x_+(t)$, определяемая далее.
+
+Ввиду симметричности спектра действительных сигналов, для описания сигнала $x(t)$ достаточно правой половины его спектра ($f \ge 0$). 
+Введем следующие обозначения:
+\begin{gather*}
+U_+(f) = 1 + \sign(f); \\
+X_+(f) = X(f) U_{+}(f) = \begin{cases}
+2X(f), & f > 0;\\
+X(0),  & f = 0;\\
+0, & f < 0.
+\end{cases}
+\end{gather*}
+Выясним, какому комплексному сигналу соответствует спектр $X_+(f)$\footnote{Во многих книгах в качестве $U_+(f)$ определяется как $(1 + \sign(f)) / 2$. В результате в последующих вычислениях в качестве множителя появляется двойка. Поэтому в данном курсе $U_+(f) \triangleq 1 + \sign(f)$.}. 
+\begin{gather*}
+\sign(f) \leftrightarrow \frac{j}{\pi t},\quad 1 \leftrightarrow \delta(t) \Rightarrow U_+(f) \leftrightarrow u_+(t) = \delta(t) + \frac{j}{\pi t}. \\
+X_+(f) = X(f) U_+(f)  \leftrightarrow x_+(t) = x(t) \otimes u_+(t) = \Int_{-\infty}^{\infty} x(\tau) u_+(t - \tau)d\tau = x(t) + j \cdot x(t) \otimes \frac{1}{\pi t} = x(t) + j\hat{x}(t).\\
+\end{gather*}
+Сигнал $\hat{x}(t)$ называется \textbf{гильбертовым преобразованием} сигнала $x(t)$. Комплексная компонента сигнала $x_+(t)$ появляется вследствие несимметричности спектра $X_+(f)$. Так как $x(t) = \Re\{x_+(t)\}$, то $x_+(t)$ --- комплексная эквивалента сигнала $x(t)$.
+\begin{definition}
+Сигнал $x_+(t) = x(t) + j\Hilbert{x}(t)$ называется \textbf{положительной эквивалентой} действительного сигнала $x(t)$. В отличие от обычной комплексной эквиваленты, положительная эквивалента $x_+(t)$ однозначно определена, так как ее мнимая часть --- гильбертово преобразование сигнала $x(t)$.
+\end{definition}
+
+\subsection{Низкочастотная эквивалента сигнала}
+В реальных системах передачи спектр передаваемого по каналу сигнала $x(t)$ сконцентрирован вокруг некоторой частоты $f_c$, называемой \textbf{несущей частотой} сигнала (см. рис.~\ref{fig:phy:carrier_frequency}). В результате все математические выкладки, касающиеся приема, передачи и преобразований сигнала $x(t)$ явно или неявно содержат частоту $f_c$. Чтобы исключить $f_c$ из этих выкладок, вместо сигнала $x(t)$ рассматривают сигнал $x_{l}(t) = \Complex{x}(t)e^{-j2\pi f_c t}$, имеющий спектр $\Complex{X}(f + f_c)$. Действительно, сигнал $\Complex{x}(t)$ имеет спектр $\Complex{X}(f)$, а домножение его на $e^{-j2\pi f_c t}$ смещает спектр на $f_c$ к началу координат. Спектр сигнала $x_l(t)$ расположен в окрестности нулевой частоты, что исключает несущую частоту $f_c$ из выкладок. 
+\begin{definition}
+\textbf{Низкочастотной эквивалентой} \translation{lowpass equivalent, complex envelope} сигнала $x(t)$, имеющего Фурье-спектр $X(f)$, называется сигнал $x_l(t) = \Complex{x}(t)e^{-j2\pi f_c t}$, Фурье-спектр которого есть $\Complex{X}(f + f_c)$. Низкочастотная эквивалента определена с точностью до комплексной эквиваленты.
+\end{definition}
+\begin{definition}
+\textbf{Низкочастотной положительной эквивалентой} сигнала $x(t)$, имеющего Фурье-спектр $X(f)$, называется сигнал $x_{l,+}(t) = x_+(t)e^{-j2\pi f_c t}$, Фурье-спектр которого есть $X_+(f + f_c)$. Низкочастотная положительная эквивалента однозначно определена.
+\end{definition} 
+Будем называть исходный сигнал $x(t)$ \textbf{широкополосным} или \textbf{частотно-модулированным} \translation{passband signal}, а сигнал $x_l(t)$ \textbf{узкополосным} или \textbf{немодулированным}. 
+
+Действительная и мнимая компоненты сигнала $x_{l,+}(t)$ называются \textbf{синфазной} и \textbf{квадратурной} составляющими соответственно:
+\begin{align}
+x_{I}(t) &= \Re \{x_{l,+}(t)\} = x(t) \cos(2\pi f_c t)  + \hat{x}(t) \sin(2 \pi f_c t),  \label{eq:phy:inphase}\\
+x_{Q}(t) &= \Im \{x_{l,+}(t)\} = \hat{x}(t) \cos(2 \pi f_c t) - x(t) \sin(2 \pi f_c t).  \label{eq:phy:qphase}
+\end{align}
+Заметим, что составляющие $x_{I}(t)$ и $x_{Q}(t)$ определены с точностью до несущей частоты $f_c$. Выразим сигнал $x(t)$ и его гильбертово преобразование $\Hilbert{x}(t)$ через синфазную и квадратурную составляющие:
+\begin{align}
+x(t) &= x_{I}(t) \cos(2\pi f_c t) - x_Q(t) \sin(2 \pi f_c t), \label{eq:phy:back_signal}\\
+\hat{x}(t) &= x_{Q}(t) \cos(2 \pi f_c t) + x_{I}(t) \sin(2 \pi f_c t). \label{eq:phy:back_hilbert}
+\end{align}
+Практическая значимость соотношения~\eqref{eq:phy:back_signal} состоит в том, что оно показывает, как можно получить сигнал $x(t)$ с желаемыми синфазной и квадратурной компонентами (при заранее выбранной $f_c$). Такой подход к формированию сигнала используется в цифровой модуляции [TODO про модуляцию]. Более того, относительно компонент $x_{I}(t) \cos(2\pi f_c t)$ и  $x_Q(t) \sin(2 \pi f_c t)$ верно следующее утверждение.
+
+\begin{statement}
+\label{st:low:orthogonality}
+Пусть $x(t)$ и $y(t)$ --- вещественные сигналы, спектры которых отличны от нуля только в интервале $[-W, W]$ и равны нулю вне него. Пусть $f_c \ge W$. Тогда функции $\phi_1(t) = x(t)\cos(2\pi f_c t)$ и $\phi_2(t) = y(t)\sin(2\pi f_c t)$ ортогональны.
+\end{statement}
+\begin{proof}
+\begin{gather*}
+\Phi_1(f) = \fourier{\phi_1(t)} = \frac{X(f - f_c) + X(f + f_c)}{2} \\
+\Phi_2(f) = \fourier{\phi_2(t)} = \frac{Y(f - f_c) - Y(f + f_c)}{2j}
+\end{gather*}
+Далее воспользуемся равенством Парсеваля:
+\begin{gather*}
+\Int_{-\infty}^{+\infty} \phi_1(t) \phi_2^*(t) dt = \Int_{-\infty}^{+\infty} \Phi_1(f) \Phi^*_2(f) df = 
+\frac{1}{4j} \Int_{-\infty}^{+\infty} (X(f - f_c) + X(f + f_c))(Y^*(f - f_c) - Y^*(f + f_c)) df
+\\
+= \frac{1}{4j} \Int_{-\infty}^{+\infty} \left(X(f - f_c) Y^*(f - f_c) - X(f - f_c)Y^*(f + f_c) + X(f + f_c) Y^*(f - f_c) - X(f + f_c)Y^*(f + f_c)\right) df = \dots \\ 
+\end{gather*}
+Рассмотрим попарные произведения по-отдельности.
+\begin{align*}
+\Int_{-\infty}^{+\infty} X(f - f_c) Y^*(f - f_c) df   &  & = & &  &\Int_{-\infty}^{+\infty} X(f) Y^*(f) df = \Int_{-\infty}^{+\infty} X(f) Y(-f) df \\
+\Int_{-\infty}^{+\infty} X(f + f_c) Y^*(f + f_c) df     &  & = & &  &\Int_{-\infty}^{+\infty} X(f) Y^*(f) df = \Int_{-\infty}^{+\infty} X(f) Y(-f) df  \\  
+\Int_{-\infty}^{+\infty} X(f - f_c) Y^*(f + f_c) df    &  & = & &  &\Int_{-\infty}^{+\infty} X(f) Y^*(f + 2f_c) df \\
+\Int_{-\infty}^{+\infty} X(f + f_c) Y^*(f - f_c) df &  & = &  & &\Int_{-\infty}^{+\infty} X(f) Y^*(f - 2f_c) df = \Int_{-\infty}^{+\infty} X^*(f) Y(f + 2f_c) df
+\end{align*}
+Откуда получаем
+\begin{gather*}
+\Int_{-\infty}^{+\infty} \phi_1(t) \phi_2^*(t) dt = \frac{1}{4j} \Int_{-\infty}^{+\infty}\left(X^*(f)Y(f + 2f_c) - X(f)Y^*(f + 2f_c)\right).
+\end{gather*}
+Если спектры сосредоточены в интервале $[-W, W]$, и $f_c \ge W$, то
+\begin{gather*}
+\Int_{-\infty}^{+\infty} \phi_1(t) \phi_2^*(t) dt = 0.
+\end{gather*}
+\end{proof}
+
+\begin{note}
+На практике спектры $X(f)$ и $Y(f)$ любых реальных сигналов неограниченны, так как конечны длительности сигналов $x(t)$ и $y(t)$. Если же спектры существенно отличны от нуля только в полосе $[-W, W]$, то сигналы $\phi_1(t)$ и $\phi_2(t)$ \textit{приблизительно} ортогональны при $f_c \gg W$. %Причем чем больше $f_c$ тем все меньше становится их скалярное произведение $\langle \phi_1(t), \phi_2(t)\rangle$. 
+Действительно, в таком случае
+$$
+\Int_{-\infty}^{+\infty} \phi_1(t) \phi_2^*(t) dt = \frac{1}{4j} \Int_{-\infty}^{+\infty}\left(X^*(f)Y(f + 2f_c) - X(f)Y^*(f + 2f_c)\right) df.
+$$
+в общем случае отличен от нуля, но из-за убывания спектров $X(f)$ и $Y(f)$ вне полосы $[-W, W]$ его значение будет стремиться к нулю с ростом $f_c$. Таким образом, если $f_c \gg W$, то
+$$
+\langle \phi_1(t), \phi_2(t)\rangle = \Int_{-\infty}^{+\infty} \phi_1(t) \phi_2^*(t) dt \approx 0.
+$$
+
+Тот же результат можно было бы получить и во временной области:
+\begin{gather*}
+\langle \phi_1(t), \phi_2(t)\rangle = \Int_{-\infty}^{+\infty} x(t) y(t) \sin(2\pi f_c t) \cos(2 \pi f_c t) dt = \frac{1}{2}\Int_{-\infty}^{+\infty} x(t) y(t) \sin(4\pi f_c t) dt.
+\end{gather*}
+Равенство этого интеграла нулю можно обосновать следующим образом. Разделим временную ось на интервалы длительности $1/f_c$. Так как $f_c \gg W$, то скорость изменения $x(t)$ и $y(t)$ много меньше скорости изменения $\sin(4\pi f_c t)$. Иначе говоря, на интервале длительности $1/f_c$ $x(t)$ и $y(t)$ можно считать приблизительно неизменными, но в таком случае интеграл от $\sin(4\pi f_c t)$ по любому интервалу длительности $1/f_c$ есть 0. А значит и весь интеграл стремится к нулю. В курсе математического анализа можно найти более строгое доказательство данного утверждения, основанное на той же идее. 
+
+Рассмотренная ситуация с сигналами $x(t)$, $y(t)$ и несущей частотой является достаточно типичной на практике. В частности, 
+во многих существующих системах передачи данных $f_c$ превосходит $W$ в сотню а то и более раз\footnote{Например, в Wi-Fi, где $W \approx 20$ МГц, а $f_c \approx 2.5$ ГГц.}. Поэтому сигналы $x(t)\cos(2\pi f_c t)$ и $y(t)\sin(2\pi f_c t)$ рассматривают как ортогональные. 
+\end{note}
+
+Ввиду утверждения~\ref{st:low:orthogonality} на соотношение 
+$$x(t) = x_{I}(t) \cos(2\pi f_c t) - x_Q(t) \sin(2 \pi f_c t)$$
+можно взглянуть несколько под другим углом. Это соотношение показывает, 1) как сформировать передаваемый сигнал из двух (приблизительно) ортогональных сигналов $x_{I}(t) \cos(2\pi f_c t)$ и $x_Q(t) \sin(2 \pi f_c t)$, и 2) как при этом выглядит $\Hilbert{x}(t)$ \eqref{eq:phy:back_hilbert}. 
+%Формулы~\ref{eq:phy:inphase} и~\ref{eq:phy:qphase} подобным свойством ``обратимости'' не обладают: нельзя выбрать любые желаемые $x(t)$ и $\hat{x}(t)$, так как они должны быть связаны преобразованием Гильберта. Однако~\eqref{eq:phy:inphase} и~\eqref{eq:phy:qphase} показывают, чему равны синфазная и квадратурная компоненты сигнала $x(t)$.
+
+\paragraph{Формирование сигнала.} Важность соотношений~\eqref{eq:phy:back_signal} и \eqref{eq:phy:back_hilbert} будет продемонстрирована 
+
+
+\begin{task}
+	Пусть $X(f)$ --- это Фурье-спектр комплексного сигнала $x(t)$. Выразите через $X(f)$ спектр сигнала $\Re\{x(t)\}$.  
+\end{task}
+\begin{proof}
+	\begin{equation}
+	\label{eq:phy:complex:fourier_of_real_part}
+	\begin{aligned}
+	\fourier{\Re\{x(t)\}} = \Int_{-\infty}^{+\infty} \Re\{x(t)\}e^{-j2\pi f t} df = \frac{1}{2} \Int_{-\infty}^{\infty} x(t) e^{-j 2\pi f t} df + \frac{1}{2} \Int_{-\infty}^{+\infty} x^*(t) e^{-j2\pi f t} df = \\ 
+	= \frac{1}{2} \Int_{-\infty}^{\infty} x(t) e^{-j 2\pi f t} df + \frac{1}{2} \left(\Int_{-\infty}^{+\infty} x(t) e^{j2\pi f t} df\right)^* = \frac{X(f) + X^*(-f)}{2}
+	\end{aligned} 
+	\end{equation}
+\end{proof}
+
+\subsection{Низкочастотная импульсная характеристика}
+\label{repr:low_imp_char}
+При прохождении сигнала $x(t)$  (с Фурье-спектром $X(f)$) через линейный фильтр с импульсной характеристикой $c(t)$ (с передаточной характеристикой $C(f)$) для сигнала $y(t)$ на выходе фильтра верны следующие соотношения:
+\begin{gather*}
+y(t) = c(t) \otimes x(t),\\
+Y(f) = C(f) X(f).
+\end{gather*}
+\begin{definition}
+Функция $c_{l,+}(t)$ называется \textbf{низкочастотной положительной эквивалентой импульсной характеристикой} канал. Ее спектр $C_{l,+}(f)$ есть $C_{+}(f + f_c)$.
+\end{definition}
+Определим, как эквивалента $y_l(t)$ связана с $x_l(t)$ и $c_l(t)$. При $f > -f_c$ для низкочастотной положительной эквиваленты $Y_{l,+}(f)$ верно следующее:
+\begin{gather*}
+Y_{l,+}(f) \MYdef Y_{+}(f + f_c) \MYdef 2 Y(f + f_c) = 2 C(f + f_c) X(f + f_c) = \frac{1}{2} C_+(f + f_c) X_+(f + f_c) = \frac{1}{2} X_{l,+}(f) C_{l,+}(f).
+\end{gather*}
+\begin{equation}
+\label{eq:phy:filter}
+Y_{l,+}(f) = (1/2) X_{l,+}(f) C_{l,+}(f).
+\end{equation}
+Соотношение~\eqref{eq:phy:filter} справедливо и при $f < -f_c$, так как в этом случае левая и правая части обращаются в 0. Единственная точка, в которой оно не выполняется, это точка $f = -f_c$. Действительно,
+\begin{gather*}
+Y_{l,+}(-f_c) = Y(0), \quad \frac{1}{2} X_{l,+}(-f_c) C_{l,+}(-f_c) = \frac{1}{2} X(0) C(0).
+\end{gather*}
+В результате спектры сигналов, имеющих НПЭ $Y_{l,+}(f)$ и $(1/2) X_{l,+}(f) C_{l,+}(f)$ в общем случае отличаются в одной точке --- точке $f = 0$. Для 
+$Y_{l,+}(f)$ это $Y(0)$, а для второго сигнала --- это $Y(0) / 2$. Разумеется, хотелось бы использовать все удобство соотношения~\eqref{eq:phy:filter}, однако остается вопрос о влиянии точки $f = -f_c$. 
+
+Если говорить о математическом обосновании использования~\eqref{eq:phy:filter} во всей области частот, то достаточно вспомнить, что конечное число выколотых точек не влияет на результат обратного преобразования Фурье (разумеется до тех пор пока мы говорим о непрерывном спектре, а не о рядах Фурье). Поэтому во временной области сигналы, соответствующие левой и правой части равенства~\eqref{eq:phy:filter} совпадают. Иначе говоря, для $y_l(t)$ верно следующее:
+\begin{equation}
+\label{eq:phy:low_filter}
+y_l(t) = \frac{1}{2} x_l(t) \otimes c_l(t).
+\end{equation}
+На практике отличие двух НПЭ в точке $f = -f_c$ (или $f = 0$ в исходной системе отсчета) не имеет значения еще и потому, что в этой точке $X(0) \approx 0$, а весь спектр сосредоточен около частоты $f_c \gg 1$.
+
+Подойдем к выводу соотношения~\eqref{eq:phy:filter} немного с другой стороны.
+%\begin{gather*}
+%Y(f) = X(f) C(f) \Rightarrow \frac{\Complex{Y}(f) + \Complex{Y}^*(-f)}{2} = \frac{\Complex{X}(f) + \Complex{X}^*(-f)}{2} \cdot \frac{\Complex{C}(f) + \Complex{C}^*(-f)}{2}.
+%\end{gather*}
+\begin{gather*}
+Y(f) = X(f) C(f) \Rightarrow \frac{\Complex{Y}(f) + \Complex{Y}^*(-f)}{2} = \frac{\Complex{X}(f) + \Complex{X}^*(-f)}{2} \cdot \frac{\Complex{C}(f) + \Complex{C}^*(-f)}{2}.
+\end{gather*}
+Подставим $X_+(f) = \Complex{X}(f)$, $C_+(f) = \Complex{C}(f)$, $Y_+(f) = \Complex{Y}(f)$:
+\begin{gather*}
+Y_+(f) + Y_+^*(-f) = \frac{1}{2}(X_+(f) + X_+^*(-f)) (C_+(f) + C_+^*(-f)).
+\end{gather*}
+Отсюда получаем, что
+\begin{gather}
+Y_+(f) =
+\begin{cases} 
+\frac{1}{2} X_+(f) C_+(f), &\text{ при } f > 0;\\
+X_+(0) C_+(0), &\text{ при } f = 0; \\
+0, &\text{ при } f < 0.
+\end{cases}
+\end{gather}
+Получили тот же самый результат, что и ранее.
+
+\begin{task}
+Пусть $\Complex{x}(t)$, $\Complex{c}(t)$, $\Complex{y}(t)$ --- произвольные КЭ для $x(t)$, $y(t)$, $c(t)$. Как они связаны в общем случае?
+\end{task}
+\begin{proof}
+\begin{gather*}
+\Complex{Y}(f) + \Complex{Y}^*(-f) = \frac{1}{2}\left(\Complex{X}(f) \Complex{C}(f) + \Complex{X}(f) \Complex{C}^*(-f) + \Complex{X}^*(-f) \Complex{C}(f) + 
+\Complex{X}^*(-f) \Complex{C}^*(-f) \right),\\
+\Complex{y}(t) + \Complex{y}^*(t) = \frac{1}{2} (\Complex{x}(t) \otimes \Complex{c}(t) + \Complex{x}(t) \otimes \Complex{c}^*(t) +  \Complex{x}^*(t) \otimes \Complex{c}(t) + \Complex{x}^*(t) \otimes \Complex{c}^*(t)), \\
+\Re \{\Complex{y}(t)\} = \frac{1}{2} \left(\Re\{\Complex{x}(t) \otimes \Complex{c}(t)\} + \Re\{\Complex{x}^*(t) \otimes \Complex{c}(t)\} \right)
+\end{gather*}
+\end{proof}
+
+\subsection{Мощности реальных и эквивалентных сигналов}
+Мгновенная мощность $P(t)$ сигнала $x(t)$ вычисляется следующим образом
+\begin{equation}
+P_x(t) = \frac{x(t)^2}{R},
+\end{equation}
+где $R$ --- сопротивление нагрузки.
+\begin{equation}
+\label{eq:phy:power}
+P_x = \Int_{-\infty}^{+\infty}\frac{x(t)^2}{R} dt = \frac{2}{R} \Int_{-\infty}^{\infty} \frac{|2X(f)|^2}{4} df = \underbrace{\frac{1}{2R} \Int^{+\infty}_{0} |X_+(f)|^2 df}_{{\frac{P_{x_{+}}}{2}}}  = \underbrace{\frac{1}{2R} \Int_{-f_c}^{+\infty} |X_{l,+}(f)|^2 df}_{\frac{P_{x_{l,+}}}{2}}.
+\end{equation}
+В результате получаем, что
+\begin{equation}
+P_x = \frac{P_{x_{+}}}{2} = \frac{P_{x_{l,+}}}{2}.
+\end{equation}
+В случае произвольной КЭ $\Complex{x}(t)$ подобных ``аккуратных'' соотношений не получается. Основная проблема состоит в том, что спектры $\Complex{X}(f)$ и $\Complex{X}^*(-f)$ перекрываются (т.е. спектр $\Complex{X}(f)$ имеет ``хвосты'' в отрицательной области частот). Поэтому при попытке произвести преобразования, аналогичные~\eqref{eq:phy:power}, приходим к множеству перекрестных множителей:
+\begin{equation}
+\notag
+P_x = \frac{2}{R} \Int_{-\infty}^{\infty} \frac{|\Complex{X}(f) + \Complex{X}^*(-f)|^2}{4} df = \Int_{-\infty}^{\infty} \frac{\Complex{X}(f) \Complex{X}^*(f) + \Complex{X}(f) \Complex{X}(-f) + \Complex{X}^*(-f) \Complex{X}^*(f) + \Complex{X}^*(-f) \Complex{X}(-f)}{4} df.
+\end{equation}
+Извлечь что-то полезное отсюда крайне сложно.
+
+\paragraph{Энергия сигнала}
+Как меняется энергия сигнала при частотной модуляции? Во-первых, надо формально определить процесс частотной модуляции.
+
+\begin{gather}
+s(t) = x(t) \cdot \alpha \cos(2\pi f_c t + \phi) = \alpha \cos (\phi) x(t) \sin (2\pi f_c t) - \alpha \sin (\phi) x(t) \sin(2\pi f_c t). \\
+s(t) = \Re\{\underbrace{\alpha e^{j\phi} x(t)}_{s_l(t)} e^{j2\pi f_c t}\}.
+\end{gather}
+Комплексная эквивалента $s_l(t)$, энергия которой равна $P_{s_l} = \alpha^2 P_x$, однозначно имеет ненулевые гармоники в отрицательной области частот, так как $x(t)$ --- действительный сигнал и его спектр $X(f)$ симметричен $(X(-f) = X^*(f))$. Как было показано выше, в этом случае нет простого взаимоотношения между $P_s$ и $P_x$.
+
+
+\subsection{Зачем все это было нужно?}
+
+В англоязычной литературе сигналы характеризуют с помощью терминов ``bandpass'' и ``baseband''.
+\begin{definition}
+\textbf{Bandpass-сигнал} --- реальный узкополосный высокочастотный сигнал, спектр которого сосредоточен в небольшом интервале с центром в частоте $f_0$. Иными словами $x(t)$ --- это bandpass-сигнал если существуют такие положительные числа $f_0$ и $W$, что в положительной области частот спектр $X(f)$ сосредоточен на интервале $[f_0 - W/2, f_0 + W / 2]$, где $W/2 < f_0$ (на практике $W \ll f_0$).
+\end{definition}
+\begin{definition}
+\textbf{Baseband-сигнал} --- это реальный сигнал, спектр которого сосредоточен около нулевой частоты в интервале $[-W, W]$.
+\end{definition}
+
+\subsection{Детектирование сигнала, согласованный фильтр}
+
+\section{Векторное представление сигналов}
+TODO
+
+Множество сигналов и множество векторов эквивалентно. Между ними существует взаимно однозначное отображение, задаваемое некоторым ортонормированным базисом.
+Пусть $\{\phi_i(t)\}_{i=0}^{N-1}$ --- ортонормированный базис, т.е.
+$$
+\langle \phi_n, \phi_m \rangle = \Int_{-\infty}^{+\infty} \phi_n(t) \phi_m^*(t) dt = 
+\begin{cases}
+1, &\text{ если } n = m, \\
+0, &\text{ если } n\neq m.
+\end{cases}
+$$
+Пусть $s(t)$ --- сигнал с конечной энергией (в общем случае комплексный):
+$$
+\energy_s = \Int_{-\infty}^{+\infty} |s(t)|^2 dt < \infty.
+$$
+Тогда сигнал $s(t)$ можно разложить по функциям $\{\phi_i(t)\}_{i=0}^{N - 1}$:
+$$
+s(t) = \Sum_{i = 0}^{N - 1} s_i \phi_i(t).
+$$
+Сигнал $s(t)$ однозначно определяется своим векторным представлением $\bm{s} = (s_0, \dots, s_{N-1})^T$.
+
+\section{Цифровая модуляция}
+В общем случае источник информации на отправителе генерирует последовательность нулей и единиц. Нужно эту \textbf{информационную последовательность} преобразовать в формат, пригодный для передачи по каналу связи. Для этого используется цифровая модуляция [?].
+\begin{definition}
+\textbf{Цифровая модуляция\translation{(digital modulation, digital signalling)}} --- процесс отображения цифровой последовательности (обычно бинарной) в последовательность сигналов, пригодных для передачи по каналу связи. Устройство, выполняющее цифровую модуляцию, называется \textbf{цифровым модулятором\translation{(digital modulator)}}.
+\hidden{The process of mapping a digital sequence to signals for transmission over a communication channel is called digital modulation or digital signaling. [Кроме цифровой модуляции также существует еще и аналоговая модуляция]}
+\end{definition}
+
+Цифровой модулятор отображает $k$-битовое сообщение в один из $M = 2^k$ вещественных сигналов $\{s_m(t)\}_{m=0}^{M-1}$ длительности $T$, пригодных для передачи по беспроводному каналу связи\ignore{О том, какие пригодны, а какие нет, слушатели уже должны знать}. 
+
+В литературе, при формальном описании процесса модуляции, широко используется понятие ``символа''. Это понятие неразрывно связано с выбором ортонормированного базиса:
+\begin{definition}
+Пусть задан ортонормированный базис $\{\phi_i(t)\}_{i=1}^{\N}$ (конечный или бесконечный) в пространстве $\mathcal{L}_2[0, T]$. Тогда \textbf{символом\translation{(symbol)}}, соответствующим сигналу $x(t) \in \mathcal{L}_2[0, T]$, называется вектор $\vec{x} \in \mathbb{R}^N$ его коэффициентов в этом базисе.
+\end{definition}
+
+Обозначим через $\Tsym = T$ длительность каждого из сигналов $\{s_m(t)\}$. Каждые $\Tsym$ секунд отправитель начинает передачу сигнала соответствующего новой $k$-битовой подпоследовательности. $\Tsym$ называется \textbf{длительностью символа\translation{(symbol period)}}. Выражаемая через нее \textbf{символьная скорость\translation{(symbol rate)}} $\srate$ равна $1/\Tsym$ символов/с. Так как каждый символ содержит $k = \log_2 (M)$ бит, то \textbf{битовый интервал\translation{(bit interval)}} $\Tbit$ равен
+\begin{equation}
+\notag
+\Tbit = \frac{\Tsym}{k} = \frac{\Tsym}{\log_2 (M)},
+\end{equation}
+а \textbf{битовая скорость\translation{(bit rate)}} $\brate$, соответственно, равна
+\begin{equation}
+\notag
+\brate = k \srate = \srate \log_2 (M) \text{ [бит/с]}.
+\end{equation}
+
+Обозначим через $\ps{m}$ вероятность появления сигнала $s_m(t)$ на выходе отправителя. Пусть $\energy_m$ --- энергия сигнала $s_m(t)$. Тогда \textbf{средняя энергия\translation{average energy}} сигнала на выходе отправителя равна
+$$
+\energy_{avg} = \Sum_{m = 0}^{\M - 1} \energy_m \ps{m},
+$$
+а \textbf{средняя мощность\translation{average power}}, соответственно, равна
+$$
+\power_{avg} = \frac{\energy_{avg}}{T_s}.
+$$
+
+
+\begin{definition}
+Множество символов $\{\vec{s}_i\}_{i = 0}^{\M - 1}$, соответствующих сигналам $\{s_i(t)\}_{i=0}^{\M-1}$ на выходе модулятора называется \textbf{сигнальным созвездием\translation{signal constellation}}.
+\end{definition}
+
+\subsection{Примеры цифровой модуляции}
+\subsubsection{ASK (PAM)}
+$$
+\vec{x}_i = 
+\begin{bmatrix}
+x_{1i} \\
+x_{2i} \\
+\dots  \\
+x_{\N i} \\
+\end{bmatrix}
+$$
+
+Сигналы $\{s_m(t)\}$ могут иметь произвольную форму. В зависимости от используемой модуляции, сигналы $\{s_m(t)\}$ отличаются по амплитуде, частоте или фазе.
+$$s_m(t) = \Re\{s_{ml}(t)e^{j2\pi\Freq_c t}\}.$$
+
+Начнем с рассмотрения амплитудной модуляции (Amplitute Shift Keying, ASK Pulse Amplitute Modulation, PAM). В этом случае сигналы $s_m(t)$ имеют вид
+\begin{equation}
+s_m(t) = A_m p(t),
+\end{equation}
+где $p(t)$ --- это импульс длительности $T \le T_s$, и $\{A_m, 1 \le m \le M\}$ --- множество различных амплитуд сигналов.
+
+Зачастую сигнал $s_m(t)$ получают из некоторого низкочастотного реального сигнала $g(t)$ путем его \emph{частотной модуляции} \TODO{проверить термин}, т.е. <<подъема>> на несущую частоту $\Freq_c$.
+\begin{equation}
+\label{eq:phy:mod:ask:carrier_modulated_ask_signal}
+s_m(t) = \Re\{s_{ml}(t)e^{j2\pi\Freq_c t}\} = \Re\{\symb_m g(t) e^{j2\pi \Freq_c t}\} = A g(t) \cos(2\pi \Freq_c t).
+\end{equation}
+В этом случае 
+\begin{equation}
+\notag
+p(t) = g(t) \cos(2 \pi \Freq_c t).
+\end{equation}
+
+\begin{task}
+	\label{task:phy:mod:ask:task1}
+	Исходя из равенства
+	\begin{equation*}
+	s_m(t) = \Re\{s_{ml}(t)e^{j2\pi\Freq_c t}\} = \Re\{\symb_m g(t) e^{j2\pi \Freq_c t}\}
+	\end{equation*}
+	возникает соблазн сказать, что $s_{ml}(t) = \symb_m g(t)$. Однако это в общем случае неверно. В этом можно убедиться, посмотрев на спектры сигналов $s_{ml}(t)$ и $\symb_m g(t)$. Приведите примеры, когда равенство $s_{ml}(t) = A g(t)$ (a) выполнено, (b) не выполнено.
+\end{task}
+
+Для модулированных по частоте ASK-сигналов~\eqref{eq:phy:mod:ask:carrier_modulated_ask_signal} ширина полосы, необходимая для передачи, в два раза больше, чем для соответствующего низкочастотного сигнала (см. рис.~\ref{fig:phy:mod:ask:doubling}). Сигналы вида~\eqref{eq:phy:mod:ask:carrier_modulated_ask_signal} являются так называемыми двухсторонними ASK-сигналами (Double-sideband, DSB) \TODO{Проблемы перевода}. Из них можно получить односторонние (Single-sideband, SSB) ASK-сигналы, имеющие вид
+\begin{equation}
+\notag
+s_m(t) = \Re\{\symb_m (g(t) + j \hat{g}(t)) e^{j2\pi \Freq_c t}\}.
+\end{equation}
+
+\begin{note}
+	Заметим, что в отличие от случая \eqref{eq:phy:mod:ask:carrier_modulated_ask_signal}, сигнал $g_{l}(t) = \symb_m (g(t) + j \hat{g}(t))$, являющийся низкочастотным эквивалентным сигналом для $g(t)$, является таковым и для сигнала $s_m(t)$. Докажем это.
+	
+	Сигналы $s_m(t)$, $s_{ml}(t)$ и $g_{l}(t) = g(t) + j\hat{g}(t)$ связаны между собой следующим соотношением:
+	\begin{equation}
+	\label{eq:phy:mod:ask:ask_compressed_spectrum}
+	s_m(t) = \Re\{s_{ml}(t)e^{j2\pi\Freq_c t}\} = \Re\{\symb_m (g(t) + j \hat{g}(t)) e^{j2\pi \Freq_c t}\}.
+	\end{equation}
+	
+	Доказать, что $s_{ml}(t) \equiv \symb_m g(t) + j \hat{g}(t)$ можно, рассматривая эти сигналы в частотной или временной областях.
+	\begin{itemize}
+		\item Из~\eqref{eq:phy:complex:fourier_of_real_part} и~\eqref{eq:phy:mod:ask:ask_compressed_spectrum} получаем, что спектр сигнала $s_m(t)$ имеет вид:
+		\begin{equation}
+		S_m(f) = \symb_m [G_+(f - f_c) + G_+^*(-f - f_c)].
+		\end{equation}
+		В таком случае спектр $S_{ml}(f)$ низкочастотного эквивалентного сигнала имеет вид
+		\begin{equation}
+		\notag
+		S_{ml}(f) = 2 S_+(f + f_c) = 2 \symb_m G_+(f + f_c - f_c) = 2 \symb_m G_+(f).
+		\end{equation}
+		Точно такой же спектр имеет сигнал $\symb_m g_l(t)$, откуда и получаем совпадение сигналов $s_{ml}(t)$ и $\symb_m g_l(t)$.
+		
+		\item То же самое можно доказать рассматривая сигналы во временной области. Заметим, что из~\eqref{eq:phy:mod:ask:ask_compressed_spectrum} следует, что
+		\begin{equation}
+		\label{eq:phy:modulation:ask_ssb1}
+		s_m(t) = \symb_m [g(t) \cos(2\pi f_c t) - \hat{g}(t) \sin(2\pi f_c t)].
+		\end{equation}
+		Каждый сигнал $x(t)$ может быть единственным образом представлен в виде
+		\begin{equation}
+		\notag
+		x(t) = x_I(t) \cos(2\pi f_c t)- x_Q(t) \sin (2\pi f_c t).
+		\end{equation}
+		Отсюда получаем, что для сигнала $s_m(t)$ его синфазная и квадратурная составляющие имеют вид:
+		\begin{equation*}
+		s_{mI}(t) = \symb_m g(t), \qquad\qquad s_{mQ}(t) = \symb_m \hat{g}(t).
+		\end{equation*}
+		С другой стороны, сигнал $\hat{s}_m(t)$ может быть выражен через компоненты $s_{mI}(t)$ и $s_{mQ}(t)$. Поэтому для $\hat{s}_m(t)$ получаем.
+		\begin{equation}
+		\label{eq:phy:modulation:ask_ssb2}
+		\hat{s}_m(t) = \symb_m [g(t) \sin(2\pi f_c t) + \hat{g}(t) \cos(2 \pi f_c t)].
+		\end{equation}
+		Из~\eqref{eq:phy:modulation:ask_ssb1} и~\eqref{eq:phy:modulation:ask_ssb2} выражаем $\symb_m g(t)$ и $\symb_m \hat{g}(t)$:
+		\begin{align*}
+		\symb_m        g(t) &= s_m(t) \cos(2\pi f_c t) + \hat{s}_m(t) \sin(2\pi f_c t); \\
+		\symb_m  \hat{g}(t) &= \hat{s}_m(t) \cos(2\pi f_c t) - s_m(t) \sin(2\pi f_c t).
+		\end{align*}
+		Полученные равенства соответствуют равенству действительных и мнимых частей сигналов $s_{ml}(t)$ и $\symb_m(g(t) + \hat{g}(t))$.
+	\end{itemize}
+	
+	Вспомним причины, по которым это было на так раньше. Тогда нам мешали <<хвосты>> спектра сигнала $g(t)$. Спектр сигнала $g(t)$ является симметричным и в случае импульсов конечной длительности (что только и рассматривается на практике) бесконечным. В отличие от него спектр сигнала $s_l(t)$ в любом случае не распространяется в область отрицательных частот дальше, чем $-\Freq_c$. 
+\end{note}
+
+
+$$s_m(t) = \Re\{A g(t) e^{j2\pi \Freq_c t}\} = A_Q \cos(2\pi \Freq_c t) - A_I \sin(2 \pi \Freq_c t).$$
+
+\subsubsection{PSK}
+Теперь рассмотрим фазовую модуляцию (Phase Shift Keying, PSK). В этом случае передаваемый сигнал имеет вид
+\begin{equation}
+\begin{aligned}
+\label{eq:phy:mod:psk:signal}
+s_m(t) &= \Re\{e^{\frac{2\pi(m - 1)}{M}} g(t) e^{j2\pi f_c t}\} = g(t) \cos(2\pi f_c t + \frac{2\pi(m - 1)}{M}) = \\ &= g(t) \left[\cos\left(\frac{2\pi(m - 1)}{M}\right) \cos(2\pi f_c t) - \sin\left(\frac{2\pi(m - 1)}{M}\right) \sin(2\pi f_c t) \right].
+\end{aligned}
+\end{equation}
+
+\subsubsection{QAM}
+\label{sec:modulation:QAM}
+Вспомним SSB/PAM-модуляцию, при которой для передачи одного символа требовалась ширина полосы, равная ширине полосы сигнала $g(t)$ (в случае DSB/PAM-модуляции требовалась в два раза большая полоса). Тогда мы смогли уменьшить требуемую полосу за счет того, что квадратурные составляющие $\sin(2\pi f_c t)$ и $\cos(2\pi f_c t)$ были согласованы друг с другом:
+\begin{equation}
+\notag
+s_m(t) = \symb_m [g(t) \cos(2\pi f_c t) - \hat{g}(t)\sin(2\pi f_c t)].
+\end{equation}
+Сейчас мы достигнем той же эффективности использования полосы частот за счет того, что будем передавать фактически сразу два символа на каждой из компонент:
+\begin{equation}
+\label{eq:phy:mod:qam:signal}
+s_m(t) = \Re\{\symb_m g(t) e^{j2\pi f_c t}\} = 
+\Re\{(\symb_{mI} + j\symb_{mQ}) g(t) e^{j2\pi f_c t}\} = 
+g(t)[\symb_{mI} \cos(2\pi f_c t) - \symb_{mQ} \sin(2\pi f_c t)].
+\end{equation}
+Полученная модуляция называется квадратурной модуляцией (Quadrature PAM, QAM). 
+
+Передаваемый сигнал $s_m(t)$ можно записать в эквивалентном виде
+\begin{equation}
+\label{eq:phy:mod:qam:equaivalen_signal}
+s_m(t) = \Re\{r_m e^{j \theta_m} e^{j2\pi f_c t}\} = r_m \cos(2 \pi f_c t + \theta_m).
+\end{equation}
+где
+\begin{equation}
+r_m = \sqrt{\symb_{mI}^2 + \symb_{mQ}^2}, \qquad \theta_m = \arctan \left(\frac{\symb_{mQ}}{\symb_{mI}} \right).
+\end{equation}
+
+\section{Теория случайных процессов}
+\begin{definition}
+	Гауссовским случайным процессом называется процесс
+\end{definition}
+
+\begin{theorem}[Теорема Карунена-Лоэва]
+\end{theorem}
+В теории случайных процессов теорема Карунена-Лоэва (названа в честь Кари Карунена и Мишеля Лоэва) --- представление случайного процесса в виде бесконечной линейной комбинации ортогональных функций, аналогичное представлению рядов Фурье. Однако, в отличие от рядов Фурье, где коэффициенты являются действительными числами и базис представления состоит из комплексных экспоненты, коэффициенты в теореме Карунена-Лоэва --- случайные переменные, а базис представления зависит от процесса. Ортогональные базисные функции, использованные в этом представлении, определяет функция ковариации процесса. 
+
+%Центрированный случайный процесс {Xt}t ∈ [a, b] (где центрирование означает, что математические ожидания E(Xt) существуют и равны нулю для всех значений параметра t из [a, b]), удовлетворяющий техническому условию непрерывности, допускает разложение следующего вида:
+
+%{\displaystyle \mathbf {X} _{t}=\sum _{k=1}^{\infty }\mathbf {Z} _{k}e_{k}(t).} {\mathbf  {X}}_{t}=\sum _{{k=1}}^{\infty }{\mathbf  {Z}}_{k}e_{k}(t).
+%где Zk — взаимнонекоррелированые случайные величины и функции ek — непрерывные вещественные функции на [a, b], ортогональные в L² [a, b]. В случае нецентрированного процесса имеет место аналогичное разложение, получаемое разложением функции математического ожидания в базисе ek.
+%
+%Если процесс {\displaystyle \mathbf {X} _{t}} {\mathbf  {X}}_{t} гауссовский, то случайные величины Zk — тоже гауссовские и являются независимыми. Этот результат обобщает преобразования Карунена-Лоэва. Важным примером центрированного случайного процесса на интервале [0,1] является винеровский процесс, и теорема Карунена-Лоэва может быть использована для получения канонического ортогонального представления. В этом случае разложение состоит из синусоидальных функций.
+%
+%Приведенные выше разложения в также известны как разложения или декомпозиция Карунена-Лоэва (эмпирическая версия, то есть, с коэффициентами из исходных числовых данных), как анализ главных компонент, собственное ортогональное разложение или преобразование Хотеллинга.
+
+
+\begin{definition}
+	\textbf{Автокорреляционная функцией} случайного процесса сигнала $X(t)$ называется функция
+	$$
+	R_X(t_1, t_2) = \Exp{X(t_1)X^*(t_2)}
+	$$
+\end{definition}
+\begin{definition}
+	\textbf{Кросс-корреляционной функцией} случайных процессов $X(t)$ и $Y(t)$ называется функция
+	$$
+	R_{XY}(t_1, t_2) = \Exp{X(t_1)Y^*(t_2)}.
+	$$
+\end{definition}
+\begin{definition}
+	\textbf{Автоковариационной функцией} случайного процесса сигнала $X(t)$ называется функция
+	$$
+	C_X(t_1, t_2) = \Cov\{X(t_1),X^*(t_2)\} = \Exp{X(t_1)X^*(t_2)} - \Exp{X(t_1)}\Exp{X^*(t_2)}
+	$$
+\end{definition}
+
+\begin{definition}
+	Случайный процесс $X(t)$ называется \textbf{стационарным в широком смысле} (Wide Sense Stationary), если его среднее значение не зависит от времени и $R_{X}(t_1, t_2) \equiv R_X(\tau)$, где $\tau = t_1 - t_2$.
+\end{definition}
+\begin{definition}
+	Случайные процессы $X(t)$ и $Y(t)$ называются \textbf{совместно-стационарным TODO в широком смысле}, если они оба являются WSS-процессами и $R_{XY}(t_1, t_2) \equiv R_{XY}(\tau)$, где $\tau = t_1 - t_2$.
+\end{definition}
+
+Рассмотрим процесс $X(t)$ с автокорреляционной функцией $R_X(\tau)$. Допустим, что значения функции $R_X(\tau)$ существенно отличны от нуля только в интервале $[-T, T]$. Это значит, что отсчеты процесса в моменты, отстоящие друг от друга на величину $T$, почти некоррелированы. В этом смысле $R_X(\tau)$ является мерой скорости изменения случайного процесса $X(t)$ со временем. В частности, можно оценить характерную скорость изменения процесса как $1/T$. Заметим, что в общем случае характерную скорость изменения сигнала тесно связана с его Фурье-спектром. Посмотрим Фурье-спектр некоторой реализации процесса $X(t)$. Если он существенно отличен от нуля в интервале $[-W, W]$, то скорость изменения значений реализации можно оценить как $W$. С другой стороны, ранее эта величина была оценена как $1/T$.
+В предшествующих рассуждениях есть один недостаток --- рассматривается конкретная реализация случайного процесса, когда хотелось бы каким-то образом анализировать весь ансамбль возможных Фурье-спектров. Например, информация о скорости изменения значений случайного процесса ``в среднем'' содержится в функции $R_X(\tau)$. Именно это рассуждения приводят к следующему определению.
+\begin{definition}
+\textbf{Спектральной плотностью мощности} WSS-процесса $X(t)$ называется преобразование Фурье его функции автокорреляции:
+$$
+S_X(f) = \fourier{R_X(\tau)} = \Int_{-\infty}^{+\infty} R_X(\tau) e^{-j2\pi f \tau} d\tau. 
+$$
+\end{definition}
+Следующая теорема показывает, что значение спектральной плотности $S_X(f)$ в точке $f$ есть средняя (по ансамблю реализаций случайного процесса $X(t)$) энергия, передаваемая на частоте $f$.
+\begin{theorem}[Теорема Винера-Хинчина]Спектральная плотность шума $X(t)$ есть преобразование Фурье от его функции автокорреляции:
+$$
+X(f) = \fourier{R_X(\tau)} = \Int_{-\infty}^{+\infty} R_X(\tau) e^{-j2\pi f \tau} d\tau.
+$$
+\end{theorem}
+
+\begin{definition}
+\textbf{Кросс-спектральной плотностью мощности} WSS-процессов $X(t)$ и $Y(t)$ называется преобразование Фурье их функции кросс-корреляции:
+$$
+S_X(f) = \fourier{R_{XY}(\tau)} = \Int_{-\infty}^{+\infty} R_{XY}(\tau) e^{-j2\pi f \tau} d\tau. 
+$$
+\end{definition}
+
+%\lim\limits_{\tau \rightarrow \infty} \frac{1}{T}\Int_{-T}^{T} x(t)x^*(t + \tau) dt
+
+\begin{definition}
+Мощность WSS-процесса $X(t)$ определяется как
+$$
+P_X = \Exp{\|X(t)\|^2} = \Int_{-\infty}^{+\infty} S_X(f) df.
+$$
+\end{definition}
+
+\subsection{Прохождение случайного процесса через линейный фильтр (LTI)}
+Пусть $WSS$-процесс $X(t)$ проходит через линейный фильтр. На выходе фильтра тоже некоторый случайный процесс $Y(t)$. Непосредственное нахождение функции или плотности распределения процесса $Y(t)$ --- крайне сложная задача. Поэтому подойдем к решению проблемы с другой стороны: найдем среднее значение $m_Y$ и АКФ $R_Y(\tau)$ процесса $Y(t)$. Пусть $h(t)$ --- импульсная характеристика линейного фильтра, а $H(f) \triangleq \fourier{h(t)}$ --- его передаточная характеристики. Тогда 
+\begin{gather}
+m_Y = \Exp{\Int_{-\infty}^{+\infty} X(\tau) h(t - \tau) d\tau} = \Int_{-\infty}^{+\infty} \Exp{X(\tau)} h(t - \tau) d\tau = m_X \Int_{-\infty}^{\infty} h(\tau) d\tau = m_X H(0).
+\end{gather}
+
+%\begin{gather}
+%R_Y(s, t) = \Exp{Y(s)Y^*(t)} = \Exp{\Int_{-\infty}^{+\infty} X(\tau_1) h(t_1 - \tau_1) d\tau_1 \cdot \Int_{-\infty}^{+\infty} X(\tau_2) h(t_2 - \tau_2) d\tau_2} = 
+%\end{gather}
+
+Для начала рассмотрим общий случай нестационарных процессов.
+\begin{gather*}
+R_{YX}(s, t) = \Exp{Y(s)X^*(t)} = \Exp{X^*(t)\Int_{-\infty}^{+\infty} X(\tau) h(s - \tau) d \tau} = \Exp{\Int_{-\infty}^{+\infty} (X(\tau) X^*(t)) h(s - \tau) d \tau} = \\ = \Int_{-\infty}^{+\infty} \Exp{X(\tau) X^*(t)} h(s - \tau) d \tau = \Int_{-\infty}^{+\infty} R_X(\tau, t) h(s - \tau) d \tau = R_X(s, t) \star h(s).
+\end{gather*}
+\begin{gather*}
+R_Y(s, t) = \Exp{Y(s)Y^*(t)} = \Exp{Y(s)\left(\Int_{-\infty}^{\infty} X^*(\sigma) h^*(t - \sigma)d\sigma\right)} = \Int_{-\infty}^{\infty} \Exp{Y(s)X^*(\sigma)} h^*(t - \sigma)d\sigma = \\ = \Int_{-\infty}^{\infty} R_{YX}(s, \sigma) h^*(t - \sigma)d\sigma = \Int_{-\infty}^{\infty} \Int_{-\infty}^{\infty} R_{X}(\tau, \sigma) h(s - \tau) h^*(t - \sigma) d\tau d\sigma.
+\end{gather*}
+\begin{gather*}
+R_Y(s, t) = R_{YX}(s, t) \star h^*(t) = R_X(s, t) \star h(s) \star h^*(t)
+\end{gather*}
+
+Будто каждую переменную заменяем на соответствующую для $Y$.
+
+В данной формуле свертка происходит по двум параметрам независимо. Таким образом, $R_{Y}(s, t)$ выражено через $R_X(s, t)$ и $h(t)$.
+
+Теперь рассмотрим случай, когда процесс $X(t)$ --- WSS-процесс. Тогда $R_X(s,t)\equiv R_X(s - t)$ и 
+\begin{gather*}
+R_{YX}(s, t) = R_{X}(s, t) \star h(s) = \Int_{-\infty}^{\infty} R_{X}(s - \sigma, t) h(\sigma) d\sigma = \\ = 
+\Int_{-\infty}^{\infty} R_{X}(s - t - \sigma) h(\sigma) d\sigma = \Int_{-\infty}^{\infty} R_{X}(\sigma) h(s - t - \sigma) d\sigma.
+\end{gather*}
+Таким образом,
+$$
+R_{YX}(t + \tau, t) \equiv R_{YX}(\tau) = R_X(\tau) \star h(\tau).
+$$
+\begin{gather*}
+R_Y(s, t) = R_{YX}(s, t) \star h^*(t) = \Int_{-\infty}^{+\infty} R_{YX}(s - t + \sigma) h^*(\sigma) d \sigma =  \Int_{-\infty}^{+\infty} R_{YX}(s - t - \sigma) h^*(-\sigma) d \sigma.
+\end{gather*}
+\begin{gather*}
+R_Y(t+\tau, t) \equiv R_{YX}(\tau) = R_{YX}(\tau) \star h^*(-\tau) =  R_{YX}(\tau) \star h(\tau)  \star h^*(-\tau).
+\end{gather*}
+
+Из полученный соотношений следует, что если фильтр является LTI-фильтром и входной случайный процесс $X(t)$ является WSS-процессом, то и процесс $Y(t)$ на выходе фильтра также будет WSS-процессом. Для спектральной плотности $S_Y(f)$ получаем
+\begin{equation}
+S_Y(f) = S_X(f) H(f) H^*(f) = |H(f)|^2 S_X(f)
+\end{equation}
+
+После того, как получены выражения для $R_{Y}()$
+
+Подведем итог для LTI-систем и WSS-процессов
+\begin{eqnarray}
+\mu_Y &=& \mu_X \Int_{-\infty}^{+\infty} h(\tau) d\tau = \mu_X H(0) \\
+R_{YX}(\tau)  &=& R_{X}(\tau) \star h(\tau) \\
+R_{Y}(\tau)   &=& R_{X}(\tau) \star h(\tau) \star h^*(-\tau) \\
+S_{YX}(f)     &=& H(f) S_X(f)\\
+S_{Y}(f)      &=& |H(f)|^2 S_X(f) \\
+\end{eqnarray}
+
+\begin{itemize}
+	\item 
+\end{itemize}
+
+\begin{itemize}
+	\item 
+\end{itemize}
+
+\chapter{Каналы с белым шумом}
+%R(s, t) \star h(s) \star h(t) = R_X(s - t) \star h(s - t) \star h(t)
+
+\begin{definition}
+	Процесс $X(t)$ называется белым гауссовским шумом, если его спектральная плотность мощности одинакова на всех частотах:
+	$$
+	S_X(f) = \frac{N_0}{2}.
+	$$
+\end{definition}
+
+\begin{note}
+	Белый шум используется как модель теплового шума --- равновесного шума, обусловленный тепловым движением носителей заряда в проводнике, в результате чего на концах проводника возникает флуктуирующая разность потенциалов. При этом $S_X(f) = kT/2$, где $k = 1.38 \cdot 10^{-23} \text{ Дж/К}$ --- постоянная Больцмана.
+\end{note}
+
+Особую роль в теории беспроводной связи играют каналы с аддитивным белым гауссовским шумом, или AWGN-каналах (англ.: Additive White Gaussian Noise).
+\begin{definition}
+	AWGN-канал --- это канал, единственным влиянием которого на переданный сигнал состоит в добавлении к нему некоторой реализации гауссовского случайного процесса.
+\end{definition}
+
+При передаче сигнала $s(t)$ через AWGN-канал, принимаемый сигнал $r(t)$ имеет вид
+\begin{equation*}
+r(t) = s(t) + n(t),
+\end{equation*}
+где $n(t)$ --- некоторая реализация гауссовского случайного процесса со спектральной плотностью мощности $N_0 / 2$.
+
+Как все это подружить с комплексными эквивалентами сигналов?
+
+$s(t) \Re\{u(t)e^{j2\pi f_ct}\}$
+
+$r(t) \Re\{v(t)e^{j2\pi f_c t}\}$
+
+$$r(t) = \Int_{-\infty}^{\infty} s(\tau) h(t - \tau) d\tau + n(t)$$
+
+С интегралом все понятно
+
+$$\frac{1}{2} u(t) \star h(t)$$
+
+Мы работаем в пространстве низкочастотных эквивалент.
+
+Расписать законы преобразования белого шума
+
+\section{Векторное представление сигнала}
+Следующее соотношение связывает переданный и принятый сигналы в случае передачи по AWGN-каналу:
+\begin{equation}
+\label{phi:awgn:vec1}
+r(t) = s_i(t) + n(t),
+\end{equation}
+где $s_i(t)$ --- это один из сигналов $s_1(t), \dots, s_M(t)$. Пусть $\{\phi_j\}_{j = 1}^N$ --- ортонормированный базис, по которому раскладываются сигналы $s_m(t)$. Реализация $n(t)$ случайного процесса в общем случае не может быть разложена по базису $\{\phi_j\}_{j = 1}^N$. Представим $n(t)$ в виде суммы $n(t) = n_1(t) + n_2(t)$, где $n_1(t)$ --- это та часть $n(t)$, которая разложима по $\{\phi_j\}_{j = 1}^N$ (проекция $n(t)$ на линейную оболочку базисных сигналов $\{\phi_j\}_{j = 1}^N$), а $n_2(t)$ --- неразложимая по $\{\phi_j\}_{j = 1}^N$ часть.
+\begin{gather}
+\label{phi:awgn:vec2}
+n_1(t) = \Sum_{j = 1}^N n_j \phi_j(t), \text{ где } n_j = \langle n(t), \phi_j(t) \rangle. \\
+n_2(t) = n(t) - n_1(t). \notag
+\end{gather}
+Так как
+\begin{equation}
+\label{phi:awgn:vec3}
+s_i(t) = \Sum_{j = 1}^N s_{ij} \phi_j(t), \text{} s_{ij} = \langle s_i(t), \phi_j(t)\rangle,
+\end{equation}
+то подставляя \eqref{phi:awgn:vec2} и \eqref{phi:awgn:vec3} в \eqref{phi:awgn:vec1}, получаем
+\begin{equation*}
+r(t) = \Sum_{j = 1}^N (s_{ij} + n_j) \phi_j(t) + n_2(t) = \Sum_{j = 1}^N r_j \phi_j(t) + n_2(t),
+\end{equation*}
+где 
+\begin{equation}
+r_j = \langle s_i(t), \phi_j(t) \rangle + \langle n(t), \phi_j(t)  \rangle = \langle s_i(t) + n(t), \phi_j(t) \rangle = \langle r(t), \phi_j(t) \rangle.
+\end{equation}
+
+С точки зрения векторного представления сигнала AWGN-канал просто добавляет случайный гауссовский вектор $\makebold{n}$ к отправленному сигналу $\makebold{s_m}$:
+\begin{equation}
+\makebold{r} = \makebold{s_m} + \makebold{n}.
+\end{equation}
+
+Векторное представление сигналов
+\begin{gather}
+s(t) \leftrightarrow \makebold{s} \\
+r(t) = s(t) + n(t) \\
+r(t) \leftrightarrow \makebold{r}
+\end{gather}
+
+Далее будем работать с главным образом с векторными представлениями сигналов. Пусть был принят сигнал $\makebold{r}$. Возникает вопрос, какой же сигнал был на самом деле передан.
+
+
+\section{Оптимальное детектирование сигнала}
+Hard decision demodulation, Log-likelihood ratio or Approximate log-likelihood ratio.
+
+Процесс декодирования сигнала состоит в том, чтобы по принятому сигналу $\makebold{r}$ восстановить фактически переданный $\makebold{s}$. Понятно, что в общем случае сделать это можно лишь с некоторой вероятностью, так как сильная помеха способна исказить переданный сигнал до неузнаваемости. Формально процесс декодирования представляет собой некоторую \emph{решающую функцию}\footnote{Данный термин позаимствован из машинного обучения [TODO. Дать ссылку на курс Воронцова].} $\decisionf{\makebold{r}}\colon \real{n} \rightarrow \{1, \dots, M\}$, называемую также функцией декодирования\footnote{Такое определение соответствует процессу ``жесткого'' декодирования.  ``Мягкое'' декодирование возвращает список всевозможных $\makebold{s}$ с оценкой вероятности данных $\makebold{s}$.}. Все пространство $\real{n}$ выбором решающей функции $g(\makebold{r})$ делится на области $\{\decreg_m\}_{m=1}^M$, называемыми \emph{областями декодирования}, такие что если $\makebold{r} \in \decreg_m$, то $g(\makebold{r}) = \makebold{s_m}$, т.е.
+\begin{gather}
+\decreg_m = \{\makebold{r}\in\real{n}\colon \makebold{s_m} = \decfunc(\makebold{r})\}\\
+\real{n} = \decreg_1 \cap \decreg_2 \cap \dots \cap \decreg_M.
+\end{gather}
+При этом возникает вопрос, какую решающую функцию $\decfunc(\makebold{r})$ выбрать? Иными словами, как разделить всю область $\real{n}$ на области декодирования $\decreg_1$, $\decreg_2$, $\dots$, $\decreg_M$? Для ответа на данный вопрос необходимо формально определить критерий качества решающей функции.
+
+Обозначим через $\lambda_{mn} \ge 0$ величину штрафа за то, что сигнал $\makebold{s_m}$ был распознан как сигнал $\makebold{s_n}$. Тогда среднее значение величины штрафа при приеме сигнала вычисляется следующим образом 
+\begin{equation}
+Q = \Sum_{m = 1}^M \Sum_{n = 1}^M \lambda_{mn} \Prob_m \Prob(\vec{r} \in D_n|\vec{s} = \vec{s_m}).
+\end{equation}
+\begin{theorem}
+	\label{th:bayes}
+	Минимальное значение штрафа $Q$ достигается при следующей функции декодирования:
+	$$
+	\decisionf{\makebold{r}} = \arg \min\limits_n \{\Sum_m \lambda_{mn}\Prob_m\Prob(\vec{r}|\vec{s_m})\}
+	$$
+\end{theorem}
+%Как при этом выглядит решающая функция, минимизирующая средний штраф $Q$?
+%Докажите, что MAP-декодирование минимизирует средний штраф $Q$.
+%\textbf{Примечание.} Утверждение верно и в случае $\lambda_{nn} > 0$, т.е. когда формально штраф начисляется даже в случае корректного распознавания сигнала.
+%\textbf{Примечание.} Считается $\lambda_{nn} \ge 0$, т.е. когда формально штраф начисляется даже в случае корректного распознавания сигнала.
+\begin{proof}
+	\begin{gather*}
+	Q = \Sum_{m} \Sum_{n} \lambda_{mn} \Prob_m \Prob[\vec{r} \in D_n|\vec{s_m}] = 
+	\Sum_{m} \Sum_{n \neq c} \lambda_{mn} \Prob_m \Prob[\vec{r} \in D_n|\vec{s_m}] + \Sum_{m} \lambda_{mc} \Prob_m \Prob[\vec{r} \in D_c|\vec{s_m}] = \\
+	= \Sum_{m} \Sum_{n \neq c} \lambda_{mn} \Prob_m \Prob[\vec{r} \in D_n|\vec{s_m}] + \Sum_{m} \lambda_{mc} \Prob_m (1 - \Sum_{n\neq c} \Prob[\vec{r} \in D_n|\vec{s_m}]) = \\
+	= \Sum_{m} \Sum_{n \neq c} \Prob_m  (\lambda_{mn} - \lambda_{mc}) \Prob[\vec{r} \in D_n|\vec{s_m}] + \Sum_{m} \lambda_{mc} \Prob_m
+	\end{gather*}
+	$\Sum_{m} \lambda_{mc} P_m$ является константой
+	\begin{gather*}
+	\Sum_{m} \Sum_{n \neq c} P_m (\lambda_{mn} - \lambda_{mc}) P[\vec{r} \in D_n|\vec{s_m}] = 
+	\Sum_{n \neq c} \Sum_{m} P_m (\lambda_{mn} - \lambda_{mc}) P[\vec{r} \in D_n|\vec{s_m}] = \\ 
+	= \Sum_{n \neq c} \Sum_{m} P_m (\lambda_{mn} - \lambda_{mc}) \Int_{D_n} p(\vec{x}|\vec{s_m}) d\vec{x} =
+	\Sum_{n \neq c} \Sum_{m} P_m (\lambda_{mn} - \lambda_{mc}) \Int_{D_n} p(\vec{x}|\vec{s_m}) d\vec{x} = 
+	\Sum_{n \neq c} \Int_{D_n} (a_n(\vec{x}) - a_c(\vec{x})) d\vec{x},
+	\end{gather*}
+	где $a_n(\vec{x}) = \Sum_{m} P_m \lambda_{mn} p(\vec{x}|\vec{s_m})$. Далее зададим области декодирования $\decreg_n$ следующим образом:
+	\begin{equation}
+	\decreg_n = \{\vec{r} \in \real{n} \colon \forall c \in \{1, \dots, M\} \rightarrow a_n(\vec{r}) \leqslant a_c(\vec{r})\}.
+	\end{equation}
+	Нетрудно видеть, что при таком выборе выражение под знаком интеграла всегда имеет минимально возможное значение. Таким образом, решающее правило, минимизирующее математическое ожидание штрафа $Q$, имеет следующий вид:
+	\begin{equation}
+	\decfunc(\vec{r}) = \arg \min_{n} \Sum_m P_m \lambda_{mn} p(\vec{r}|\vec{s_{m}}).
+	\end{equation}
+\end{proof}
+
+При $\lambda_{mn} = [m \neq n]$, величина $Q$ представляет собой вероятность ошибки декодирования. При этом функция декодирования принимает вид
+\begin{gather*}
+\decfunc(\vec{r})  = 
+\arg \min_{n} \Sum_{m \neq n} P_m p(\vec{r}|\vec{s_{m}}) = \arg \max_{n} \{\Sum_{m} P_m p(\vec{r}|\vec{s_{m}}) - P_n p(\vec{r}|\vec{s_{n}})\} = 
+\arg \max_{n} \{P_n p(\vec{r}|\vec{s_{n}})\}.
+\end{gather*}
+Данное правило декодирования уже интуитивно понятно. С точностью до константы $P_n p(\vec{r}|\vec{s_{n}})$ --- это апостериорная вероятность передачи сигнала $\vec{s_{n}}$ (априорная вероятность --- это $\Prob_n$). Действительно, $P(\vec{s_m}|\vec{r}) = \frac{P_m p(\vec{r}|\vec{s_m})}{p(\vec{r})}$. Поэтому такое декодирование называется декодированием по максимуму апостериорной вероятности (MAP-декодирование). Его решающая функция имеет вид
+\begin{equation}
+\label{eq:phy:map_decoder}
+g_{MAP}(\vec{r}) = \arg \Max_{m} P(\vec{s_m} | \vec{r}) = \arg \Max_{m} P_m p(\vec{r}|\vec{s_m}).
+\end{equation}
+В случае равновероятных сигналов $P_m = \frac{1}{M}$ MAP-декодирования превращается декодирование по максимум правдоподобия (ML-декодирование):
+\begin{equation}
+g_{ML}(\vec{r}) = \arg \Max_{1 \leqslant m \leqslant M} p(\vec{r}|\vec{s_m}).
+\end{equation}
+
+В AWGN-канале функция правдоподобия (ML-функция) имеет вид $$p(\vec{r}|\vec{s_m}) = \Prod_{i=1}^M p(r_i|s_{mi}) = \Prod_{i=1}^M \frac{1}{\sqrt{\pi N_0}} e^{-\frac{(r_i - s_{mi})^2}{N_0}}.$$
+При таких распределениях $\{p(\vec{r}|\vec{s_m})\}_{m=1}^M$, функцию декодирования $\decisionf{\vec{r}}$ можно переписать в следующих видах:
+\begin{eqnarray*}
+	\decisionf{\vec{r}} &=& \arg \Max_{m} P_m p(\makebold{r}|\makebold{s_m}),\\
+	\decisionf{\vec{r}} &=& \arg \Max_{m} \left(N_0\ln P_m - \|\makebold{r}-\makebold{s_m}\|^2\right), \\
+	\decisionf{\vec{r}} &=& \arg \Max_{m} \left(\frac{N_0}{2}\ln P_m - \frac{\mathcal{E}_m}{2} + \langle \makebold{r}, \makebold{s_m} \rangle \right), \\
+	\decisionf{\vec{r}} &=& \arg \Max_{m} \left(\eta_m + \langle \makebold{r}, \makebold{s_m} \rangle \right),
+\end{eqnarray*}
+
+Если сигналы равновероятны $P_m = \frac{1}{M}$, то MAP-декодирование превращается в ML-декодирование, а оно, в свою очередь оказывается декодированием по ближайшему соседу (по минимуму расстояния):
+\begin{equation}
+\notag
+\decisionf{\vec{r}} = \arg \Max_{1 \leq m \leq M} \left(N_0\ln P_m - \|\vec{r}-\vec{s_m}\|^2\right) = 
+\arg \Max_{m} \|\vec{r}-\vec{s_m}\|.
+\end{equation}
+Таким образом, в случае AWGN-канала ML-декодирование является декодированием по минимуму евклидова расстояния.
+
+На данный момент были упомянуты следующие три вида детектирования принятого сигнала
+\begin{itemize}
+	\item Детектирование по максимуму апостериорной вероятности (MAP-детектор):
+	$$\decisionf{m} = \arg\max\limits_{1 \le m \le M}{\Prob(\bm{s_m})p(\bm{r}|\bm{s_m})}$$
+	\item Детектирование по максимуму правдободобия (ML-детектор):
+	$$\decisionf{m} = \arg\max\limits_{1 \le m \le M}{p(\bm{r}|\bm{s_m})}$$
+	\item Детектирование по минимальному расстоянию:
+	$$\decisionf{m} = \arg\min \|\bm{r} - \bm{s_m}\|^2$$
+\end{itemize}
+В случае AWGN-канала и равенства равномерного априорного распределения символов ($\Prob(s_i) = \Prob_i =  1 / M$, $i = 1, \dots, M$) результаты всех трех видов детектирования совпадают.
+
+\subsection{Согласованный фильтр}
+TODO Описать частный случай согласованного фильтра для AWGN-канала.
+
+\section{Вероятность ошибки детектирования}
+Значение вероятности ошибки детектирования символа является одним из основных факторов, принимаемых во внимание при проектирование систем передачи данных. В простейших случаях BPSK, QPSK и PSK-модуляций это вероятность может быть найдена аналитически. 
+
+\subsection{BPSK}
+Рассмотрим созвездие из двух символов $A_1 = (\sqrt{\Energy_1}, 0)$ и $A_2 = (-\sqrt{\Energy_2}, 0)$ (рис.~TODO). Априорная вероятность появления символа $A_1$ равна $\Prob_1 = p$, а символа $A_2$, соответственно, --- $\Prob_2 = 1 - p$. По теореме~\ref{th:bayes} функция декодирования имеет вид:
+$$
+\decisionf{\vec{r}} = \argmax\limits_{m} \Prob_m p(\vec{r}|\vec{s}_m) = \argmax_m \left\{ \frac{\Prob_1}{\sqrt{\pi N_0}} e^{-\frac{(x - \sqrt{\Energy_1})^2 + y^2}{N_0}}, \frac{1 - p}{\sqrt{\pi N_0}} e^{-\frac{(x + \sqrt{\Energy_2})^2 + y^2}{N_0}}\right\}.
+$$
+Пусть спектральная мощность гауссовского шума равна $\sigma^2 = \frac{N_0}{2}$. Пусть $\vec{r} = (x, y)^T$, где $x$ --- синфазная компонента, а $y$ --- квадратурная. Тогда уравнение границы области декодирования в плоскости $(A_I,A_Q)$ имеет вид:
+$$
+\frac{p}{\sqrt{\pi N_0}} e^{-\frac{(x - \sqrt{\Energy_1})^2 + y^2}{N_0}} = \frac{1-p}{\sqrt{\pi N_0}} e^{-\frac{(x + \sqrt{\Energy_2})^2 + y^2}{N_0}}.
+$$
+Отсюда получаем, что
+\begin{gather}
+r^* = \frac{N_0\left(\ln (1 - p) - \ln p\right) + (\Energy_1 - \Energy_2)}{2\left(\sqrt{\Energy_1} + \sqrt{\Energy_2}\right)},
+\end{gather}
+т.е. множество точек границы оптимальных областей $D_1^*$ и $D_2^*$ есть $\{(x, y)\colon x = r^*,\ y \in \mathbb{R}\}$.
+
+Найдем вероятность ошибки $\Prob_e$ при приема символа. Для этого положим, что декодирование не оптимально по Байесу, т.е. используемый порог $r$ может быть отличен от $r^*$. В таком случае
+$$D_1 = \{(x,y)\colon x > r\},\quad D_2 = \{(x,y)\colon x \le r\}.$$
+Заметим, что области декодирования выбраны так, что их разделяющая поверхность вертикальна. Когда мы искали оптимальные области, то их форма определялась теоремой~\ref{th:bayes}. Сейчас же области $D_1$ и $D_2$ выбраны исходя из того, что величина искажение вдоль квадратурной составляющей имеет одинаковое распределение для обоих символов. Поэтому приемнику нет смысла ориентироваться на квадратурную составляющую. %Собственно, выше при поиске оптимальных областей выше это было неявно учтено тем, что множитель $e^{-y^2/N_0}$ присутствовал в обоих частях равенства. 
+При выбранных $D_1$ и $D_2$, для вероятности ошибки получаем
+\begin{gather*}
+\Prob_e = p \Prob\{r \in D_2\} + (1 - p) \Prob\{r \in D_1\} = 
+p\Int_{-\infty}^{r} \frac{1}{\sqrt{\pi N_0}} e^{-\frac{(z - \sqrt{\Energy_1})^2}{N_0}} dz + 
+(1 - p)\Int_{r}^{\infty}\frac{1}{\sqrt{\pi N_0}} e^{-\frac{(z + \sqrt{\Energy_2})^2}{N_0}} dz = \\
+=p\frac{1}{\sqrt{\pi N_0}}\sqrt{\frac{N_0}{2}} \Int_{-\infty}^{\frac{\sqrt{2}(r - \sqrt{\Energy_1})}{\sqrt{N_0}}} e^{-\frac{t^2}{2}}dt + 
+(1 - p)\frac{1}{\sqrt{\pi N_0}}\sqrt{\frac{N_0}{2}} \Int_{\frac{\sqrt{2}(r + \sqrt{\Energy_2})}{\sqrt{N_0}}}^{+\infty} e^{-\frac{t^2}{2}}dt= \\
+= p \frac{1}{\sqrt{2\pi}} \Int_{\frac{\sqrt{2}(\sqrt{\Energy_1} - r)}{\sqrt{N_0}}}^{+\infty} e^{-\frac{t^2}{2}} dt + 
+(1-p) \frac{1}{\sqrt{2\pi}} \Int_{\frac{\sqrt{2}(\sqrt{\Energy_2} + r)}{\sqrt{N_0}}}^{+\infty} e^{-\frac{t^2}{2}} dt = \\
+= p Q\left(\frac{\sqrt{2}(\sqrt{\Energy_1} - r)}{\sqrt{N_0}}\right) + (1 - p) Q\left(\frac{\sqrt{2}(\sqrt{\Energy_2} + r)}{\sqrt{N_0}}\right).\\
+\end{gather*}
+\textit{Полученное выражение для $\Prob_e$ является наиболее общим} в том смысле, что для заданных параметров $\Energy_1$, $\Energy_2$, $p$, $r$ оно позволяет аналитически рассчитать вероятность ошибки:
+\begin{gather}
+\label{eq:bpsk_gen_error}
+\Prob_e(\Energy_1, \Energy_2, p, r)  = p Q\left(\frac{\sqrt{2}(\sqrt{\Energy_1} - r)}{\sqrt{N_0}}\right) + (1 - p) Q\left(\frac{\sqrt{2}(\sqrt{\Energy_2} + r)}{\sqrt{N_0}}\right).
+\end{gather}
+
+
+Используя~\eqref{eq:bpsk_gen_error}, можно минимизировать величину ошибки по параметрам $r$, $\Energy_1$, $\Energy_2$, $p$\footnote{Что же касается $N_0$ - то это внешний параметр, оптимизировать по которому нет смысла, ибо он а) задается извне, и б) вполне очевидно, что чем меньше $N_0$, то тем больше вероятность доставки данных.}. Убедимся, например, при  минимум ошибки декодирования $\Prob_e$ достигается при $r=r^*$. 
+\begin{gather}
+\frac{\partial \Prob_e}{\partial r} = \frac{p}{\sqrt{2\pi}} e^{-\frac{(\sqrt{\Energy_1} - r)^2}{N_0}} \sqrt{\frac{2}{N_0}} - \frac{1 - p}{\sqrt{2\pi}} e^{-\frac{(\sqrt{\Energy_2} + r)^2}{N_0}} \sqrt{\frac{2}{N_0}} = 0 \Rightarrow
+e^{\frac{(\sqrt{\Energy_2} + r)^2 - (\sqrt{\Energy_1} - r)^2}{N_0}}= \frac{1-p}{p}.
+\end{gather}
+Откуда находим, что
+\begin{gather}
+r = \frac{N_0\left(\ln (1 - p) - \ln p\right) + (\Energy_1 - \Energy_2)}{2\left(\sqrt{\Energy_1} + \sqrt{\Energy_2}\right)}.
+\end{gather}
+Как и ожидалось, получили, что минимум достигается при $r = r^*$. Подставим $r = r^*$ в выражение для $\Prob_e$, положив для удобства $d = \sqrt{\Energy_1} + \sqrt{\Energy_2}$.
+\begin{gather}
+\label{eq:bpsk_ser_opt}
+\Prob_e = p Q\left(\frac{d}{\sqrt{2N_0}} - \sqrt{\frac{N_0}{2}} \frac{\ln(1-p) - \ln p}{d}\right) + (1 - p) Q\left(\frac{d}{\sqrt{2N_0}} + \sqrt{\frac{N_0}{2}} \frac{\ln(1-p) - \ln p}{d}\right).
+\end{gather}
+
+Рассмотрим некоторые частные случаи~\eqref{eq:bpsk_ser_opt}.
+\begin{itemize}
+\item В случае $p = 0.5$:
+\begin{gather}
+\Prob_e = Q\left(\frac{d}{\sqrt{2N_0}}\right), \quad r^* = \frac{\sqrt{\Energy_1} - \sqrt{\Energy_2}}{2}.
+\end{gather}
+\item В случае $\Energy_1 = \Energy_2 = \Energy_b$:
+\begin{gather}
+\Prob_e = Q\left(\sqrt{\frac{2\Energy_b}{N_0}} - \sqrt{\frac{N_0}{2\Energy_b}} \frac{\ln(1-p) - \ln p}{2}\right) + Q\left(\sqrt{\frac{2\Energy_b}{N_0}} + \sqrt{\frac{N_0}{2\Energy_b}} \frac{\ln(1-p) - \ln p}{2}\right),\quad r^* = \frac{N_0}{4\sqrt{\Energy_b}} \ln \left(\frac{1-p}{p}\right).
+\end{gather}
+\item В случае $p = 0.5$ и $\Energy_1 = \Energy_2 = \Energy_b$
+\begin{gather}
+\Prob_e = Q\left(\sqrt{\frac{2\Energy_b}{N_0}}\right), \quad r^* = 0.
+\end{gather}
+\end{itemize}
+
+%\begin{gather}
+%erfc(x) = Q(x) = \frac{1}{2} erfc\left(\frac{x}{\sqrt{2}}\right)
+%\end{gather}
+%\begin{gather}
+%g(r) = \arg \min_{m} \Prob_m p(r|s_m) = 
+%\end{gather}
+%Отсюда получаем, что оптимальная разделяющая поверхность - линия с $y \in \mathbb{R}$ и $x$, имеющим следующее значение:
+%\begin{gather}
+%x_{opt} = \frac{N_0\left(\ln (1 - p) - \ln p\right) + (\Energy_1 - \Energy_2)}{2\left(\sqrt{\Energy_1} + \sqrt{\Energy_2}\right)}.
+%\end{gather}
+
+
+%При этом плотность распределения полученного сигнала равна
+%$$p(\makebold{r}|\makebold{s_m}) = \left(\frac{1}{\sqrt{\pi N_0}}\right)^Ne^{-\frac{\|\makebold{r} - \makebold{s_m}\|^2}{N_0}}.$$
+%
+%\begin{gather*}
+%\proba{e} = P_{-}\Int_{0}^{+\infty} \frac{1}{\sqrt{\pi N_0}}e^{-\frac{(x + \sqrt{E_s})^2}{N_0}}+ P_{+}\Int_{-\infty}^{0}\frac{1}{\sqrt{\pi N_0}}e^{-\frac{(x - \sqrt{E_s})^2}{N_0}} = \Int_{0}^{+\infty} \frac{1}{\sqrt{\pi N_0}}e^{-\frac{(x + \sqrt{E_s})^2}{N_0}} = \\
+%= \Int_{\sqrt{\frac{2E_s}{N_0}}}^{+\infty} \frac{1}{\sqrt{2\pi}}e^{-\frac{x^2}{2}} = Q\left(\sqrt{\frac{2E_s}{N_0}}\right)
+%\end{gather*}
+
+\subsection{QPSK}
+Уже начиная с QPSK-модуляции анализ вероятностей ошибок в случае неравномерного апостериорного распределения становится нетривиальной задачей. Поэтому ограничимся случаем $\Prob_m = 1/M$, $m \in \{1, \dots, M\}$, так что созвездие QPSK состоит из 4-х равновероятных символов: $A_1 = (-\sqrt{\Energy/2}, \sqrt{\Energy/2}), A_2 = (\sqrt{\Energy/2}, \sqrt{\Energy/2}), A_3 = (\sqrt{\Energy/2}, -\sqrt{\Energy/2}), A_4 = (-\sqrt{\Energy/2}, -\sqrt{\Energy/2})$. Ввиду симметрии системы оптимальные области декодирования символов представляют собой четверти плоскости $(A_I, A_Q)$ (рис.~TODO)
+В результате вероятности ошибочного детектирования символов равны. В результате 
+$$
+\Prob_e = \Sum_{m = 1}^M \Prob_m \Prob(\vec{r} \notin D_m|\vec{s_m}) = \Prob(\vec{r} \neq D_1|\vec{s_1}) = 1 - \Prob(\vec{r} \in D_1|\vec{s_1}).
+$$
+Так как отклонения вдоль синфазной и квадратурной составляющих независимы, то получаем, что вероятность успешного приема символа $A_1$ равна произведению вероятностей того, что отклонение вдоль синфазной и квадратурной составляющих не превысит $\sqrt{\Energy / 2}$:
+$$
+\Prob_s = \Prob(\vec{r} \in D_1|\vec{s_1}) = \left(1 - Q\left(\sqrt{\frac{\Energy}{N_0}}\right)\right)^2.
+$$
+
+$$
+\Prob_e = 1 - \left(1 - Q\left(\sqrt{\frac{\Energy}{N_0}}\right)\right)^2 = 2Q\left(\sqrt{\frac{\Energy}{N_0}}\right)\left(1 - \frac{1}{2} Q\left(\sqrt{\frac{\Energy}{N_0}}\right) \right).
+$$
+
+\subsection{PSK}
+В случае PSK-модуляции символы имеют вид $A_i = \sqrt{\Energy} e^{j\frac{2\pi}{M}(m-1)}$, $i \in \{1, \dots, M\}$. Считаем, что символы равновероятны. В силу симметрии оптимально областью декодирования каждого из символов является сектор с углом развертки $\varphi = 2\pi / M$. Вероятность ошибочного детектирования равна вероятности ошибочного детектирования любого из символов. Рассмотрим для определенности область декодирования символа $A_1 = (\sqrt{\Energy}, 0)$. 
+$$
+\Prob_s = \Int_{-\infty}^{+\infty} \frac{1}{\sqrt{\pi N_0}} e^{-\frac{(x - \sqrt{\Energy})^2}{N_0}}\left(\Int_{-x / \tan(\alpha)}^{x / \tan(\alpha)} \frac{1}{\sqrt{\pi N_0}} e^{-\frac{y^2}{N_0}} dy\right) dx.
+$$
+Перейдем к полярным координатам:
+\begin{gather*}
+\begin{cases}
+r = \sqrt{x^2 + y^2} \\
+\varphi = \arctan \left( \frac{y}{x} \right)
+\end{cases}
+\Leftrightarrow
+\begin{cases}
+x = r \cos \varphi \\
+y = r \sin \varphi
+\end{cases}
+\end{gather*}
+В полярных координатах $(r, \varphi)$ плотность вероятности имеет вид
+$$
+p_{V,\Theta}(r, \varphi) = \frac{r}{\pi N_0} e^{-\frac{(r\cos \varphi - \sqrt{\Energy})^2 + r^2 \sin^2 \varphi}{N_0}} =
+\frac{r}{\pi N_0} e^{-\frac{(r - \sqrt{\Energy} \cos \varphi)^2 + \Energy \sin^2 \varphi}{N_0}}
+$$
+\begin{gather*}
+\Prob_s = %\Int_{0}^{+\infty} \Int_{-\pi/M}^{+\pi/M} p(r, \varphi)  dr d\varphi = 
+\Int_{0}^{+\infty} \Int_{-\pi/M}^{+\pi/M} \frac{r}{\pi N_0} e^{-\frac{(r - \sqrt{\Energy} \cos \varphi)^2 + \Energy \sin^2 \varphi}{N_0}} dr d\varphi = \Int_{\mathclap{-\pi/M}}^{\mathclap{+\pi/M}} e^{-\frac{\Energy \sin^2 \varphi}{N_0}} \left(\Int_{0}^{+\infty}  \frac{r}{\pi N_0} e^{-\frac{(r - \sqrt{\Energy} \cos \varphi)^2}{N_0}} dr\right) d \varphi = \\
+= \Int_{-\pi /M }^{\pi / M}   \frac{1}{2\pi}  e^{-\gamma_s \sin^2 \varphi} \Int_{0}^{+\infty} e^{-\frac{(r - \sqrt{2\gamma_s} \cos \varphi)^2}{2}} dr d\varphi.
+\end{gather*}
+Здесь $\gamma_s = \Energy/N_0$ --- \textit{отношение сигнал-шум на символ}. Ранее нам встречалась только величина $\gamma_b = \Energy_b / N_0$ --- \textit{отношение сигнал-шум на бит}. 
+
+Маргинальное распределение $\Theta$ имеет вид
+$$
+p_{\Theta}(\theta) = \frac{1}{2\pi}  e^{-\gamma_s \sin^2 \varphi} \Int_{0}^{+\infty} e^{-\frac{(r - \sqrt{2\gamma_s} \cos \varphi)^2}{2}}.
+$$
+TODO Изобразить зависимости $p_{\Theta}(\theta)$ при различных $\gamma_s$.
+$$
+\Prob_e = 1 - \Int_{-\pi / M}^{+\pi / M} p_{\Theta}(\theta) d\theta.
+$$
+
+\subsubsection{Оценка вероятностей ошибок в случае произвольных созвездий}
+В случае более сложных модуляций (таких как QAM-1024) точный подсчет вероятностей ошибок становится нетривиальной задачей. Поэтому прибегают к использованию различных оценок.
+
+Пусть $D_1,\dots,D_M$ --- области декодирования для символов $\bm{s_1}, \dots, \bm{s_m}$. Тогда вероятность ошибки есть
+$$
+\Prob_e = \Sum_{m = 1}^{M}\Prob_m \Prob(\bm{r} \notin D_m |\bm{s_m}) = \Sum_{m = 1}^{M}\Prob_m \Prob(\bm{r} \in \bigcup_{\substack{n=1\\n\neq m}}^{M} D_n |\bm{s_m}) \le \Sum_{m=1}^M \Prob_m \Sum_{\substack{n=1 \\ n\neq m}}^{M} \Prob(\bm{r} \in D_n|\bm{s_m}) = \Sum_{m=1}^M \Prob_m \Sum_{\substack{n=1 \\ n\neq m}}^{M} Q\left(\frac{d_{mn}}{\sqrt{2N_0}}\right).
+$$
+
+\begin{equation}
+\label{eq:phy:const:pe1}
+\Prob_e^{(1)} = \Sum_{m=1}^M \Prob_m \Sum_{\substack{n=1 \\ n\neq m}}^{M} Q\left(\frac{d_{mn}}{\sqrt{2N_0}}\right) 
+= \Sum_{m < n} (\Prob_m + \Prob_n) Q\left(\frac{d_{mn}}{\sqrt{2N_0}}\right).
+\end{equation}
+Таким образом, получили оценку сверху для вероятности ошибки $\Prob_e$. Присвоим этой оценке номер $1$, обозначив ее как $\Prob_e^{(1)}$ (далее будут получено еще несколько оценок). 
+
+Полученная выше оценка называется \textbf{union bound on the error pro\-ba\-bi\-lity}.
+
+\begin{equation*}
+\Prob_e^{(1)} = \Sum_{m=1}^M \Prob_m \Sum_{\substack{n=1 \\ n\neq m}}^{M} Q\left(\frac{d_{mn}}{\sqrt{2N_0}}\right) \le
+\Sum_{m=1}^M \Prob_m \Sum_{\substack{n=1 \\ n\neq m}}^{M} Q\left(\frac{d_{\text{min}}}{\sqrt{2N_0}}\right) =
+\Sum_{m=1}^M \Prob_m (M - 1) Q\left(\frac{d_{\text{min}}}{\sqrt{2N_0}}\right) =
+(M - 1) Q\left(\frac{d_{\text{min}}}{\sqrt{2N_0}}\right) = \Prob_e^{(2)}.
+\end{equation*}
+Воспользовавшись неравенством 
+$$
+Q(x) \le \frac{1}{2} e^{-\frac{x^2}{2}}
+$$ 
+Можно получить другую оценку сверху на $\Prob_e^{(1)}$:
+\begin{equation*}
+\Prob_e^{(1)} = \Sum_{n < m} (\Prob_m + \Prob_n) Q\left(\frac{d_{mn}}{\sqrt{2N_0}}\right) \le \frac{1}{2} \Sum_{n < m} (\Prob_n + \Prob_m) e^{-\frac{d^2_{mn}}{4N_0}} = \Prob_e^{(3)}.
+\end{equation*}
+
+Для $\Prob^{(1)}$ и $\Prob^{(2)}$ можно записать одну и ту же оценку сверху:
+\begin{gather}
+\Prob_e^{(2)} = (M - 1) Q\left(\frac{d_{\text{min}}}{\sqrt{2N_0}}\right) \le \frac{M-1}{2} e^{-\frac{d^2_{\text{min}}}{4N_0}} = \Prob_e^{(4)}.
+\end{gather}
+и
+\begin{gather}
+\Prob_e^{(3)} = \frac{1}{2} \Sum_{n < m} (\Prob_n + \Prob_m) e^{-\frac{d^2_{mn}}{4N_0}} \le \frac{1}{2} \Sum_{m < n}(\Prob_m + \Prob_n) e^{-\frac{d^2_{\text{min}}}{4N_0}} = \frac{M-1}{2} e^{-\frac{d^2_{\text{min}}}{4N_0}} \le \Prob_e^{(4)}.
+\end{gather}
+Таким образом, получили 4-ую оценку $\Prob^{(4)}$ на вероятность ошибки $\Prob_e$. Между оценками и самой вероятностью существуют следующие отношения:
+\begin{gather}
+\Prob_e \le \Prob_e^{(1)} \le  \begin{pmatrix}
+\Prob_e^{(2)} \\
+? \\
+\Prob_e^{(3)}
+\end{pmatrix}\le \Prob_e^{(4)}
+\end{gather}
+Отношение между оценками $\Prob^{(2)}$ и $\Prob^{(3)}_e$ зависит от конкретной ситуации (см. задачу~\ref{phy:task:est23}). 
+
+\begin{table} 
+\begin{tabular}{l|c|c}
+Оценка вероятности & Общий случай & Равновероятные символы \\ \hline
+$\Prob_{e}^{(1)}$ & $\Sum_{m=1}^M \Sum_{\substack{n = 1\\n\neq m}}^M \Prob_m Q\left(\frac{d_{mn}}{\sqrt{2N_0}}\right) = 
+\Sum_{m < n} (\Prob_m + \Prob_n) Q\left(\frac{d_{mn}}{\sqrt{2N_0}}\right)$ &  
+$\frac{1}{M}\Sum_{m = 1}^M \Sum_{\substack{n = 1\\m\neq n}}^M Q\left(\frac{d_{mn}}{\sqrt{2N_0}}\right) = \frac{2}{M}\Sum_{m < n} Q\left(\frac{d_{mn}}{\sqrt{2N_0}}\right)$ \\
+$\Prob_{e}^{(2)}$ & $(M - 1) Q\left(\frac{d_{\text{min}}}{\sqrt{2N_0}}\right)$ & $(M - 1) Q\left(\frac{d_{\text{min}}}{\sqrt{2N_0}}\right)$ \\
+$\Prob_{e}^{(3)}$ & $\frac{1}{2}\Sum_{m=1}^M \Prob_m \Sum_{\substack{n = 1\\n\neq m}}^M e^{-\frac{d_{mn}^2}{4N_0}} = \frac{1}{2}\Sum_{m<n}(\Prob_m + \Prob_n) e^{-\frac{d_{mn}^2}{4N_0}}$ &  
+$\frac{1}{2M}\Sum_{m=1}^M \Sum_{\substack{n = 1\\n\neq m}}^M e^{-\frac{d_{mn}^2}{4N_0}} = \frac{1}{M}\Sum_{m < n} e^{-\frac{d_{mn}^2}{4N_0}}$ \\
+$\Prob_{e}^{(4)}$ & $\frac{M-1}{2} e^{-\frac{d^2_{\text{min}}}{4N_0}}$ &  $\frac{M-1}{2} e^{-\frac{d^2_{\text{min}}}{4N_0}}$ \\ \hline
+\end{tabular}
+\end{table}
+
+%Прежде, чем идти далее, заметим, что 
+%\begin{gather}
+%\prob{\received{m} \neq m} = \Sum_{m' \neq m} \Int_{D_{m'}} p(\makebold{r}|\makebold{s_m}) d\makebold{r}  \le \Sum_{m' \neq m} \Int_{D_{mm'}} p(\makebold{r}|\makebold{s_m}) d\makebold{r} \\
+%\proba{e} \le \frac{1}{M} \Sum_{m = 1}^{M} \Sum_{m' \neq m} \Int_{D_{mm'}} p(\makebold{r}|\makebold{s_m}) d\makebold{r} =  \frac{1}{M}\Sum_{m = 1}^{M} \Sum_{m' \neq m} \proba{m \rightarrow m'}
+%\end{gather}
+%
+
+%Пусть имеется M сигналов $s_m(t)$, которые могут быть в ортонормированном базисе $\{\phi_i\}_{i=1}^N$ имеют координаты $\makebold{s_m}$. Обозначим через $d_{mn}$ евклидово расстояние между сигналами $s_m(t)$ и $s_n(t)$:
+%$$d_{mn} =\|\makebold{s_m} - \makebold{s_n}\|.$$
+%
+%$$d_{\min} = \Min_{q \le m < n \le M} d_{mn}.$$
+%
+%Теперь оценим сверху вероятность ошибки при использовании QAM-модуляции большей размерности.
+%\begin{gather*}
+%\proba{e} \le \frac{1}{M} \Sum_{m = 1}^M \proba{m \rightarrow m'} = \frac{1}{M}\Sum_{m = 1}^M \Sum_{m' \neq m}Q\left(\frac{d_{mm'}}{\sqrt{2N_0}}\right)
+%\end{gather*}
+%Начиная с этого момента возможны различные подходы к дальнейшей оценке ошибки. 
+%
+%Ввиду справедливости неравенства $Q(x) \le \frac{1}{2} e^{-\frac{x^2}{2}}$, получаем, что
+%$$
+%\proba{e} \le \frac{1}{M}\Sum_{m = 1}^M \Sum_{m' \neq m}Q\left(\frac{d_{mm'}}{\sqrt{2N_0}}\right) \le \frac{1}{2}\Sum_{m = 1}^M P_m \Sum_{m' \neq m}e^{-\frac{1}{2}\left(\frac{d_{mm'}}{\sqrt{2N_0}}\right)^2} = \frac{1}{2}\Sum_{m = 1}^M P_m \Sum_{m' \neq m}e^{-\frac{d_{mm'}^2}{4N_0}} 
+%$$
+
+Посмотрим на оценку 2 вероятности ошибки $\Prob_e$:
+$$
+\Prob_e^{(2)} = \frac{1}{2M}\Sum_{\substack{m \neq n \\ 1 \le m, n \le M}}  e^{-\frac{d^2_{mn}}{4N_0}}.
+$$
+Теперь рассмотрим так называемую \textbf{функцию перечисления расстояний} $T_{\Const}(X)$:
+\begin{equation}
+T(X) = \Sum_{\substack{m \neq n \\ 1 \le m, n \le M}} X^{d_{mn}^2} = \Sum_{d} a_d X^{d^2}, 
+\end{equation}
+где $a_d ---$ количество упорядоченных пар $(m,n)$, таких что $d_{mn} = d$. В результате $\Prob_e^{(2)}$ записывается следующим образом:
+\begin{equation}
+\Prob_e^{(2)} = \frac{1}{2M}\Sum_{\substack{m \neq n \\ 1 \le m, n \le M}} e^{-\frac{d_{mn}^2}{4N_0}} = \frac{1}{2M}\Sum_{m = 1}^M T(e^{-\frac{1}{4N_0}}).
+\end{equation}
+
+% \le \\ \le\Sum_{m = 1}^M P_m \Sum_{m' \neq m}Q\left(\frac{d_{min}}{\sqrt{2N_0}}\right) = (M - 1) Q\left(\frac{d_{min}}{\sqrt{2N_0}}\right)
+
+%С другой стороны можно подойти к проблеме следующим образом:
+%\begin{gather*}
+%\proba{e} \le \frac{1}{M}\Sum_{m = 1}^M \Sum_{m' \neq m}Q\left(\frac{d_{mm'}}{\sqrt{2N_0}}\right) \le \frac{1}{M}\Sum_{m = 1}^M \Sum_{m' \neq m}Q\left(\frac{d_{min}}{\sqrt{2N_0}}\right) = \\ = (M - 1) Q\left(\frac{d_{min}}{\sqrt{2N_0}}\right) \le \frac{M - 1}{2} e^{-\frac{d^2_{min}}{4N_0}}
+%\end{gather*}
+%
+%Таким образом, в общей сложности получены четыре оценки:
+%\begin{equation}
+%\proba{e} \le \begin{cases}
+%\frac{1}{M}\Sum_{m = 1}^M \Sum_{m' \neq m}Q\left(\frac{d_{mm'}}{\sqrt{2N_0}}\right), \\
+%\frac{1}{2M}\Sum_{m = 1}^M T(e^{-\frac{1}{4N_0}}), \\
+%(M - 1) Q\left(\frac{d_{min}}{\sqrt{2N_0}}\right), \\
+%\frac{M - 1}{2} e^{-\frac{d^2_{min}}{4N_0}}.
+%\end{cases}
+%\end{equation}
+
+\subsubsection{Задачи}
+%\begin{homework} Для нескольких выбранных видов модуляции построить зависимости BER от SNR, их верхние и нижние оценки.
+%\end{homework}
+%\begin{itemize}
+%	\item \textbf{2 балл} BPSK
+%	\item \textbf{2 балла} QPSK
+%	\item \textbf{4 балла} N-QAM для общего случая $N$, равного степени двойки.
+%	\item \textbf{4 балла} N-PSK для любого $N \ge 2$.
+%\end{itemize}
+%
+%\begin{homework} (Дополнительное) Реализовать в MATLAB блоки
+%\end{homework} 
+%\begin{itemize}
+%	\item \textbf{1 балл} MAP и ML-декодеров (просто явно декодируя по расстоянию)
+%	\item \textbf{2 балла} correlation и matched приемников.
+%\end{itemize}
+%При выполнении задания можно писать блоки как на языке MATLAB, так и на C++.
+
+
+\begin{task} Докажите, что 
+	\begin{equation}
+	\Sum_{n=1}^M n^2 = \frac{M(M + 1)(2M + 1)}{6}.
+	\end{equation}
+	Предложите различные способы доказательства этого утверждения.
+\end{task}
+
+\begin{task} Докажите следующее равенство:
+	\begin{equation}
+	C^n_n + C^n_{n + 1} + \dots + C^n_{n + m - 1} = C^{n + 1}_{n + m}.
+	\end{equation}
+	Предложите на основе этого равенство общий метод вывода сумм вида $\Sum_{n = 1}^M n^r$. Продемонстрируйте его применение для случаев $r = 1$ и $r = 2$.
+\end{task}
+
+\begin{task} 
+	Докажите неравенство $Q(x) \le \frac{1}{2} e^{-\frac{x^2}{2}}$.
+\end{task}
+\begin{proof}
+	Заметим, что $$\forall x \ge y \rightarrow \frac{1}{\sqrt{2\pi}}e^{-\frac{x^2}{2}} \le \frac{1}{\sqrt{2\pi}} e^{-\frac{(x - y)^2}{2}} e^{-\frac{y^2}{2}}.$$
+	Проинтегрировав левую и правую части неравенства по $x$ от $y$ до $\infty$, получаем, что
+	$$
+	Q(y) \le \frac{1}{2} e^{-\frac{y^2}{2}}.
+	$$
+\end{proof}
+\begin{task}
+\label{phy:task:est23} Покажите, что существуют созвездия при которых $\Prob^{(2)}_e < \Prob^{(3)}_e$ и созвездия, при которых $\Prob^{(2)}_e > \Prob^{(3)}_e$, т.е. соотношение между оценками $\Prob^{(2)}_e$ и $\Prob^{(3)}_e$ зависит от ситуации.
+\end{task}
+\begin{proof}
+Нетрудно проверить, что в случае BPSK-модуляции
+$$
+\Prob^{(2)} = Q\left(\frac{d_{\text{min}}}{\sqrt{2N_0}}\right) < \frac{1}{2} e^{-\frac{d^2_{\text{min}}}{4N_0}} = \Prob^{(3)},
+$$
+т.е. $\Prob^{(2)} < \Prob^{(3)}$. 
+
+Обратное соотношение наблюдается, например, в случае созвездия из $M = K + 2$ равновероятных точек, две из которых расположены на расстоянии $d_{\text{min}}$ друг от друга, а оставшиеся $K$ расположены одинаковом расстоянии друг от друга на окружности радиуса $d' \gg d_{\text{min}}$ с центром в середине отрезка, соединяющего первые две точки. При этом расстояние между соседними точками на окружности равно $2d'\sin(\pi / K)$. В таком случае для $\Prob_{e}^{(2)}$ получаем
+$$
+\Prob^{(2)} = (K + 1) Q\left(\frac{d_{\text{min}}}{4N_0}\right).
+$$
+Причем эта оценка не зависит от $d'$. При нахождении оценки $\Prob^{(3)}$ уточним геометрию созвездия, положив $d' = K^2 d_{\text{min}}$. При этом
+$$
+\Prob^{(3)} \xrightarrow{K \rightarrow \infty}\frac{1}{K} e^{-\frac{d_{\text{min}}^2}{4N_0}},
+$$
+так как все экспоненты, содержащие в своих степенях $d' = K^2 d_{\text{min}}$ и $2d'\sin(\pi / K) \approx 2Kd_{\text{min}}$ экспоненциально убывают с ростом $K$. Очевидно, для всех $K$ превосходящих некоторый порог $K_0$ выполняется неравенство
+$$
+\Prob^{(3)} \approx \frac{1}{K} e^{-\frac{d_{\text{min}}^2}{4N_0}} < (K + 1) Q\left(\frac{d_{\text{min}}}{4N_0}\right) = \Prob^{(2)}.
+$$
+
+Как видно из приведенного примера, выполнение неравенства $\Prob^{(3)} < \Prob^{(2)}$ достигнуто за счет крайне неравномерного расположения точек на плоскости: две точки расположены близко, в то время как оставшиеся точки расположены на значительном расстоянии от первых двух и всех остальных. 
+Однако на практике такие случаи не имеют места. Чтобы показать это, рассмотрим практическую задачу выбора созвездия $\Const$ некоторого заданного размера $M=2^k$, $k \in \mathbb{N}$. Предполагается, что 
+\begin{itemize}
+	\item символы созвездия равновероятны, т.е. $\Prob_m = 1/M$ для всех $m = 1,\dots, M$ (TODO это действительно так из-за скремблинга);
+	\item средняя энергия на символ ограничена:
+	$$
+	\Energy(\Const) = \Sum_{m=1}^M \Prob_m |A_m|^2 = \frac{1}{M} \Sum_{m=1}^M |A_m|^2 \le \Energy_{avg}^*.
+	$$
+\end{itemize}
+При этом требуется найти такое созвездие размера $M$, при котором вероятность ошибки минимальна:
+$$
+\Const^* = \arg \min\limits_{\mathclap{\substack{\Const\colon\\ \Energy(\Const) \le \Energy_{avg}^*}}} \Prob_e(\Const).
+$$
+На самом деле в условии на энергию можно заменить знак неравенства на равенство:
+$$
+\Const^* = \arg \min\limits_{\mathclap{\substack{\Const\colon\\ \Energy(\Const) = \Energy_{avg}^*}}} \Prob_e(\Const).
+$$
+Действительно, если $\Energy_{avg} < \Energy_{avg}^*$, то домножив созвездие $\Const$ на $\alpha = \sqrt{\Energy_{avg}^* / \Energy_{avg}}$, получим новое созвездие средняя энергия которого есть $\Energy_{avg}^*$. При этом увеличение попарных расстояний между точками в $\alpha$ раз приводит к уменьшению вероятности ошибки, а значит, решение всегда следует искать при условии $\Energy(\Const) = \Energy_{avg}^*$.
+
+Интуитивно понятно, что для достижения меньшей вероятности ошибки $\Prob_e$ следует располагать точки как можно более равномерно. При этом оценка $\Prob^{(2)}$ начинает работать все точнее, а оценка $\Prob^{(3)}$ наоборот начинает сильно завышать вероятность ошибки. 
+
+\begin{itemize}
+	\item [TODO а можно ли не интуитивно]
+	\item [TODO сделать пункт в лабе на эту тему]
+	\item [TODO Есть ли конструктивные методы построения греевского кодирования]
+\end{itemize}
+%При такой постановке сразу же возникает элементарное ограничение на минимальное расстояние между символами:
+%$$
+%\frac{1}{M}Q\left(\frac{d_{\text{min}}}{\sqrt{2N_0}}\right) = \ge
+%$$
+\end{proof}
+
+\begin{task}
+	Можно ли перекодировать источник таким образом, чтобы вероятности символов $s_1$, $\dots$, $s_M$ были равны соответственно $q_1$, $\dots$, $q_M$. 
+\end{task}
+
+
+\section{Созвездия на решетках}
+
+\section{Детектирование для модуляции с памятью}
+
+\paragraph{EM-алгоритм}
+
+\chapter{Передача в каналах с ограниченной полосой}
+TODO
+
+Сигналы $\{s_m(t)\}$, передаваемые по каналу связи, являются действительными функциями. Выберем ортонормированный базис $\{\phi_i(t)\}$ в пространстве $\mathcal{L}_2[0, \Tsym]$ действительных функций.
+
+%В первую очередь всегда стоит помнить о том, что именно передается по каналу связи, а что используется для описания этой передачи. В данном случае по каналу связи
+
+\begin{definition}
+	Функции $\{\phi_i\}_{i=1}^{\N}$ называются \textbf{ортонормированными}, если
+	\begin{equation}
+	\Int_{-\infty}^{+\infty} \phi_n(t) \phi^*_m(t) dt = \delta_{nm} =
+	\begin{cases}
+	1, &\text{ если } m = n; \\
+	0, &\text{ если } m \neq n.
+	\end{cases}
+	\end{equation}
+\end{definition}
+
+\begin{definition}
+	\textbf{Модулированный сигнал\translation{modulated waveform}} $x(t)$, соответствующий символу $\vec{x}$ и ортонормированному базису $\{\phi_i\}$, определяется следующим образом:
+	\begin{equation}
+	x(t) = \Sum_{i=1}^\N x_i \phi_i(t).
+	\end{equation}
+\end{definition}
+
+\subsection{Теорема Котельникова}
+В данном разделе рассматривается передача данных в ограниченной полосе. Зададимся следующим вопросом. Как выглядят сигналы, спектр которых полностью сосредоточен в интервале $[-\fupp, \fupp]$? Выясним, например, какому сигналу $x(t)$ соответствует спектр
+\begin{equation}
+X(f) = \frac{1}{2\fupp}\Pi_{[-\fupp, \fupp]}(f) = \begin{cases}
+\frac{1}{2\fupp}, &\text{ если } f \in [-\fupp, \fupp];\\
+0, &\text{ если } f \notin [-\fupp, \fupp].
+\end{cases}
+\end{equation}
+Для этого осуществим обратное преобразование Фурье
+\begin{equation}
+x(t) = \bfourier{X(f)} = \Int_{-\fupp}^{+\fupp} \frac{e^{j2\pi f t}}{2\fupp} df = \frac{\sin (2 \pi \fupp t)}{2\pi \fupp t}.
+\end{equation}
+По виду данного можно построить целое множество сигналов, спектр которых полностью сосредоточен в интервале $[-W, W]$, отличающихся друг от другом сдвигом на $\Delta t$ во временной области: 
+\begin{gather}
+\phi_k(t) = \frac{\sin(2\pi \fupp (t - k \Delta t))}{2 \pi\fupp (t - k \Delta t)}, k \in \mathbb{Z} \\
+\Phi_k(f) = e^{-j2\pi f k \Delta t} \cdot \frac{1}{2\fupp}\Pi_{[-\fupp, \fupp]}(f).
+\end{gather}
+Нетрудно выбрать такое $\Delta t$, чтобы сигналы $\phi_n(t)$ и $\phi_m(t)$ были ортогональны при $n \neq m$:
+\begin{gather}
+\Int_{-\infty}^{+\infty} \phi_n(t) \phi^*_m(t) dt = \Int_{-\fupp}^{+\fupp} \Phi_n(f) \Phi_m^*(f) df = \frac{1}{4\fupp^2}\Int_{-\fupp}^{+\fupp} e^{j2\pi f (m - n) \Delta t} df = \left.\frac{1}{4\fupp^2} \frac{\sin (2\pi f(m - n) \Delta t)}{2 \pi (m - n) \Delta t} \right|_{-\fupp}^{+\fupp}
+\end{gather}
+Положим $\Delta t = \frac{1}{2\fupp}$. В таком случае
+\begin{gather}
+\langle \phi_n(t), \phi_m(t) \rangle = \Int_{-\infty}^{+\infty} \phi_n(t) \phi^*_m(t) dt = 
+\begin{cases}
+\frac{1}{2\fupp}, &\text{ если } n = m; \\
+0, &\text{ если } n \neq m.
+\end{cases}
+\end{gather}
+Множество функций $\{\phi_k(t)\}_{k=-\infty}^{+\infty}$ имеет исключительное значение в обработке сигналов и обладает множеством замечательных свойств, первое из которых --- это ограниченность спектра. Второе свойство заключается в значениях, принимаемых функциями в точках $n\Delta t$, $n \in \mathbb{Z}$:
+\begin{equation}
+\phi_k(n \Delta t) = 
+\begin{cases}
+	1, &\text{ если } n = k; \\
+	0, &\text{ если } n \neq k.
+\end{cases}
+\end{equation}
+Проведем следующий трюк. Возьмем некоторый сигнал $x(t)$ и продискретизуем его с периодом $\Delta t$. Получим набор значений сигнала $\{x(k\Delta t)\}_{k=-\infty}^{+\infty}$. А теперь предъявим миру следующий сигнал $\hat{x}(t)$:
+\begin{equation}
+\hat{x}(t) = \Sum_{k=-\infty}^{+\infty} x(k\Delta t) \frac{\sin 2\pi f_u (t - k\Delta t)}{2\pi f_u (t - k\Delta t)}.
+\end{equation}
+В точках $\{k\Delta t\}_{k=-\infty}^{+\infty}$ данный сигнал совпадает с $x(t)$: $x(k\Delta t) = \hat{x}(k\Delta t)$. Здесь важно отметить, что в общем случае произвольного сигнала $x(t)$, значения совпадают только в точках дискретизации. Действительно, спектр сигнала $\hat{x}(t)$ полностью сосредоточен в интервале $[-\fupp, \fupp]$:
+$$
+\hat{X}(f) = \frac{1}{2\fupp}\Sum_{k =-\infty}^{+\infty} x(k\Delta t) \Pi_{[-\fupp, \fupp]}(f) e^{-j2\pi f k \Delta t}.
+$$
+Спектр же сигнала $x(t)$ в общем случае неограничен (ведь в качестве $x(t)$ можем взять любой сигнал). А значит и в целом сигналы $x(t)$ и $\hat{x}(t)$ отличаются. Но что если сигнал $x(t) \in B[-W, W]$. Тогда приведенное выше рассуждение не верно, и возникает надежда на то, что сигналы $x(t)$ и $\hat{x}(t)$ совпадают. Если это так, тогда множество функций $\{\phi_k(t)\}$ представляет собой базис в пространстве $B[-W,W]$, а формула TODO задает разложение по этому базису. 
+
+Чтобы разрешить данный вопрос выясним, как же связаны спектры сигналов $\hat{x}(t)$ и $x(t)$. 
+Для этого заметим, что $\hat{x}(t)$ есть свертка дискретизованного сигнала $x_d(t) = \sum_k x(k \cdot \Delta t) \delta (t - k \Delta t)$ и функции $\phi_0(t)$.
+\begin{gather}
+\hat{x}(t) = x_{d}(t) \star \phi_0(t) = \Int_{-\infty}^{+\infty} \left(\Sum_{k=-\infty}^{+\infty} x(k \cdot \Delta t) \delta(\tau - k \Delta t)\right) \cdot \phi_0(t - \tau) d\tau  = \\ = \Sum_{k=-\infty}^{+\infty} x(k \cdot \Delta t) \phi_0(t - k\Delta t) = \Sum_{k=-\infty}^{+\infty} x(k \cdot \Delta t) \phi_k(t).
+\end{gather}
+Спектр сигнала $x_d(t)$ имеет вид
+\begin{equation}
+X_d(f) = \frac{1}{\Delta t} \Sum_{n=-\infty}^{+\infty} X(f - n \fupp).
+\end{equation}
+Таким образом,
+\begin{equation}
+\hat{X}(f) = X_d(f) \cdot \frac{1}{2\fupp} \Pi_{[-\fupp, \fupp]} = \frac{1}{\Delta t} \Sum_{n=-\infty}^{+\infty} X(f - n \fupp) \cdot \frac{1}{2\fupp} \Pi_{[-\fupp, \fupp]} = \Pi_{[-\fupp, \fupp]} \cdot \Sum_{n=-\infty}^{+\infty} X(f - n \fupp). 
+\end{equation}
+Получена связь между спектрами:
+\begin{equation}
+\hat{X}(f) = \Pi_{[-\fupp, \fupp]} \cdot \Sum_{n=-\infty}^{+\infty} X(f - n \fupp).
+\end{equation}
+Из данного уравнения видно следующее:
+\begin{itemize}
+\item Если спектр $X(f)$ отличен от нуля вне $[-\fupp, +\fupp]$, то спектр $\hat{X}(f)$ отличается от $X(f)$. Отличие заключается во влиянии хвостов от $X(f - n\fupp)$ при $n \neq 0$.
+\item Если же спектр $X(f)$ отличен от нуля только в интервале $[-\fupp, +\fupp]$, то $\hat{X}(f) = X(f)$. Т.е. сигнал с финитным спектром можно разложить в ряд по функциям $\{\phi_k(t)\}$.
+\end{itemize}
+
+\begin{theorem}[Теорема Котельникова\footnote{В англоязычной литературе известна как теорема Найквиста.}]
+Сигнал $x(t)$, спектр которого полностью сосредоточен в интервале $[-\fupp,+\fupp]$ можно представить в виде ряда:
+$$
+x(t) = \Sum_{k=-\infty}^{+\infty} x(k\Delta t) \frac{\sin 2\pi \fupp (t - k \Delta t)}{2\pi \fupp (t - k \Delta t)}.
+$$
+\end{theorem}
+
+\begin{note}
+Сигналов с одними и теми же отсчетами $\{x(k \Delta t)\}$ бесконечно много. Однако сигнал с отсчетами $\{x(k \Delta t)\}$, спектр которого сосредоточен в интервале $[-\fupp, +\fupp]$, только один, и он имеет вид
+$$
+\hat{x}(t) = \Sum_{k=-\infty}^{+\infty} x(k\Delta t) \frac{\sin 2\pi \fupp (t - k \Delta t)}{2\pi \fupp (t - k \Delta t)}.
+$$
+Действительно, если существуют какой-то другой сигнал $\hat{x}'(t)$, то по доказанной теореме он раскладывается в ряд TODO, а это есть ряд для $\hat{x}$. Следовательно, $\hat{x}(t)$ и $\hat{x}'(t)$ совпадают. Значит при заданных $\{x(k \Delta t)\}$ сигнал $\hat{x}(t)$ и спектр $\hat{X}(f)$ однозначно определены. Последнее следствие весьма удивительно. Из него и равенства
+$$
+\hat{X}(t) = \Pi_{[-\fupp, \fupp]} \cdot \Sum_{n=-\infty}^{+\infty} X(f - n \fupp)
+$$
+следует, что для любого вещественного сигнала $x(t)$ с отсчетами $\{x(k \Delta t)\}$ сумма $\Sum_{n=-\infty}^{+\infty} X(f - n \fupp)$ одна и та же.
+Поставь в начале данного раздела вопрос вида ``докажите, что сумма $S(f) = \Sum_{n=-\infty}^{+\infty} X(f - n \fupp)$ совпадает для всех сигналов $x(t)$ с одними и теми же отсчетами $\{x(k \Delta t)\}$'', то он наверняка ввел бы читателя в ступор. 
+\end{note}
+
+Весьма примечательна альтернативная формулировка теоремы Котельникова. Можно доказать из требования отсутствия межсимвольной интерференции. Условие на отсутствие межсимвольной интерференции:
+\begin{equation}
+x(k \Delta t)
+\begin{cases}
+1, \text{ если } k = n,\\
+0, \text{ если } k \neq n.
+\end{cases}
+\end{equation}
+\begin{theorem}[Теорема Найквиста]
+Условие отсутствия межсимвольной интерференции выполнено тогда и только тогда, когда 
+$$
+\Sum_{n = -\infty}^{+\infty} X\left(f + \frac{n}{\Delta t}\right) = \Delta t.
+$$
+\end{theorem}
+
+
+\chapter{Модели каналов}
+\begin{itemize}
+\item \textbf{Потери на трассе (path loss)}. На расстояниях порядка 100-1000~м.
+\item \textbf{Экранирование (shadowing)}. обусловлено наличием преград между передатчиком и приемником, которые поглощают мощность сигнала за счет отражения, поглощения, рассеяния и дифракции. На расстояниях порядка 10-100~м.
+\item \textbf{Медленные и быстрые замирания (flat and frequency selective fading)}.
+\end{itemize}
+
+
+\begin{definition}
+	Разброс задержек --- время и между поступлениями первой и последней компонент многолучевого распространения.
+\end{definition}
+В зависимости от соотношения между величинами $T_m$ и $W$ каналы делятся на узкополосные и широкополосные.
+\begin{definition}
+	Канал называется узкополосным, если разброс задержек которого много меньше величины обратной его ширине: $T_m \ll 1 / W$. Если же $T_m \gg 1 / W$, то канал называется широкополосным.
+\end{definition}
+
+\begin{itemize}
+\item Двухлучевая модель (two-ray model). Имеется одна траектория между передатчиком и приемником и одна траектория отражения.
+\end{itemize}
+
+\section{Потери на тракте}
+\subsection{Модель потерь в тракте в свободном пространстве (free space path loss model)}
+Пусть в открытом пространстве имеется точечный источник излучения с длиной волны $\lambda$ и мощности $P_t$. Тогда мощность принимаемого на расстоянии $d$ от источника сигнала равна
+
+\begin{equation}
+\label{eq:phy:channel_models:free_path_loss}
+r(t) = \frac{\lambda \sqrt{G_l}}{4\pi d} s(t - d /c) = \Re\{\frac{\lambda \sqrt{G_l}}{4\pi d}s_l (t - d / c) e^{j2\pi f_c (t - d / c)}\},
+\end{equation}
+где $\sqrt{G_l}$ --- произведение коэффициентов усиления передающей и принимающей антенн по линии прямой видимости.
+
+Пусть $P_t$ --- модность передаваемого сигнала $s(t)$, а $P_r$ --- мощность принимаемого сигнала $r(t)$. Тогда из~\eqref{eq:phy:channel_models:free_path_loss} получаем
+\begin{equation*}
+P_r = P_t \left(\frac{\lambda\sqrt{G_l}}{4\pi d}\right)^2.
+\end{equation*}
+Величина потерь на трассе $\mathcal{L}_{fs}$ определяется следующим образом:
+\begin{equation*}
+\mathcal{L}_{fs} = \frac{P_t}{P_r} = \left(\frac{4\pi d}{\lambda}\right)^2 = \left(\frac{4\pi f_c d}{c}\right)^2 .
+\end{equation*}
+Или в дБ
+\begin{gather*}
+\mathcal{L}_{fs} \text{ [дБ] } = 10 \log \frac{P_t}{P_r} = 10 \log G_l + 20 \log \left(\frac{4\pi}{c}\right) + 20 \log f_c + 20 \log d \approx \\ 
+\approx 32.44 + 20 \log f_c \text{ [МГц]} + 20 \log d \text{ [км] }.
+\end{gather*}
+
+\subsection{Упрощенная модель потерь в тракте (simplified path loss model)}
+Широко используется следующая упрощенная модель зависимости потерь в тракте передачи от расстояния $d$:
+\begin{equation*}
+P_r = P_t K \left(\frac{d_0}{d}\right)^\gamma,
+\end{equation*}
+где 
+\begin{itemize}
+\item $K$ --- безразмерная постоянная, зависящая от характеристик антенны и среднего затухания канала.
+\item $d_0$ --- опорная дистанция, начало отсчета дальней зоны передающей антенны.
+\item $\gamma$ --- показатель потерь на тракте передаче.
+\end{itemize}
+
+\begin{table}
+\begin{center}
+\caption{\label{tab:phy:channel_models:path_loss}Типичные значения показателей потерь}
+\begin{tabular}{|l|l|}
+\hline
+Условия распространения                  & Диапазон $\gamma$ \\ \hline
+Городские макросоты                      & 3.7 - 6.5 \\ \hline
+Городские микросоты                      & 2.7 - 3.5 \\ \hline
+Здание предприятия (один и тот же этаж)  & 1.6 - 3.5 \\ \hline
+Здание предприятия (много этажей)        & 2 - 6     \\ \hline
+Склад                                    & 1.8 - 2.2 \\ \hline
+Завод (цех)                              & 1.6 - 3.3 \\ \hline
+Дом                                      & 3         \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+Для затухания $\mathcal{L}$, соответственно, получаем
+\begin{equation*}
+\mathcal{L} \text{ [дБ]} = 10 \log \frac{1}{K} \left(\frac{d}{d_0}\right)^{\gamma} = A \text{ [дБ]} + 10 \gamma \log d \text{ [км]}. 
+\end{equation*}
+Здесь $A$ --- потери на \textit{опорной} дистанции, которая в данном случае положена равной 1 км,
+Именно такой вид имеют большинство выражений для  $\mathcal{L}$, встречающихся на практике. Сюда входят, например
+\begin{itemize}
+\item Модель потерь в тракте в свободном пространстве
+\item Двухлучевая модель
+\item Модель Хата
+\item Расширенная модель COST схемы Хата
+\end{itemize}
+
+\section{Экранирование}
+Согласно лог-нормальной модели экранирования, коэффициент передачи мощности от передатчика к приемнику $\psi = \frac{P_t}{P_r}$
+является случайной величиной, имеющей лог-нормальное распределение:
+\begin{equation*}
+p(\psi) = \frac{\xi}{\sqrt{2\pi}\sigma_{\psi_{dB}}\psi} e^{-\frac{(10 \lg \psi - \mu_{dB})^2}{2\sigma_{dB}^2}}, \psi > 0,
+\end{equation*}
+где $\mu_{dB}$ [дБ] --- среднее значение случайной величины $10 \log \psi$, а 
+$\sigma_{dB}$ [дБ] --- стандартное отклонение $10 \log \psi$.
+
+При измерениях $\mu_{\psi_{dB}}$ равна потерям на трассе плюс среднее затухание экранирования.
+
+Детерминированные модели на практике встречаются редко, поэтому часто приходится описывать канал статистическими методами.
+
+Разброс задержек --- разность между прибытием первой составляющей сигнала (по LOS, когда она есть) и последней составляющей, принятой по каналу многолучевого распространения. Эти составляющие относятся к одному и тому же переданному символу.
+
+Многолучевые каналы нестационарны (движение приемника и передатчика, изменения свойств среды)
+
+Конструктивное и деструктивное сложение сигналов при многолучевом распространении
+
+Что такое узкополосный и широкополосный канал.
+
+\section{Многолучевое распространение}
+Пусть $s(t)$ и $r(t)$ --- передаваемый и принимаемый сигналы с НКЭ, равными $s_l(t)$ и $r_l(t)$ соответственно. Тогда
+\begin{gather}
+s(t) = \Re\{s_l(t) e^{j2\pi f_c t}\} = \Re\{s_l(t)\} \cos(2\pi f_c t) - \Im\{s_l(t)\} \sin(2\pi f_c t) \label{eq:phy:channel_models:s1} \\
+r(t) = \Re\{r_l(t) e^{j2\pi f_c t}\} = \Re\{r_l(t)\} \cos(2\pi f_c t) - \Im\{r_l(t)\} \sin(2\pi f_c t) \notag
+\end{gather}
+В данном разделе будем предполагать, что все искажения сигнала $s(t)$ связаны с импульсной характеристикой канала. В частности, здесь мы не будем рассматривать белый шум $n(t)$. В первую очередь выясним, как выглядит импульсная характеристика канала.
+
+%Далее будем опускать шум $n(t)$, так как он не оказывает влияние на распространение сигнала, т.е. на предмет текущий предмет исследований.
+%
+%Если сигнал $s(t)$ передается по стационарному каналу с импульсной характеристикой $c(t)$, то
+%\begin{gather*}
+%r(t) = s(t) \otimes c(t), \\
+%r_l(t) = \frac{1}{2} s_l(t) \otimes c_l(t).
+%\end{gather*}
+
+\subsection{Импульсная характеристики канала}
+
+\subsubsection{Стационарный случай.}
+Пусть передатчик, приемник, а также окружающие объекты неподвижны. Пусть, также стационарны канальные условия.
+
+Пусть распространение сигнала происходит по $(M + 1)$-му лучу. Луч $0$ --- LOS. Задержки распространения $\tau_i$. Тогда сигнал на приемнике имеет вид
+\begin{equation}
+r(t) = \Sum_{i = 0}^M \alpha_i s(t - \tau_i) = s(t) \otimes \Sum_{i = 0}^M \alpha_i \delta(t - \tau_i) = s(t) \otimes c(t).
+\end{equation}
+Таким образом, импульсная характеристика имеет вид
+\begin{equation}
+c(\tau) = \Sum_{i = 0}^M \alpha_i \delta(\tau - \tau_i).
+\end{equation}
+С другой стороны
+\begin{align}
+r(t) & = \Sum_{i = 0}^M \alpha_i s(t - \tau_i) %= \Re\{\Sum_{i=0}^M \alpha_i s_l(t - \tau_i) e^{j 2\pi f_c (t - \tau_i)}\} 
+= \Re\{  \left(\Sum_{i=0}^M \alpha_i e^{-j 2\pi f_c \tau_i} s_l(t - \tau_i) \right) e^{j 2\pi f_c t}\}  = \Re\{ r_l(t) e^{j 2\pi f_c t}\} \label{eq:channels:stat:eq0} \\
+r_l(t) & =  \Sum_{i=0}^M \alpha_i e^{-j 2 \pi f_c \tau_i} s_l(t - \tau_i) = s_l(t) \otimes \Sum_{i=0}^M \alpha_i  e^{-j 2 \pi f_c \tau_i} \delta(t - \tau_i) = s_l(t) \otimes c_l(t) \label{eq:channels:stat:eq1} \\
+c_l(t) & = \Sum_{i=0}^M \alpha_i  e^{-j 2 \pi f_c \tau_i} \delta(t - \tau_i) \label{eq:channels:stat:eq2} 
+\end{align}
+%Таким образом, НКЭ $r(t)$, обозначаемая $r_l(t)$, имеет вид
+Несложно проверить, что $c_l(t)$, найденная, по сути, эмпирическим путем, действительно является НКЭ $c(t)$:
+\begin{gather*}
+\Re \{c_l(\tau) e^{j2\pi f_c \tau}\} = \Re\{\Sum_{i=0}^M \alpha_i e^{-j 2\pi f_c \tau_i}\delta(\tau - \tau_i) e^{j 2 \pi f_c \tau_i}\} = \Re\{\Sum_{i=0}^M \alpha_i \delta(\tau - \tau_i)\} = \Sum_{i=0}^M \alpha_i \delta(\tau - \tau_i) = c(\tau).
+\end{gather*}
+
+Прежде чем переходить к более сложным случаям, установим связь между НКЭ для $c(\tau)$, определенной в разделе~\ref{repr:low_imp_char}, и найденной здесь. Вспомним, что в разделе~\ref{repr:low_imp_char} была получена следующая связь между НКЭ реального сигнала $r(t)$ при прохождении через линейный фильтр с импульсной характеристикой $c(\tau)$ (ур.~\eqref{eq:phy:low_filter}):
+\begin{equation}
+\label{eq:channels:stat:eq3}
+r_l(t) = \frac{1}{2} s_l(t) \otimes c_l(t).
+\end{equation}
+При работе с НКЭ импульсных характеристик, обычно избавляются от множителя $1/2$, полагая, что $c_l(t) \leftarrow c_l(t) / 2$, т.е. внося этот множитель в НКЭ $c(\tau)$. Выше мы неявно проделали это преобразование, потребовав в~\eqref{eq:channels:eq1} выполнение условия
+\begin{equation}
+\label{eq:channels:stat:eq4}
+r_l(t) = s_l(t) \otimes c_l(t).
+\end{equation}
+Т.е. найденная в данном разделе $c_l(\tau)$ есть лишь половина от той $c_l(\tau)$, что рассматривалась в разделе~\ref{repr:low_imp_char}. За счет этого спектры $c(\tau)$ и $\tilde{c}(\tau) = c_l(\tau) e^{j2\pi f_c \tau}$ равны, а не отличаются в два раза, как раньше:
+\begin{align}
+C(f) &= \Int_{-\infty}^{+\infty} c(\tau) e^{-j2\pi f \tau} d\tau = \Sum_{i=0}^M \alpha_i e^{-j 2 \pi f \tau_i} \\
+C_l(f) &= \Int_{-\infty}^{+\infty} c_l(\tau) e^{-j2\pi f \tau} d\tau = \Sum_{i=0}^M \alpha_i e^{-j 2 \pi (f + f_c) \tau_i} \\
+\tilde{C}(f) &= \Int_{-\infty}^{+\infty} \left(c_l(\tau) e^{j 2\pi f_c \tau} \right) e^{-j 2\pi f \tau} d\tau = \Sum_{i=0}^M \alpha_i e^{-j 2\pi f \tau_i} \label{eq:phy:model:ic:1}
+\end{align} 
+Более того, из~\eqref{eq:phy:model:ic:1} видно, что $c_l(\tau)$ ($\tilde{c}(\tau) = c_l(\tau) e^{j2\pi f_c \tau}$) в данном случае не является НПЭ (ПЭ) $c(\tau)$, так как спектр $C_l(f)$ ($\tilde{C}(f)$) отличен от нуля в области $f < -f_c$ ($f < 0$).
+
+Если присмотреться к~\eqref{eq:channels:stat:eq0}, \eqref{eq:channels:stat:eq1}, \eqref{eq:channels:stat:eq2}, то можно заметить, что ни одно из этих соотношений не требует ``положительности'' от $r_l(t)$ и $c_l(\tau)$, в то время как в разделе~$\ref{repr:low_imp_char}$ сама справедливость~\eqref{eq:channels:stat:eq3} или \eqref{eq:channels:stat:eq4} являлась следствием положительности $r_l(t)$ и $c_l(\tau)$. Почему же в данном случае положительность не требуется?
+
+
+%Почему же соотношения \eqref{eq:channels:stat:eq0}, \eqref{eq:channels:stat:eq1}, \eqref{eq:channels:stat:eq2}
+
+%Возвращаясь к разделу~\ref{repr:low_imp_char} можно вспомнить основное достоинство (Н)ПЭ:  энергия реального сигнала может быть выражена через энергию его (Н)ПЭ:
+%$$
+%\Energy_x = \frac{1}{2}\Energy_{x_l}.
+%$$
+
+
+
+\subsubsection{Нестационарный случай.}
+Пусть в канале присутствует $N(t)$ путей распространения сигнала. На этот раз это переменная величина. Тогда принимаемый сигнал имеет вид
+
+\begin{equation}
+\label{eq:phy:channel_models:r1}
+r(t) = \Sum_{n = 0}^{N(t)} \alpha_n(t) s(t - \tau_n(t)) = \Re\{\Sum_{n = 0}^{N(t)} \alpha_n(t) s_l(t - \tau_n(t)) e^{j2\pi f_c (t - \tau_n(t))}\},
+\end{equation}
+где $\tau_n(t) = d_n(t) / c$ --- время распространения по $n$-му лучу, где $d_n(t)$ --- длина пути по $n$-му лучу в момент времени $t$. Луч $n = 0$ соответствует линии прямой видимости (Line of Sight, LoS). Заметим, что в процессе передачи сигнала лучи могут исчезать как старые лучи, так и появляться новые. 
+
+Из~\eqref{eq:phy:channel_models:r1} можем найти $c(\tau, t)$:
+\begin{gather}
+r(t) = \Sum_{n = 0}^{N(t)} \alpha_n(t) s(t - \tau_n(t)) = s(t) \otimes \Sum_{n=0}^{N(t)} \alpha_n(t) \delta(\tau - \tau_n(t)) \\
+c(\tau, t) = \Sum_{n=0}^{N(t)} \alpha_n(t) \delta(\tau - \tau_n(t)). 
+\end{gather}
+
+С другой стороны
+\begin{align}
+\label{eq:phy:channel_models:r2}
+r(t) &= \Re\{\left(\Sum_{n = 0}^{N(t)} \alpha_n(t) s_l(t - \tau_n(t)) e^{-j2\pi f_c \tau_n(t)} \right)e^{j2\pi f_c t}\} = \Re\{r_l(t)e^{j2\pi f_c t}\} \\
+r_l(t) &= \Sum_{n = 0}^{N(t)} \alpha_n(t) s_l(t - \tau_n(t)) e^{-j2\pi f_c \tau_n(t)} = s_l(t) \otimes \Sum_{n = 0}^{N(t)} \alpha_n(t) \delta(t - \tau_n(t)) e^{-j2\pi f_c \tau_n(t)} \\
+c_l(\tau, t) &= \Sum_{n = 0}^{N(t)} \alpha_n(t) \delta(\tau - \tau_n(t)) e^{-j2\pi f_c \tau_n(t)}
+\end{align}
+
+Как и ранее несложно проверить, что $c_l(\tau, t)$ --- это действительно НКЭ $c(\tau, t)$ по переменной $\tau$, т.е. 
+$$
+c(\tau, t) = \Re\{c_l(\tau, t) e^{j2\pi f_c \tau}\}.
+$$
+Для этого достаточно сравнить спектры сигналов в левой и правой частях равенства. Кроме того, можно прийти к этому равенству и напрямую (задача TODO).
+
+У стационарных каналов импульсная характеристика $c(\tau,  t)$ стационарна, т.е. $c(\tau, t) = c(\tau, t + T)$. В таком случае $c(\tau, t) = c(\tau, 0) \equiv c(\tau)$.
+\begin{equation}
+c(\tau) = \Sum_{n = 0}^{N} \alpha_n e^{-j2\pi f_c \tau_n} \delta(\tau - \tau_n).
+\end{equation}
+В случае бесконечного числа многолучевых компонент, получаем
+\begin{equation}
+c(\tau, t) = \Int_{0}^{+\infty} \alpha(\xi, t) e^{-j\varphi(\xi, t)} \delta(\tau - \xi) d\xi = 
+\alpha(\tau, t) e^{-j \varphi(\tau, t)}.
+\end{equation}
+
+
+\begin{task}
+Найдите низкочастотную эквиваленту $c_l(\tau, t)$ и проверьте, что как~\eqref{eq:phy:channel_models:r1} и \eqref{eq:phy:channel_models:r2} действительно приводят к одним и тем же $r(t)$.
+\end{task}
+\begin{proof}
+\begin{equation}
+c_l(\tau, t) = (c(\tau, t) + j \hat{c}(\tau, t))e^{-j2\pi f_c \tau},
+\end{equation}
+где
+\begin{equation}
+c(\tau, t) = \Sum_{n = 0}^{N(t)} \alpha_n(t) \delta(\tau - \tau_n(t)),
+\end{equation}
+и
+\begin{equation}
+\hat{c}(\tau, t) = \Int_{-\infty}^{+\infty} \frac{1}{\pi (\tau - \xi)} \Sum_{n = 0}^{N(t)} \alpha_n(t) \delta(\xi - \tau_n(t)) = 
+\Sum_{n = 0}^{N(t)} \frac{\alpha_n(t)}{\pi(\tau - \tau_n(t))}.
+\end{equation}
+В результате для $c_l(\tau, t)$ получаем
+\begin{equation}
+\label{eq:phy:channel_models:hltrue}
+c_l(\tau, t) = \Sum_{n = 0}^{N(t)} \alpha_n(t) e^{-j2\pi f_c \tau}\left(\delta(\tau - \tau_n(t)) + \frac{j}{\pi(\tau - \tau_n(t))}\right).
+\end{equation}
+Напомним, что ее аналог $c'_l(\tau, t)$ имеет вид
+\begin{equation}
+\label{eq:phy:channel_models:hlanalog}
+c'_l(\tau, t) = \Sum_{n = 0}^{N(t)} \alpha_n(t) e^{-j2\pi f_c \tau_n(t)} \delta(\tau - \tau_n(t)).
+\end{equation}
+Чтобы доказать равенство
+\begin{equation}
+\label{eq:phy:channel_models:ClanalogCltrue}
+\left(\frac{1}{2}\Int_0^t c_l(\tau, t) s_l(t - \tau) d\tau \right) e^{j2\pi f_c t} = \left(\Int_0^t c'_l(\tau, t) s_l(t - \tau) d\tau\right) e^{j2\pi f_c t},
+\end{equation}
+посмотрим на спектры сигналов его левой и правой частях. Спектр сигнала $s_l(t)$ лежит в диапазоне $[-f_c, +\infty)$. Спектр $C'_l(f, t)$ сигнала $c'_l(\tau, t)$ имеет вид:
+\begin{equation}
+\label{eq:phy:channel_models:Clanalog}
+C'_l(f, t) = \Sum_{n = 0}^{N(t)} \alpha_n(t) e^{-j2\pi (f + f_c) \tau_n(t)},
+\end{equation}
+а спектр $C_l(f, t)$ сигнала $c_l(\tau, t)$ имеет вид:
+\begin{gather}
+\notag
+C_l(f, t) = \Sum_{n = 0}^{N(t)} \alpha_n(t) (e^{-j2\pi (f + f_c) \tau_n(t)} + \text{sign}(f + f_c) e^{-j2\pi (f + f_c) \tau_n(t)}) = \Sum_{n = 0}^{N(t)} \alpha_n(t) e^{-j2\pi(f + f_c) \tau_n(t)} (1 + \text{sign}(f + f_c)). \\
+\label{eq:phy:channel_models:Cltrue}
+C_l(f, t) = 
+\begin{cases}
+\Sum_{n=0}^{N(t)} 2 \alpha_n(t) e^{-j2\pi (f+f_c)\tau_n(t)} = 2C'_l(f, t), &\text{ если } f > -f_c; \\
+0, &\text{ если } f < -f_c.
+\end{cases}
+\end{gather}
+Теперь видно, что равенство~\eqref{eq:phy:channel_models:ClanalogCltrue} действительно имеет место.
+\end{proof}
+
+\begin{note}
+	В Goldsmith-е также явно выписан допплеровский сдвиг $\varphi_{D_n}$, хотя он уже вроде как учтен внутри $\tau_n(t)$
+\end{note}
+
+%В этой сумме есть разрешимые и неразрешимые компоненты. Для широкополосных каналов сумма~\eqref{eq:phy:channel_models:received_through_multipath1} состоит из различимых и неразличимых компонент. В случае узкополосных каналов все слагаемые суммы в основном являются неразличимыми.
+%
+%\begin{equation}
+%\label{eq:phy:channel_models:received_through_multipath2}
+%r(t) = \Re\{\left[\Sum_{n = 0}^{N(t)} \alpha_n(t) e^{-j\varphi_n(t)} s_l(t - \tau_n(t))\right] e^{j2\pi f_c t}\},
+%\end{equation}
+%где $\varphi_n(t) = 2\pi f_c \tau_n(t)$.
+%
+%Пусть $c_l(\tau, t)$ --- эквивалентная низкочастотная импульсная характеристика канала. Тогда
+%\begin{equation}
+%\label{eq:phy:channel_models:received_through_multipath3}
+%r(t) = \Re\{\left(\frac{1}{2}\Int_{0}^{+\infty} c(\tau, t) s_l(t - \tau) d\tau\right) e^{j2\pi f_c t}\},
+%\end{equation}
+
+
+\subsection{Модели узкополосных каналов}
+В случае узкополосных каналов разброс задержек много меньше длительности передаваемого импульса, а потому $s_l(t - \tau_i) \approx s_l(t)$. 
+\begin{equation}
+\label{eq:channel:narrow:eq1}
+r(t) = \Re\{e^{j2\pi f_c t}\Sum_{n = 0}^{N(t)} \alpha_n(t) e^{-j2\pi f_c \tau_n(t)} s_l(t - \tau_n(t))\} \approx 
+\Re\{s_l(t) e^{j2\pi f_c t} \left(\Sum_{n = 0}^{N(t)} \alpha_n(t) e^{-j2\pi f_c \tau_n(t)}\right)\}.
+\end{equation}
+Заметим, что в общем случае нельзя сказать, что $s(t - \tau_i) \approx s(t)$, так как $s(t)$ --- bandpass-сигнал, спектр которого сосредоточен в интервале $[f_c - W / 2, f_c + W / 2]$ ($W$ --- ширина спектра). Следовательно, сигнал $s(t)$ --- высокочастотный, быстро изменяющийся сигнал. Напротив, спектр $s_l(t)$ сосредоточен в интервале $[-W/2, W/2]$, так что за время $T_m \ll 1 / W$ (канал узкополосный), значение $s_l(t)$ практически не меняется.
+
+Из~\eqref{eq:channel:narrow:eq1} следует, что 
+$$
+r_l(t) = s_l(t) \left(\Sum_{n = 0}^{N(t)} \alpha_n(t) e^{-j2\pi f_c \tau_n(t)}\right).
+$$
+$r_l(t)$ отличается от $s_l(t)$ только комплексным множителем. До тех пор, пока выполняется условие $T_m \ll 1 / W$, этот множитель один и тот же для всех сигналов. 
+
+Передаваемый сигнал $s_l(t)$ может быть представлен в виде суперпозиции комплексных экспонент. Рассмотрим, как на каждую из таких компонент влияет рассматриваемый узкополосный канал. Пусть $s(t) = \cos(2\pi f_c t)$, т.е. $s_l(t) = 1$. Тогда,
+\begin{equation}
+r(t) = \Re\{\underbrace{\left(\Sum_{n=0}^{N(t)} \alpha_n(t)e^{-j2\pi f_c \tau_n(t)}\right)}_{r_l(t)} e^{j2\pi f_c t}\} = \Re\{r_l(t)\}  \cos(2\pi f_c t) - \Im\{r_l(t)\} \sin(2\pi f_c t),
+\end{equation}
+где 
+\begin{eqnarray*}
+r_i(t) = \Re\{r_l(t)\} &=&  \Sum_{n = 0}^{N(t)} \alpha_n(t) \cos(2\pi f_c \tau_n(t))\\
+r_q(t) = \Im\{r_l(t)\} &=& -\Sum_{n = 0}^{N(t)} \alpha_n(t) \sin(2\pi f_c \tau_n(t))
+\end{eqnarray*}
+
+Далее будем считать, что $\alpha_n(t)$ и $\tau_n(t)$ изменяются достаточно медленно в течение интересующего нас интервала времени. Обозначим $\varphi_n(t) = -2\pi f_c \tau_n(t)$. 
+
+Случайные величины $\alpha_n(t)$ и $\varphi_n(t)$ будем считать независимыми. Тогда
+\begin{align}
+\Exp{r_i(t)} = \Exp{\Sum_{n}\alpha_n(t) \cos \varphi_n(t) } &= \Sum_n \Exp{\alpha_n} \Exp{\cos \varphi_n(t)} = 0. \\
+\Exp{r_q(t)} = \Exp{\Sum_{n}\alpha_n(t) \sin \varphi_n(t) } &= \Sum_n \Exp{\alpha_n} \Exp{\sin \varphi_n(t)} = 0.
+\end{align}
+В результате получаем, что 
+$$\Exp{r(t)} = \Exp{r_i(t)} \cos(2\pi f_c t) - \Exp{r_q(t)} \sin(2 \pi f_c t) = 0$$
+
+Теперь найдем ковариацию синфазной и квадратурных составляющих в момент $t$
+\begin{gather*}
+\Cov(r_i(t), r_q(t)) = \Exp{r_i(t)r_q(t)} - \Exp{r_i(t)} \Exp{r_q(t)} = \Exp{\{r_i(t) r_q(t)\}} = \Sum_{n, m} \Exp{\alpha_n \alpha_m} \Exp{\cos\varphi_n(t) \sin\varphi_m(t)} = \\ = \Sum_{\substack{n \neq m}} \Exp{\alpha_n(t)\alpha_m(t)} \Exp{\cos\varphi_n(t)} \Exp{\sin\varphi_m(t)} + \Sum_n \Exp{\alpha_n^2(t)} \Exp{\sin\varphi_n(t) \cos\varphi_n(t)} = \frac{1}{2}\Sum_n\Exp{\alpha_n^2(t)} \Exp{\sin (2\varphi_n(t))} = 0.
+\end{gather*}
+Таким образом, $r_i(t)$ и $r_q(t)$ некоррелированы. А так как они являются гауссовскими случайными величинами, то $r_i(t)$ и $r_q(t)$ независимы.
+
+Найдем автокорреляционную функцию $r_i(t)$:
+\begin{gather*}
+K_{r_i}(t, t + \tau) = \mathbb{E}\left[(r_i(t) - \Exp{r_i(t)})(r_i(t + \tau) - \Exp{r_i(t + \tau)})\right] = \Exp{r_i(t)r_i(t + \tau)} = \\ =  \Sum_n \Exp{\alpha_n(t) \alpha_n(t + \tau)} \Exp{\cos \varphi_n(t) \cos \varphi_n(t + \tau)} 
+\end{gather*}
+Разложим $\varphi_n(t + \tau)$ в ряд Тейлора в окрестности точки $t$.
+\begin{gather*}
+\varphi_n(t + \tau) = \varphi_n(t) + \frac{\varphi'_n(t)}{1!} \tau + \frac{\varphi''_n(t)}{2!} \tau^2 + \dots \\
+\varphi'_n(t) = -2\pi f_c \tau'_n(t) = -2\pi f_c \frac{d_n'(t)}{c} = - 2\pi f_c \frac{\upsilon}{c} \cos \theta_n(t),
+\end{gather*}
+где $\upsilon$ --- скорость приемника относительно передатчика, $\theta_n(t)$ --- угол между направлением движения приемника и направлением луча $n$, так что $\upsilon \cos\theta_n(t)$ --- проекция скорости приемника на направление распространения сигнала по $n$-му лучу. Величина 
+$$
+f_{D_n} = f_c\frac{\upsilon}{c}\cos \theta_n(t)
+$$
+называется \textbf{доплеровским смещением}. В результате для $\varphi_n(t +\tau)$ получаем
+$$
+\varphi_n(t +\tau) \approx \varphi_n(t) - 2 \pi f_{D_n}(t) \tau.
+$$
+
+\begin{gather*}
+\cos \varphi_n(t) \cos \varphi_n(t + \tau) = \frac{1}{2}(\cos(\varphi_n(t + \tau) + \varphi_n(t)) 
++ \cos(\varphi_n(t + \tau) - \varphi_n(t))) = \\ = \frac{1}{2}(\cos(4 \pi f_c \tau_n(t) - 2\pi f_{D_n}(t) \tau) + \cos(2\pi f_{D_n}(t) \tau)) 
+\end{gather*}
+Случайная величина $4\pi f_c \tau_n(t)$ почти равномерно распределена по интервалу $[0, 2\pi)$. Значение доплеровского смещения $f_{D_n}(t) $ много меньше несущей частоты $f_c$. Поэтому 
+\begin{equation*}
+\Exp{\cos \varphi_n(t) \cos \varphi_n(t + \tau)} \approx \frac{1}{2} \Exp{\cos(2\pi f_{D_n}(t) \tau)}.
+\end{equation*}
+В результате для $K_{r_i}(t, t + \tau)$ получаем
+\begin{gather}
+\label{eq:channel:narrow:eq2}
+K_{r_i}(t, t + \tau) = \frac{1}{2}\Sum_n \Exp{\alpha_n^2(t)} \Exp{2\pi f_{D_n}(t) \tau} = \frac{1}{2}\Sum_n \Exp{\alpha_n^2} \cos (2\pi f_c \frac{\upsilon}{c} \tau \cos \theta_n) = \frac{1}{2}\Sum_n \Exp{\alpha_n^2} \cos (2\pi \frac{\upsilon}{\lambda} \tau \cos \theta_n).
+\end{gather}
+Здесь считается, что $f_{D_n}(t) \approx f_{D_n}$, $\theta_n(t) \approx \theta_n$ и $\alpha_n(t) \approx \alpha_n$, т.е. данные величины слабо изменяются на интересующем отрезке наблюдения. Так как $K_{r_i}(t, t + \tau) \equiv K_{r_i}(\tau)$, случайный процесс $r_i(t)$
+является стационарным в широком смысле. Аналогично, является стационарным случайный процесс $r_q(t)$ с автоковариацонной функцией, равной
+\begin{gather*}
+K_{r_q}(t, t + \tau) = \Exp{r_q(t) r_q(t + \tau)} = \Sum_n \Exp{\alpha_n(t)\alpha_n(t + \tau)} \Exp{\sin \varphi_n(t) \sin \varphi_n(t + \tau)} = \frac{1}{2}\Sum_n \Exp{\alpha_n^2} \cos (2\pi \frac{\upsilon}{\lambda} \tau \cos \theta_n).
+\end{gather*}
+В результате получаем, что $K_{r_i}(\tau) = K_{r_q}(\tau)$.
+
+Для кросс-ковариационных функций получаем
+\begin{align}
+\label{eq:channel:narrow:eq3}
+K_{r_i, r_q}(\tau) = \Exp{r_i(t) r_q(t + \tau)} & = \Sum_n \Exp{\alpha_n(t) \alpha_n(t + \tau) \Exp{\cos \varphi_n(t) \sin \varphi_n(t + \tau)}} \approx & -\frac{1}{2} \Sum_n \Exp{\alpha_n^2} \sin(2\pi \frac{\upsilon}{\lambda}\tau \cos \theta_n). \\
+K_{r_q, r_i}(\tau) = \Exp{r_q(t) r_i(t + \tau)} & =  \Sum_n \Exp{\alpha_n(t) \alpha_n(t + \tau) \Exp{\sin \varphi_n(t) \cos \varphi_n(t + \tau)}} \approx & \frac{1}{2} \Sum_n \Exp{\alpha_n^2} \sin(2\pi \frac{\upsilon}{\lambda}\tau \cos \theta_n). 
+\end{align}
+
+\begin{gather*}
+K_r(\tau) = \Exp{r(t) r(t + \tau)} = \Exp{(r_i(t) \cos (2\pi f_c t) - r_q(t) \sin (2\pi f_c t))(r_i(t + \tau) \cos (2\pi f_c (t + \tau)) - r_q(t + \tau) \sin (2\pi f_c (t + \tau)))} = \\
+= \Exp{r_i(t) r_i(t + \tau) \cos(2\pi f_c t) \cos(2\pi f_c (t + \tau))}  
+- \Exp{r_i(t) r_q(t + \tau) \cos(2\pi f_c t) \sin (2 \pi f_c (t + \tau))} + \\
+- \Exp{r_q(t) r_i(t + \tau) \sin(2\pi f_c t) \cos (2\pi f_c (t + \tau))} 
++ \Exp{r_q(t) r_q(t + \tau) \sin(2\pi f_c t) \sin (2 \pi f_c (t + \tau))} = \\
+\frac{1}{2} K_{r_i}(\tau) \left(\cos(2\pi f_c (2 t + \tau)) + \cos(2\pi f_c \tau) \right) - 
+\frac{1}{2} K_{r_i, r_q}(\tau) \left(\sin(2\pi f_c (2t + \tau)) + \sin(2\pi f_c \tau)\right) - \\
+- \frac{1}{2}  K_{r_q, r_i}(\tau) \left(\sin (2\pi f_c(2t + \tau)) - \sin(2\pi f_c \tau)\right) +
+ \frac{1}{2}  K_{r_q}(\tau) \left(\cos(2\pi f_c \tau) - \cos(2\pi f_c (2t + \tau))\right) = \\
+ = K_{r_i}(\tau) \cos(2\pi f_c \tau) - K_{r_i, r_q}(\tau) \sin (2\pi f_c \tau).
+\end{gather*}
+
+\begin{equation}
+\label{eq:channel:narrow:eq6}
+K_r(\tau) = K_{r_i}(\tau) \cos(2\pi f_c \tau) - K_{r_i, r_q}(\tau) \sin (2\pi f_c \tau).
+\end{equation}
+Теперь мы могли бы взять преобразование Фурье от $K_r(\tau)$, чтобы найти спектральную плотность мощности $S_r(f)$ случайного сигнала $r(t)$. Однако на данный момент $K_{r_i}(\tau)$ и $K_{r_i, r_q}(\tau)$ известны нам только в виде сумм~\eqref{eq:channel:narrow:eq2} и \eqref{eq:channel:narrow:eq3}. Чтобы упростить выражения для $K_{r_i}(\tau)$ и $K_{r_i, r_q}(\tau)$ воспользуемся моделью равномерной рассеивающей среды распространения.  Эта модель предполагает, что канал состоит из большого числа рассеивателей, плотно расположенных друг к другу в смысле углов падения. 
+
+
+
+Пусть лучи падают под углами $\theta_n = N \Delta \theta$, где $\Delta \theta = 2 \pi / N$. Пусть все лучи имеют одинаковую мощность, т.е. одинаковые значения $\alpha$, так что суммарная принимаемая мощность равна $P_r$. 
+\begin{gather*}
+P_r = f_c \Int_{0}^{\mathclap{1/f_c}} r^2(t) dt = f_c \Int_{0}^{1/f_c} \left(\Sum_{n, m} \alpha_n\alpha_m \cos(2\pi f_c (t - \tau_n))\cos(2\pi f_c (t - \tau_m))\right) dt = \\ = f_c \Int_{0}^{\mathclap{1/f_c}}  \Sum_n \alpha_n^2 \cos^2(2\pi f_c (t - \tau_n)) dt = \frac{1}{2} \Sum_{n=0}^M \alpha_n^2 = \frac{M}{2}\alpha^2. 
+\end{gather*}
+Откуда находим, что
+$$
+\alpha^2 = \frac{2 P_r}{M}.
+$$
+
+Напомним еще раз все условия, в рамках которых были получены результаты выше.
+\begin{itemize}
+	\item Канал узкополосный, т.е. $T_m \ll 1 / W$. Так как $T_m(t) = \tau_M(t) - \tau_0(t)$, то это условие можно записать как $\tau_{M}(t) - \tau_0(t) \ll 1 / W$
+	\item Величины $\alpha_n(t)$, $\tau_n(t)$ практически постоянны на характерном интервале наблюдения. В качестве данного интервала выше выступал период несущей $1 / f_c$. Тогда условия на малые изменения за $ 1/ f_c$ можно записать следующим образом:
+	\begin{gather*}
+	\frac{\frac{d \tau_n(t)}{d t} \cdot \frac{1}{f_c}}{\tau_n(t)} \ll 1 \Leftrightarrow \frac{d \ln \tau_n(t)}{dt} \ll f_c \\
+	\frac{\frac{d \alpha_n(t)}{d t} \cdot \frac{1}{f_c}}{\alpha_n(t)} \ll 1 \Leftrightarrow \frac{d \ln \alpha_n(t)}{dt} \ll f_c 
+	\end{gather*}
+	Из условия на $\tau_n(t)$ можно вывести эквивалентное условие
+	$$
+	(\upsilon / f_c) \cos \theta_n(t) \ll d_n(t),
+	$$
+	т.е. увеличение расстояния между передатчиком и приемником за время $1/f_c$ должно быть много меньше самого расстояния.
+\end{itemize}
+
+Итак, $\alpha^2 = 2P_r / N$, откуда из~\eqref{eq:channel:narrow:eq2} для $K_{r_i}(\tau)$ получаем
+\begin{equation*}
+K_{r_i}(\tau) = \frac{P_r}{N} \Sum_{n = 1}^N \cos (2\pi \frac{\upsilon}{\lambda} \tau \cos n \Delta \theta).
+\end{equation*}
+При $N \rightarrow +\infty$ сумма переходит в интеграл:
+\begin{equation}
+\label{eq:channel:narrow:eq4}
+K_{r_i}(\tau) = \frac{P_r}{2 \pi} \Int_{0}^{2\pi} \cos (2\pi \frac{\upsilon}{\lambda} \tau \cos \theta) d\theta = P_r J_0(2\pi f_D \tau),
+\end{equation}
+где $f_D = f_c (\upsilon / c) = \upsilon / \lambda$ --- максимальный доплеровский сдвиг, и $J_0(x)$ --- функция Бесселя нулевого порядка:
+\begin{equation*}
+J_0(x) = \frac{1}{\pi} \Int_{0}^{\pi} e^{-jx\cos\theta} d\theta.
+\end{equation*}
+Аналогично, из~\eqref{eq:channel:narrow:eq3} для $K_{r_i, r_q}(\tau)$ получаем
+\begin{equation}
+\label{eq:channel:narrow:eq5}
+K_{r_i, r_q}(\tau) = \frac{P_r}{2\pi} \Int_0^{2\pi} \sin (2\pi \frac{\upsilon}{\lambda} \tau \cos \theta) d\theta = 0.
+\end{equation}
+Таким образом, из~\eqref{eq:channel:narrow:eq6}, \eqref{eq:channel:narrow:eq4} и \eqref{eq:channel:narrow:eq5} следует
+\begin{equation*}
+K_r(\tau) = P_r J_0(2\pi f_D \tau) \cos(2\pi f_c t).
+\end{equation*}
+
+TODO Построить график зависимости $J_0(2\pi f_D \tau)$. Равенство нулю автокорреляции при $f_D \tau \approx 0.4$, т.е. $\upsilon \tau \approx 0.4 \lambda$. Отсюда следует, что значение сигнала, которое будет принято спустя время $0.4 \lambda / \upsilon$ не коррелирует с текущим значением сигнала. Но можно посмотреть и с другой стороны --- сигнал в точке, удаленной от приемника на расстояние $0.4 \lambda$, не коррелирует с со значением сигнала на приемнике. Отсюда следует множество интересных выводов. Например, в главе~\ref{ch:mimo} будет показано, как прием с помощью нескольких антенн может быть использован для борьбы с замираниями. При этом антенны должны быть расположены таким образом, чтобы вносимые каналом искажения были независимы. В рамках построенной модели узкополосного канала, это расстояние должно быть равно $0.4\lambda$.
+
+Найдем спектральные плотности мощности сигналов $S_{r_i}(f)$ и $S_{r_q}(f)$. 
+\begin{gather}
+S_{r_i}(f) = S_{r_q}(f) = \fourier{K_{r_i}(\tau)}(f) = 
+\begin{cases}
+\frac{P_r}{2 \pi f_D} \frac{1}{\sqrt{1 - (f / f_D)^2}}, & |f| \le f_D\\
+0, & |f| > f_D
+\end{cases}
+\end{gather}
+$S_{r_i}(f)$ и $S_{r_q}(f)$ изображены на рис.~TODO.
+
+Теперь найдем спектральную плотность мощности $S_{r}(f)$ сигнала $r(t)$.
+\begin{gather}
+S_r(f) = \fourier{K_r(\tau)} = \frac{S_{r_i}(f - f_c) + S_{r_i}(f + f_c)}{2} = 
+\begin{cases}
+\frac{P_r}{4 \pi f_D} \frac{1}{\sqrt{1 - \left(\frac{|f - f_c|}{f_D}\right)^2}}, & |f - f_c| \le f_D \\
+0, & |f - f_c| > f_D.
+\end{cases}
+\end{gather}
+
+The PSD is useful in constructing simulations for the fading process. A common method for simulating the envelope of a narrowband fading process is to pass two independent white Gaussian noise sources with PSD $N_0 /2$ through lowpass filters with frequency response $H(f)$ that satisfies
+$$
+S_{r_i}(f) = S_{r_Q}(f) = \frac{N_0}{2} |H(f)|^2.
+$$
+The filter outputs then correspond to the in-phase and quadrature components of the narrowband fading process with PSDs $S_{r_i}(f)$ and $S_{r_q}(f)$. A similar procedure using discrete filters can be used to generate discrete fading processes. Most communication simulation packages (e.g. Matlab, COSSAP) have standard modules that simulate narrowband fading based on this method. More details on this simulation method, as well as alternative methods, can be found in [11, 6, 7].
+
+\subsection{Зависимость мощности принимаемого сигнала от расстояния}
+We have now completed our model for the three characteristics of power versus distance exhibited in narrowband wireless channels. These characteristics are illustrated in Figure 3.8, adding narrowband fading to the path loss and shadowing models developed in Chapter 2. In this figure we see the decrease in signal power due to path loss decreasing as $d^\gamma$ with $\gamma$ the path loss exponent, the more rapid variations due to shadowing which change on the order of the decorrelation distance X c , and the very rapid variations due to multipath fading which change on
+the order of half the signal wavelength. If we blow up a small segment of this figure over distances where path loss
+
+\section{Огибающие}
+
+
+
+\section{Замирания в широкополосных каналах}
+wideband fading channels
+
+В случае широкополосных каналов разброс задержек $T_m$ много больше величины $1/W$, являющейся оценкой характерной длины сигнала. Поэтому возникают наложения множества копий сигнала, полученных по различным путям распространения. 
+
+Через $C(\tau, t)$ обозначим реальную импульсную характеристику канала, а через $C_l(\tau, t)$ --- ее низкочастотную эквиваленту.
+
+
+multipath delay spread
+
+equilization
+multicarrier modulation
+spread spectrum
+
+$T_m \approx 1/W$ Аппроксимация $s_l(t - \tau_n(t)) \approx s_l(t)$ более не имеет места 
+
+Много компонент. Нормальное распределение. Но картина на выходе существенно другая
+
+However, with wideband signals, the received signal
+experiences distortion due to the delay spread of the different multipath components, so the received signal can no
+longer be characterized by just the amplitude and phase random processes. The effect of multipath on wideband
+signals must therefore take into account both the multipath delay spread and the time-variations associated with
+the channel.
+
+\begin{itemize}
+\item $c_l(\tau, t)$ --- НКЭ $c(\tau, t)$
+\item 
+\end{itemize}
+
+\section{Частотно-селективные замирания}
+\label{sec:channel:frequency_selective}
+Связанные с многолучевым распространением и эффектом Доплера
+Возникающие в результате искажения передаваемого сигнала называют частотно-селективными замираниями.
+
+
+
+\chapter{Передача на нескольких поднесущих}
+
+\section{Пропускная способность канала с неидеальной импульсной характеристикой}
+
+Water-filling technique
+
+\section{OFDM}
+
+\subsection{Передача на нескольких поднесущих}
+
+В предыдущих лекциях рассматривались различные способы цифровой модуляции. В общем случае модулятор получает на вход бинарную последовательность, которую преобразует в последовательность комплексных символов $\{\symb_m\}$. В случае QAM-модуляции (раздел~\ref{sec:modulation:QAM}), каждый символ $\symb = \symb_i + j\symb_q$ преобразуется в выходной сигнал передатчика по закону
+\begin{equation}
+s(t) = g(t)[\symb_{i}\cos(2\pi \Freq_c t) - \symb_{q} \cos(2\pi \Freq_c t)],
+\end{equation} 
+где $\Freq_c$ --- несущая частота, а $g(t)$ --- низкочастотный импульс, используемый для формирования передаваемого сигнала. При этом передача ведется только на одной несущей частоте. Данный способ передачи имеет свои недостатки. В частности, в случае частотно-селективных замираний (раздел~\ref{sec:channel:frequency_selective}) передаточная характеристика канала неидеально по частотам. Восстановление сигнала в случае таких замираний крайне трудоемко, а подчас и невозможно, так как подразумевает знание передаточной характеристики канала. 
+
+Поэтому появилась идея одновременной передачи сразу на нескольких поднесущих. %Зачем это нужно? (рисунок с ISI)
+%Одним из способов решения проблемы эффективного использования широкой полосы частот состоит в использовании \emph{передачи на нескольких поднесущих}. 
+Основная идея состоит в том, что весь доступный частотный канал делится на подканалы, в пределах каждого из которых замирания являются приблизительно плоскими, т.е. передаточная характеристика в пределах частот данного канала равномерна. Далее передача ведется в каждом из подканалов независимо. В случае, если передаваемые сигналы ортогональны, то приемник оказывается в состоянии принять и восстановить каждый из переданных по подканалам сигналов в отдельности. В простейшем случае ортогональность может быть обеспечена, если спектры сигналов, передаваемых по подканалам, не будут перекрываться. Этого можно достигнуть путем использования защитных интервалов (рис.~\ref{fig:multicarrier:1}). Такой подход, однако, снижает эффективность использования доступной полосы частот. 
+%Можно ли добиться более плотной <<упаковки>> спектров сигналов? Да, если допустить перекрывание спектров. Чтобы при этом сохранить возможность декодирования сигналов, нужно, чтобы передаваемые на разных подчастотах сигналы были ортогональными. В этом случае на приемнике можно было восстановить каждый из передаваемых символов, сворачивая полученный сигнал с каждым из ортогональных сигналов, суммой которых он является. Ортогональными сигналы будут, если воспользоватьсяю Поэтому хотим передавать на многих частотах $\{\Freq_n\}_{n = 1}^N$. Pulse shaping определяет форму спектра на каждой из подчастот. Казалось бы, нужно чтобы спектры почти не перекрывались. Этого можно добиться с использованием защитных интервалов (guard intervals). Однако их использование фактически приводит к уменьшению эффективности использования выделенной полосы частот. 
+
+Альтернативный способ состоит в использовании сигналов хоть и с перекрывающимися, но, тем не менее, ортогональными спектрами. Именно второму способу соответствует \emph{мультиплексирование с ортогональным частотным разделением каналов} (Ortogonal Frequency Division Multiplexing, OFDM).
+
+%\footnote{Ортогональность сигналов требуется, чтобы приемник оказался в состоянии отделить друг от друга сигналы, переданные по разным подканалам}
+
+\subsection{Приближенные комплексные эквиваленты.}
+Обозначим множество несущих частот как $\OfdmSubcarriers$. При использовании OFDM на вход OFDM-модулятора поступает блок комплексных символов $\{\symb_m\}_{m=0}^{N_c - 1}$. Эти символы распределяются по поднесущим, так что сигнал, передаваемый на частоте $\Freq_k$, имеет вид
+\begin{equation}
+\notag
+x_k(t) = \Re\{\symb_k g(t) e^{j2\pi \Freq_k t} \} = g(t)[\symb_{ki}\cos(2\pi \Freq_k t) - \symb_{kq} \cos(2\pi \Freq_k t)],
+\end{equation}
+где $g(t)$ --- это прямоугольный импульс:
+\begin{equation}
+\notag
+g(t) = 
+\begin{cases}
+1, &t \in [-\frac{T_u}{2}, \frac{T_u}{2}]; \\
+0, &t \notin [-\frac{T_u}{2}, \frac{T_u}{2}].
+\end{cases}
+\end{equation}
+Спектр $G(f)$ импульса имеет вид (рис.~\ref{fig:multicarrier:gf})
+\begin{equation}
+\notag
+G(f) = \frac{\sin(\pi \Freq T_u)}{\pi \Freq}.
+\end{equation}
+Далее от действительных сигналов перейдем к рассмотрению их комплексных эквивалент $\tilde{x}_{k}(t) = \symb_k g(t) e^{j2\pi \Freq_k t} = \symb_k \tilde{\varphi}_k(t)$, где $\tilde{\varphi}_k(t) = g(t) e^{j2\pi \Freq_k t}$. 
+\begin{note}
+Сигналы $\{\tilde{x}_k(t)\}$ являются комплексными эквивалентами сигналов $\{x_k(t)\}$, т.е. для любого $k$ верно, что $x_k(t) = \Re\{\tilde{x}_k(t)\}$, но не являются положительными эквивалентами: их спектры отличны от нуля в области $f < 0$ из-за неограниченности $G(f)$. 
+\end{note}
+
+
+\subsection{Ортогональность сигналов}
+Чтобы эквиваленты $\{\tilde{x}_k(t)\}_{k = 0}^{N_c-1}$ были ортогональными, в качестве расстояния между соседними поднесущими $\Delta \Freq$ можно взять $\frac{1}{T_u}$: $\Freq_n = \Freq_{n - 1} + \Delta \Freq$, $n \in \{1, \dots, N_c - 1\}$. Действительно, в таком случае комплексные сигналы $\{\tilde{\varphi}_k(t)\}_{k=1}^{N_c - 1}$ попарно ортогональны:
+\begin{equation}
+\notag
+\langle \tilde{\varphi}_n(t), \tilde{\varphi}_m(t) \rangle =
+\Int_{-\infty}^{\infty} \tilde{\varphi}_n(t)\tilde{\varphi}_m^*(t) dt = 
+\Int_{-\frac{T_u}{2}}^{\frac{T_u}{2}} g(t) e^{j2\pi\Freq_n t} \cdot g(t) e^{-j2\pi\Freq_m t} dt = 
+\Int_{-\frac{T_u}{2}}^{\frac{T_u}{2}} e^{j2\pi(n - m) \DeltaFreq t} dt = 0, \forall n \neq m.
+\end{equation}
+%Для упрощения обозначений будем опускать нижний индекс $l$. Тогда, когда потребуется рассмотреть именно исходный действительный сигнал $x_k(t)$, об этом будет указано явно.
+%
+%Фактически здесь и далее предполагается, что в качестве центральной частоты взята минимальная частота среди поднесущих. Далее для простоты перейдем к рассмотрению рассматривается низкочастотных эквивалентных сигналы. Соответственно, по этой причине первая частота $f_0 = 0$.
+%Таким образом Далее будет показано, что в случае достаточно больших несущих частот $\{f_k\}$ влиянием спектров в области $f < 0$ можно пренебречь и рассматривать $\{\tilde{x}_k(t)\}$ как положительные эквиваленты.
+
+Если бы эквиваленты были положительными, то из их ортогональности следовала бы и ортогональность их прообразов $\{x_k(t)\}$. Однако в рассматриваемом случае это не так, и из ортогональности $\{\tilde{\varphi}_k(t)\}$ не следует ортогональность $\{x_k(t)\}$. Этот факт ставит под вопрос возможность раздельного приема сигналов $\{x_k(t)\}$ на поднесущих. Докажем, что влияние данной неортогональности пренебрежимо мало.
+
+Спектр $X_k(f)$ действительного сигнала $x_k(t)$ имеет вид (см. задачу~\ref{task:phy:ofdm:spectrum})
+\begin{gather}
+\label{phy:ofdm:fourier_real_signal}
+X_k(f) = \frac{\symb_k}{2} \frac{\sin(\pi (\Freq - \Freq_k)T_u)}{\pi (\Freq - \Freq_k)}  + 
+\frac{\symb_k^*}{2} \frac{\sin(\pi (\Freq + \Freq_k)T_u)}{\pi (\Freq + \Freq_k)}.
+\end{gather}
+
+Рассмотрим попарные скалярные произведения сигналов $\{\tilde{\phi}_k(t) = g(t) \cos(2\pi\Freq_k t)\}$:
+\begin{equation}
+\begin{gathered}
+\Int_{-\frac{T_u}{2}}^{\frac{T_u}{2}} g(t) \cos(2\pi \Freq_n t) \cdot g(t) \cos(2\pi \Freq_m t) dt = 
+\frac{1}{2} \Int_{-\frac{T_u}{2}}^{\frac{T_u}{2}} \cos(2\pi (\Freq_n + \Freq_m) t) + \cos(2\pi (\Freq_n - \Freq_m) t) dt = \\
+= \frac{1}{2} \Int_{-\frac{T_u}{2}}^{\frac{T_u}{2}} \cos(2\pi (2 \Freq_0 + (n + m) \Delta \Freq) t) + \cos(2\pi (n - m) \Delta \Freq t) dt = \\
+= \frac{1}{2} \Int_{-\frac{T_u}{2}}^{\frac{T_u}{2}} \cos(2\pi (2 \Freq_0 + (n + m) \Delta \Freq) t) dt
+= \left. \frac{\sin(2\pi (2 \Freq_0 + (n + m) \Delta \Freq) t)}{4\pi (2 \Freq_0 + (n + m) \Delta \Freq)}  \right|_{-\frac{T_u}{2}}^{\frac{T_u}{2}} = \\ 
+= \frac{\sin(2\pi \Freq_0 T_u)}{2\pi (2 \Freq_0 + (n + m) \Delta \Freq)}.
+\end{gathered}
+\end{equation}
+Если $f_0 \gg N_c \Delta$, что обычно имеет место на практике, то скалярное произведение $\tilde{\phi}_n(t)$ и $\tilde{\phi}_m(t)$ практически равно 0 для любых $n \neq m$. Поэтому на практике сигналы $\{x_k(t)\}$ практически ортогональны, что делает возможным раздельный прием на поднесущих.
+%Наличие у сигналов $\{x_k(t)\}$ ненулевых спектров в области отрицательных частот приводит к тому, что их хвосты попадают в область положительных частот и приводят к неортогональности. Причиной, по которой во многих источниках данная неортогональность не принимается во внимание состоит в ее пренебрежимо малом влиянии при достаточно больших значениях $\Freq_0$ (что имеет место на практике). 
+
+\begin{task} Найдите спектр $X_k(f)$ сигнала $x_{k}(t)$.
+	\label{task:phy:ofdm:spectrum}
+\end{task}
+\begin{proof}
+	Спектр $\tilde{X}_k(f)$ сигнала $\tilde{x}_k(t) = \symb_k g(t) e^{j2\pi\Freq_k t}$ равен
+	\begin{equation}
+	\notag
+	\label{phy:ofdm:fourier_complex_signal}
+	\tilde{X}_{k}(f) = \fourier{\tilde{x}_k(f)} = \symb_k \frac{\sin(\pi (\Freq - \Freq_k)T_u)}{\pi (\Freq - \Freq_k)},
+	\end{equation}
+	откуда по свойству преобразования Фурье
+	\begin{equation}
+	\notag
+	X(f) = \fourier{\Re\{\tilde{x}(t)\}} = \frac{\tilde{X}(\Freq) + \tilde{X}^*(-\Freq)}{2}
+	\end{equation}
+	получаем
+	\begin{equation}
+	\notag
+	X_k(f) = \frac{\symb_k}{2} \frac{\sin(\pi (\Freq - \Freq_k)T_u)}{\pi (\Freq - \Freq_k)}  + 
+	\frac{\symb_k^*}{2} \frac{\sin(\pi (\Freq + \Freq_k)T_u)}{\pi (\Freq + \Freq_k)}.
+	\end{equation}
+\end{proof}
+
+\subsection{OFDM-символ}
+\begin{definition}
+Пусть $g(t)$ --- это прямоугольный импульс длительности $T_u$ и $\DeltaFreq = 1 / T_u$. Тогда \textbf{комплексным OFDM-символом} называется сигнал вида
+\begin{equation}
+\label{eq:phy:ofdm:complex_ofdm_symbol}
+\CompOfdmSignal(t) = \Sum_{\FI = 0}^{\Nc - 1}\CompOfdmSubsignal{} = 
+g(t) e^{j2\pi \OfdmSubcarrier{0} t}\Sum_{\FI = 0}^{\Nc - 1} \symb_\FI e^{j2\pi \FI \DeltaFreq t},
+\end{equation}
+а \textbf{действительным OFDM-символом}, соответственно
+\begin{equation}
+\RealOfdmSignal(t) = \Real{\CompOfdmSignal(t)} = \Real{\Sum_{\FI = 0}^{\Nc - 1}\CompOfdmSubsignal{}} = 
+\Real{g(t) e^{j2\pi \OfdmSubcarrier{0} t}\Sum_{\FI = 0}^{\Nc - 1} \symb_\FI e^{j2\pi \FI \DeltaFreq t}}
+\end{equation}
+\end{definition}
+Действительный OFDM-символ представляет собой сигнал, генерируемый передатчиком. Комплексный же OFDM-символ является ни чем иным как комплексной эквивалентой действительного OFDM-символа (по опр.~\ref{def}). В дальнейшем префиксы ``комплексный'' и ``действительный'' не будут упоминаться явно, кроме случаев, когда это может вызвать неоднозначность.
+
+Кроме комплексной эквиваленты $\CompOfdmSignal(t)$, (действительному) OFDM-символу $\RealOfdmSignal(t)$ соответствует его положительная эквивалента
+$$
+\RealOfdmSignal_{+}(t) = \RealOfdmSignal(t) + j\Hilbert{\RealOfdmSignal}(t),
+$$
+и низкочастотные эквиваленты
+\begin{eqnarray}
+\RealOfdmSignal_{l}(t) = &\Lower{\CompOfdmSignal}{\OfdmSubcarrier{0}} &=\CompOfdmSignal(t)e^{-j2\pi \OfdmSubcarrier{0} t} = 
+g(t) \Sum_{\FI = 0}^{\Nc - 1} \symb_\FI e^{j2\pi \FI \DeltaFreq t},\\
+\RealOfdmSignal_{l,+}(t) = &\Lower{\RealOfdmSignal_{+}(t)}{\OfdmSubcarrier{0}} &= \RealOfdmSignal_{+}(t) e^{-j2\pi \OfdmSubcarrier{0} t}.
+\end{eqnarray}
+
+
+
+\begin{definition}
+\label{def:phy:ofdm:ofdm_continuation}
+Следующие сигналы
+\begin{equation}
+\label{eq:phy:ofdm:ofdm_continuation}
+\CompOfdmSignal_{\infty}(t) = e^{j2\pi \OfdmSubcarrier{0} t}\Sum_{\FI = 0}^{\Nc - 1} \symb_{\FI} e^{j2\pi \FI \DeltaFreq t},\qquad 
+\RealOfdmSignal_{\infty}(t) = \Real{\CompOfdmSignal_{\infty}(t)}.
+\end{equation}
+будем называть, соответственно, \textbf{комплексным и действительным продолжениями OFDM-символа} на интервал $(-\infty, +\infty)$.
+\end{definition}
+Аналогично определяются продолжения $x_{l,\infty}(t)$ и $x_{l,+,\infty}(t)$ низкочастотных эквивалент: сигнал является продолжением, если он не содержит импульс $g(t)$.
+
+\subsection{Простейший OFDM модулятор.}
+На рис.~\ref{fig:phy:ofdm:simple_modulator} изображена схема простейшего OFDM-модулятора, состоящего из $N_c$ генераторов и одного сумматора. Генераторы участвуют в формировании сигналов $\{x_n(t)\}$, которые далее суммируются в OFDM-символ $x(t)$. Однако подобный OFDM-модулятор практически не реализуем ввиду больших значений величин $N_c$\footnote{Значения $N_c$ достигают нескольких сотен, а то и тысяч.}. Поэтому на практике используется OFDM-модулятор на основе быстрого преобразования Фурье (Fast Fourier Transform, FFT).
+
+\subsection{Реализация OFDM с помощью IFFT/FFT}
+\label{sec:phy:ofdm:ifft_fft}
+
+Рассмотрим низкочастотную эквиваленту $\RealOfdmSignal_{l}(t)$ OFDM-символа и ее продолжение:
+\begin{equation}
+\label{eq:phy:ofdm:ofdm_symbol_f0}
+\RealOfdmSignal_{l}(t) = 
+g(t)\Sum_{\FI = 0}^{\Nc - 1} \symb_{\FI} e^{j2\pi \FI \DeltaFreq t},\qquad \RealOfdmSignal_{l, \infty}(t) = 
+\Sum_{\FI = 0}^{\Nc - 1} \symb_{\FI} e^{j2\pi \FI \DeltaFreq t}.
+\end{equation}
+
+Дискретизуем $x_{l}(t)$ с частотой $f_s = \Nfft / T_u = N \DeltaFreq$ на интервале $[0, T_u)$, т.е. с периодом дискретизации $T_s = 1 / f_s = T_u/\Nfft$ ($\Nfft$ отсчетов в течение одного OFDM-символа). Величина отсчета в момент времени $\TI T_s$, $\TI \in \{0, \dots, \Nfft-1\}$, равна
+\begin{equation}
+\label{phy:ofdm:sampling_ofdm_symbol}
+x[\TI] \triangleq x_{l}(\TI T_s) = 
+\Sum_{\FI = 0}^{\Nc - 1} \symb_\FI e^{j2\pi \FI \DeltaFreq \TI T_s} = 
+\Sum_{\FI = 0}^{\Nc - 1} \symb_\FI e^{j2\pi \frac{\TI \FI}{\Nfft}} = 
+\Sum_{\FI = 0}^{\Nfft - 1} \symb'_\FI e^{j2\pi \frac{\TI \FI}{\Nfft}},
+\end{equation}
+где 
+\begin{equation}
+\notag
+\symb'_n =
+\begin{cases}
+\symb_n, &0 \le n < N_c;\\
+0, &N_c\le n < N.
+\end{cases}
+\end{equation}
+Сравнив~\eqref{phy:ofdm:sampling_ofdm_symbol} с формулами дискретного преобразования Фурье
+\begin{align}
+\label{eq:phy:ofdm:ifft_fft:dft}
+X[n] &= \Sum_{k = 0}^{N-1} x[k] e^{j2\pi \frac{k n}{N}}, \\
+\label{eq:phy:ofdm:ifft_fft:idft}
+x[k] &= \frac{1}{N} \Sum_{n = 0}^{N-1} X[n] e^{j2\pi \frac{k n}{N}},
+\end{align}
+заметим, что с точностью до масштабирующего коэффициента $\frac{1}{N}$, \eqref{phy:ofdm:sampling_ofdm_symbol} соответствует обратному преобразованию Фурье~\eqref{eq:phy:ofdm:ifft_fft:idft}, где символы $\{\symb'_n\}_{n = 0}^{\Nfft - 1}$ выступают в роли отсчетов в частотной области. Таким образом, последовательность $\{x[k]\}_{k = 0}^{\Nfft - 1}$ отсчетов передаваемого OFDM-символа представляет собой $\Nfft$-мерное обратное дискретное преобразование Фурье (Inverse Discrete Fourier Transform, IDFT) блока модуляционных символов $\{\symb_n\}_{n = 0}^{\Nc - 1}$, дополненного до $\Nfft$ символов нулями. Поэтому OFDM может быть реализован посредством IDFT-преобразования с последующим цифро-аналоговым преобразованием (рис.~\ref{fig:phy:ofdm:ifft_fft:ofdm_mod_impl}). В частном случае, когда $N$ является степенью двойки, OFDM-модуляция может быть эффективно реализована с использованием процедуры быстрого обратного преобразования Фурье (IFFT).
+
+\begin{note}
+Разберемся в причинах, позволяющих использовать дискретное преобразование Фурье. Для этого рассмотрим продолжение $x_{l, \infty}(t)$. Из периодичности $x_{l, \infty}(t)$ следует, что его спектр дискретен, причем разложение по гармоникам следует из определения~\eqref{def:phy:ofdm:ofdm_continuation}: $x_{\infty}(t)$ имеет дискретный спектр с амплитудами $\{\symb_n\}_{n = 0}^{\NumberOfSubcarriers}$ на частотах $\OfdmSubcarriers$ соответственно. С точки зрения математики дискретное преобразование Фурье применимо именно к $x_{l, \infty}(t)$, а не к $x_{l}(t)$, имеющему неограниченный и непрерывный спектр (см. рис.~\ref{fig}). Связать IFFT-преобразование с конечной эквивалентой $x_{l}(t)$ помогает тот факт, что на интервале $[0, T_u)$ эквиваленты $x_{l,\infty}(t)$ и $x_{l}(t)$ совпадают.
+\end{note}
+
+\begin{note}
+Доля $\frac{N}{N_c}$ не обязательно должна быть целым числом. Например в LTE, в случае когда ширина полосы частот равна $10$ MHz, количество поднесущих $N_c$ равно $600$\footnote{Когда $W = 10$~MHz, количество ресурсных блоков $N_{RB}$ равно 50. Каждый ресурсных блок содержит $N_{sc}^{RB} = 12$ поднесущих. Откуда и получаем $N_{sc} = N_{RB} N_{sc}^{RB} = 600$ поднесущих.} При этом в качестве размерности FFT может быть взята $N_{FFT} = 1024$. В этом случае $f_s = N \DeltaFreq = 1024 \cdot 15~\text{kHz} = 15.36~\text{MHz}$.
+\end{note}
+
+Итак, применив FFT-преобразование над модуляционными символами $\{\symb_n\}$, вычислительный блок передатчика находит отсчеты $\{x[\TI]\}$ в моменты $\{kT_s\}_{\TI=0}^{\Nfft-1}$. Однако из отсчетов $\{x[\TI]\}$ нужно еще образовать непрерывный фактически передаваемый по каналу сигнал. Здесь нужно помнить, что \textit{отсчеты $\{x[\TI]\}$ --- это отсчеты комплексной низкочастотной эквиваленты $x_{l}(t)$, а не отсчеты сигнала $x(t)$}, который фактически должен быть передан в канал. Напомним, что желаемый сигнал (OFDM-символ) $x(t)$, имеет вид
+$$
+x(t) =  \Real{\Sum_{\FI = 0}^{\Nc - 1}\tilde{x}_\FI(t)} = \Real{g(t) e^{j2\pi f_0 t} \Sum_{\FI = 0}^{\Nc - 1} \symb_\FI e^{j2\pi \FI \DeltaFreq t}}.
+$$
+Отсчеты $x(t)$ связаны с отсчетами $x_l(t)$ следующим образом:
+$$
+x(k T_s) = \Real{x_l(kT_s) e^{j2\pi \OfdmSubcarrier{0} k T_s}} = \Real{x[k] e^{j2\pi \OfdmSubcarrier{0} \TI T_s}}, \quad \TI \in \{0, \dots, \Nfft - 1\}
+$$
+
+%Осталось из отсчетов образовать непрерывный сигнал для передачи данных, т.е. произвести цифро-аналоговое преобразование (digital-to-analog conversion, DAC). В идеале передаваемый в канал сигнал должен иметь вид
+Чтобы точно восстановить сигнал $x(t)$ по отсчетам $\{x[k]\}$, можно вернуться к модуляционным символам $\{\symb_n\}$ и <<посадить>> их на несущие частоты $\{\Freq_n\}$, т.е. вернуться к реализации OFDM-модулятора на основе $\Nc$ генераторов. %С другой стороны, сигнал $x(t)$ связан непосредственно с отсчетами $\{x(kT_s)\}$ по формуле
+%\begin{equation}
+%x(t) = e^{j f_s t} \Sum_{k = -\infty}^{\infty} x(k T_s) \frac{\sin (\pi f_s (t - kT_s))}{\pi f_s (t - kT_s)}.
+%\end{equation}
+%Однако данное соотношение имеет только теоретическое значение и не может быть использовано на практике для восставления $x(t)$ из отсчетов $\{x(k)\}$.
+
+Остальные способы восстановления сигнала $x(t)$ основаны на аппроксимации низкочастотной эквиваленты $x_l(t)$ по ее отсчетам $\{x[k]\}$ с последующим ``подъемом'' на несущую частоту $f_0$. Пусть имеется аппроксимация $x_{l, app}(t)$ эквиваленты $x(t)$. Тогда аппроксимация $x_{app}(t)$ исходного OFDM-символа имеет вид
+$$
+x_{app}(t) = \Real{x_{l, app}(t) e^{j2\pi f_0 t}}.
+$$
+Например, ступенчатая аппроксимация $x_{l, step}(t)$ эквиваленты $x_l(t)$ на интервале $[0, T_u)$ имеет вид
+\begin{equation}
+\label{eq:phy:ofdm:ifft_fft:stepwise_approx}
+x_{l, step}(t) = \begin{cases}
+x[k],\qquad &t \in [kT_s, (k+1)T_s),\quad k \in \{0,\dots,N-1\};\\
+0,\qquad &t \notin [0, T_u).
+\end{cases}
+\end{equation}
+Этот сигнал изображен на рис.~\ref{fig:ofdm:ifft_fft:stepwise_approx}. При такой аппроксимации получателю требуется лишь сэмплировать принимаемый сигнал с частотой $f_s$ и по полученным отсчетам восстановить модуляционные символы с помощью DFFT-преобразования.
+
+%С одной стороны острой необходимости в этом, казалось бы, быть не должно. Можно например использовать какую-либо аппроксимацию. Главное что в моменты времени $t = k T_s$ сигнал был именно таким, каким он и должен быть. С другой стороны нельзя откидывать тот факт, что в таком случае фактически передаваемый в канал сигнал
+
+Важно понимать, что способ реализации OFDM-модулятора не регламентируется какими-бы то ни было стандартами. Ничего не запрещает реализовать OFDM-модулятор из $N_c$ параллельных модуляторов и генераторов (рис.~\ref{fig:phy:ofdm:bank_mod:ofdm_mod_impl}). Единственная причина в пользу применения FFT-преобразования --- это эффективность и простота реализации. Также ничего не мешает использовать FFT-преобразование любого размера даже в случае, когда число $N_c$ поднесущих не велико. 
+
+\begin{task}
+\label{task:phy:ofdm:fft_ofdm}
+Найдите спектр аппроксимации $x_{step}(t)$
+\end{task}
+\begin{proof}
+Заметим, что
+$$x_{l, d}(t) = x_l(t) \cdot D_{T_s}(t) = \Sum_{k = -\infty}^{+\infty} x_l(kT_s)\delta(t - kT_s),$$
+$$x_{l, step}(t) = x_{l, d}(t) \otimes \Pi_{[0, T_s]}(t) = \Sum_{k=-\infty}^{+\infty} x_l(kT_s) \Pi_{[0, T_s]}(t - kT_s).$$
+При этом 
+$$X_l(f) = e^{-j\pi f T_u}\Sum_{n = 0}^{N_c} \symb_n \frac{\sin (\pi (f - n \DeltaFreq) T_u)}{\pi (f - n \DeltaFreq)},$$
+$$X_{l,d}(f) = \Sum_{k = -\infty}^{+\infty} f_s X_l(f - kf_s),$$
+$$X_{l, step}(f) = \fourier{\Pi_{[0, T_s]}} \cdot X_{l, d}(f) = \frac{\sin (\pi f T_s)}{\pi f} e^{-j \pi f T_s}\Sum_{k = -\infty}^{+\infty} f_s X_{l}(f - kf_s).$$
+Теперь ``поднимем'' сигнал на частоту $f_0$:
+$$
+x_{step}(t) = x_{l, step}(t) e^{j2\pi f_0 t},$$
+$$
+X_{step}(f) = \frac{\sin (\pi (f - f_0) T_s)}{\pi (f - f_0)} e^{-j \pi (f - f_0) T_s} \cdot \Sum_{k = -\infty}^{+\infty} f_s X(f - f_0 - kf_s).
+$$
+\end{proof}
+Из вида спектра $X_{l, d}(f)$ следует, что $N$ представляет собой максимальное число поднесущих, которые могут быть одновременно использованы для передачи данных (возможно разными передатчиками). Однако на практике число используемых поднесущих $N_c$ существенно меньше $N$ из-за искажений, вносимых множителем $\fourier{\Pi_{[0, T_s]}}$. 
+
+%До настоящего момента полагалось, что $f_0 = 0$. Таким образом рассматриваемые до настоящего момента отсчеты $\{x(k)\}_{k = 0}^{N - 1}$ и сформированный на их основе сигнал $x_{step}(t)$ соответствовали низкочастотной эквиваленте OFDM-символа. Требуется промодулировать $x_{step}(t)$ частотой $f_0$:
+%$$
+%x_{tx,step}(t) = x_{step}(t) e^{j2\pi f_0 t}.
+%$$
+%При этом аппроксимация $x_{step}(t)$ также относится к низкочастотной эквиваленте. Чтобы получить аппроксимацию OFDM-символа, требуется
+%На практике $f_0$ много больше используемой полосы, т.е. $f_0 \gg N_f \DeltaFreq$. Чтобы из отсчетов 
+
+\begin{figure}
+\centering
+
+\def\OfdmSymbolDuration{4}
+\pgfmathsetmacro{\SubcarriersBaseFrequency}{1.0/\OfdmSymbolDuration}
+\def\NumberOfOFDMSymbols{1}
+\pgfmathsetmacro{\FromTime}{-0.5*\OfdmSymbolDuration}
+\pgfmathsetmacro{\ToTime}{(\NumberOfOFDMSymbols + 0.5) * \OfdmSymbolDuration}
+
+\def\NumberOfSubcarriers{6} 
+\def\ColorsOfSubcarriers{red, orange, yellowgreen, green, blue, magenta} % Must match number of subcarriers
+\def\NumberOfTails{6}
+
+\pgfmathsetmacro{\DegInRad}{180 / \PI}
+\pgfmathsetmacro{\RadInDeg}{\PI / 180}
+
+\pgfmathsetmacro{\CyclicFrequency}{2 * \PI * \SubcarriersBaseFrequency}
+\def\OfdmSymbol(#1){0.2 * cos(0 * \CyclicFrequency * #1) + 0.1 * sin(0 * \CyclicFrequency * #1) +
+ 		  	       	-0.1 * cos(1 * \CyclicFrequency * #1) + 0.1 * sin(1 * \CyclicFrequency * #1) + 
+			       	 0.3 * cos(2 * \CyclicFrequency * #1) + 0.2 * sin(2 * \CyclicFrequency * #1) + 
+			       	-0.2 * cos(3 * \CyclicFrequency * #1) + 0.1 * sin(3 * \CyclicFrequency * #1) + 
+			       	 0.1 * cos(4 * \CyclicFrequency * #1) - 0.5 * sin(4 * \CyclicFrequency * #1) + 
+			       	-0.2 * cos(5 * \CyclicFrequency * #1) + 0.1 * sin(5 * \CyclicFrequency * #1)}
+\def\NFFT{32}
+\pgfmathsetmacro{\SamplePeriod}{\OfdmSymbolDuration / \NFFT}			       
+			       
+\begin{tikzpicture}[domain=\FromTime:\ToTime]
+	\fill[color=black, domain=0:\OfdmSymbolDuration, samples=200, fill=blue, fill opacity=0.2, variable=\x] 
+			(0, 0) -- plot[id=sinc] function{\OfdmSymbol(x)} -- (\OfdmSymbolDuration, 0) -- cycle;
+			        
+    \draw[->, >=latex, black] (\FromTime, 0) -- (\ToTime, 0);
+    \draw[->, >=latex, black] (0, -1) -- (0, 2);
+    
+    \pgfmathsetmacro{\NFFT}{\NFFT - 1}
+    \pgfmathsetmacro{\PreviousOfdmSymbolValue}{0}
+    \pgfplotsforeachungrouped \k in {0, ..., \NFFT} {
+    	\pgfmathsetmacro{\OfdmSymbolValue}{\OfdmSymbol(\DegInRad * \k * \SamplePeriod)}
+    	\draw[color=black] (\k * \SamplePeriod, \OfdmSymbolValue) -- + (\SamplePeriod, 0);
+    	\draw[color=black] (\k * \SamplePeriod, \PreviousOfdmSymbolValue) -- (\k * \SamplePeriod, \OfdmSymbolValue);
+    	\pgfmathsetmacro{\PreviousOfdmSymbolValue}{\OfdmSymbolValue}
+    }
+    \pgfmathsetmacro{\NFFT}{\NFFT + 1}
+	\draw[color=black] (\OfdmSymbolDuration, \PreviousOfdmSymbolValue) -- (\OfdmSymbolDuration, 0);
+	
+
+%   \draw[->] (0,-1.25) -- (0,1.5) node [above]
+%     {$\displaystyle
+%        \frac{1}{\sigma\sqrt{2\pi}}\exp\biggl(\frac{-x^2}{2\sigma^2}\biggr)
+%     $};
+%
+%   \begin{scope}[smooth,draw=gray!20,y=0.3989422804cm]
+%        \filldraw [fill=col3] plot[id=f1,domain=-3:-2] function {exp(-x*x/2)}
+%            -- (-2,0) -- (-3,0) -- cycle;
+%        \filldraw [fill=col2] plot[id=f2,domain=-2:-1] function {exp(-x*x/2)}
+%            -- (-1,0) -- (-2,0) -- cycle;
+%        \filldraw [fill=col1] plot[id=f3,domain=-1:0]  function {exp(-x*x/2)}
+%            -- (0,0)  -- (-1,0) -- cycle;
+%        \filldraw [fill=col1] plot[id=f4,domain=0:1] function {exp(-x*x/2)}
+%            -- (1,0)  --  (0,0) -- cycle;
+%        \filldraw [fill=col2] plot[id=f5,domain=1:2] function {exp(-x*x/2)}
+%            -- (2,0)  -- (1,0) -- cycle;
+%        \filldraw [fill=col3] plot[id=f6,domain=2:3] function {exp(-x*x/2)}
+%            -- (3,0)  -- (2,0) -- cycle;
+%        \draw[black] plot[id=f7,domain=-4.25:4.25,samples=100]
+%            function {exp(-x*x/2)};
+%   \end{scope}
+%       \draw[->] (-4.25,0) -- (4.25,0) node [right] {$x$};
+%
+%    \foreach \pos/\label in {-3/$-3\sigma$,-2/$-2\sigma$,-1/$-\sigma$,
+%            1/$\sigma$,2/$2\sigma$,3/$3\sigma$}
+%        \draw (\pos,0) -- (\pos,-0.1) (\pos cm,-3ex) node
+%            [anchor=base,fill=white,inner sep=1pt]  {\label};
+%
+%    \draw (-0.1,1) -- (.1,1) node [right,fill=white,inner sep=1pt] {$\sigma$};
+%
+%    \foreach \pos/\percent/\height in {1/34/0.5,2/14/0.25,3/2/0.125,4/0.1/0.1}
+%    {
+%      \node[text=col\pos,anchor=base,yshift=2pt,xshift=-0.625cm,
+%        fill=white,inner sep=1pt] at (\pos,\height) {$\percent\%$};
+%      \node[text=col\pos,anchor=base,yshift=2pt,xshift=.625cm,
+%        fill=white,inner sep=1pt]  at (-\pos,\height) {$\percent\%$};
+%    }
+\end{tikzpicture}
+\end{figure}
+
+\begin{figure}
+\centering
+\def\OfdmSymbolDuration{2}
+\pgfmathsetmacro{\SubcarriersBaseFrequency}{1.0/\OfdmSymbolDuration}
+\def\NumberOfSubcarriers{6} 
+\def\ColorsOfSubcarriers{red, orange, yellowgreen, green, blue, magenta} % Must match number of subcarriers
+\def\NumberOfTails{6}
+
+\pgfmathsetmacro{\FromFrequency}{-\NumberOfTails * \SubcarriersBaseFrequency}
+\pgfmathsetmacro{\ToFrequency}{(\NumberOfSubcarriers + \NumberOfTails - 1) * \SubcarriersBaseFrequency}
+
+\def\xticklength{0.1}
+\def\yticklength{0.1}
+
+\begin{tikzpicture}[xscale=1, yscale=1, domain=\FromFrequency:\ToFrequency]
+	\foreach \x [count=\i] in \ColorsOfSubcarriers {
+		\pgfmathtruncatemacro{\j}{int(\i - 1)}
+		\filldraw[color=\x, domain=\FromFrequency:\ToFrequency, samples=200, fill=\x, fill opacity=0.2] plot[id=sinc] 
+			function{sin(\PI * \OfdmSymbolDuration * (x - \j * \SubcarriersBaseFrequency)) / 
+					 (\PI * (x - \j * \SubcarriersBaseFrequency))};
+		
+		\ifthenelse{\i=1 \OR \i=\NumberOfSubcarriers}{}{
+		\draw[color=black, dashed] (\j * \SubcarriersBaseFrequency, -0.5)
+		-- (\j * \SubcarriersBaseFrequency, 1 * \OfdmSymbolDuration);
+		}
+	}
+	
+	\draw[->, >=latex, color=black] 
+	(\FromFrequency - 3 * \SubcarriersBaseFrequency, 0) -- (\ToFrequency + 3 * \SubcarriersBaseFrequency, 0) 
+	node[below right] {$f$};
+
+	\draw[->, >=latex, color=black] (0, 1.2 * \OfdmSymbolDuration) node[above] {$\frac{\sin(\pi (f - f_0) T_u)}{\pi f}$} -- (0, \OfdmSymbolDuration); 
+	\draw[color=black, dashed] (0, -0.5) node[below, color=black] {$f_0$}
+	-- (0, \OfdmSymbolDuration);
+			
+	\pgfmathtruncatemacro{\j}{\NumberOfSubcarriers - 1}
+	\draw[->, >=latex, color=black] 
+	(\j * \SubcarriersBaseFrequency, 1.2 * \OfdmSymbolDuration) node[above] {$\frac{\sin(\pi (f - f_{N_c - 1}) T_u)}{\pi f}$} -- (\j * \SubcarriersBaseFrequency, \OfdmSymbolDuration); 
+	\draw[color=black, dashed] (\j * \SubcarriersBaseFrequency, -0.5) node[below, color=black] {$f_{N_c - 1}$}
+	-- (\j * \SubcarriersBaseFrequency, \OfdmSymbolDuration);
+	
+	\draw[->, >=latex, color=black] (\FromFrequency, -1) -- (\FromFrequency, 1.5 * \OfdmSymbolDuration) node[right] {$|X(f)|$}; 
+	\draw (-\yticklength + \FromFrequency, \OfdmSymbolDuration) -- (\yticklength + \FromFrequency, \OfdmSymbolDuration) node[left] {$T_u$};
+	\draw[dashed] (\yticklength + \FromFrequency, \OfdmSymbolDuration) -- (\ToFrequency, \OfdmSymbolDuration);
+	
+	
+%    \draw[very thin,color=gray] (-0.1,-1.1) grid (3.9,3.9);
+%    \draw[->] (-0.2,0) -- (4.2,0) node[right] {$x$};
+%    \draw[->] (0,-1.2) -- (0,4.2) node[above] {$f(x)$};
+%    \draw[color=red] plot[id=x] function{x} 
+%        node[right] {$f(x) =x$};
+%    \draw[color=blue] plot[id=sinc] function{sin(x) / x} 
+%        node[right] {$f(x) = \sin x$};
+%    \draw[color=orange] plot[id=exp] function{0.05*exp(x)} 
+%        node[right] {$f(x) = \frac{1}{20} \mathrm e^x$};
+%
+%
+%\begin{scope}[thick,font=\scriptsize]
+%    % Axes:
+%    % Are simply drawn using line with the `->` option to make them arrows:
+%    % The main labels of the axes can be places using `node`s:
+%    \draw [->] (-5,0) -- (5,0) node [above left]  {$\Re\{z\}$};
+%    \draw [->] (0,-5) -- (0,5) node [below right] {$\Im\{z\}$};
+%
+%    % Axes labels:
+%    % Are drawn using small lines and labeled with `node`s. The placement can be set using options
+%    \iffalse% Single
+%    % If you only want a single label per axis side:
+%    \draw (1,-3pt) -- (1,3pt)   node [above] {$1$};
+%    \draw (-1,-3pt) -- (-1,3pt) node [above] {$-1$};
+%    \draw (-3pt,1) -- (3pt,1)   node [right] {$i$};
+%    \draw (-3pt,-1) -- (3pt,-1) node [right] {$-i$};
+%    \else% Multiple
+%    % If you want labels at every unit step:
+%    \foreach \n in {-4,...,-1,1,2,...,4}{%
+%        \draw (\n,-3pt) -- (\n,3pt)   node [above] {$\n$};
+%        \draw (-3pt,\n) -- (3pt,\n)   node [right] {$\n i$};
+%    }
+%    \fi
+%    \end{scope}
+%    % The circle is drawn with `(x,y) circle (radius)`
+%    % You can draw the outer border and fill the inner area differently.
+%    % Here I use gray, semitransparent filling to not cover the axes below the circle
+%    \path [draw=none,fill=gray,semitransparent] (+1,-1) circle (3);
+%    % Place the equation into the circle:
+%    \node [below right,darkgray] at (+1,-1) {$|z-1+i| \leq 3$};
+\end{tikzpicture}
+\end{figure}
+
+
+\subsection{Циклический префикс}
+\label{sec:phy:ofdm:cyclic}
+Рассмотрим передачу одного OFDM-символа, имеющего положительную эквиваленту
+\begin{equation}
+s_{+}(t) = \Sum_{n = 0}^{N_c - 1}s^{(n)}_{+}(t) =  \Pi_{[0, T_u]}(t)  \Sum_{n = 0}^{N_c - 1} \symb_n e^{j2\pi \Freq_n t}.
+\end{equation}
+
+\begin{figure}
+\centering
+\begin{tikzpicture}
+% System parameters
+\def\SubcarriersDistance{0.8}
+\def\OfdmSymbolDuration{0.6}
+\def\ResponseFunction{0.5/1, 1/0.5, 1.6/0.2}
+
+% Drawing parameters
+\def\TxLevel{2.5}
+\def\HLevel{0}
+\def\RxLevel{-2.5}
+
+\draw (-4, \TxLevel) node[right] {\footnotesize Переданный сигнал};
+\foreach \col in {0, 1, ..., 15} {
+        \draw[fill=lemonchiffon] (\col * \OfdmSymbolDuration, \TxLevel) rectangle +(\OfdmSymbolDuration, \SubcarriersDistance) node[midway] {\pgfmathparse{int(1 + \col)} \pgfmathresult};
+}
+
+\draw (-4, \HLevel) node[right] {\footnotesize Отклик канала};
+\draw[->, >=latex] (0, \HLevel) -- +(4, 0) node[below right] {$\tau$};
+\draw[->, >=latex] (0, \HLevel) -- +(0, 2) node[right] {$|h(\tau)|$};
+\foreach \delay/\value in \ResponseFunction {
+    \draw[->, >=stealth, double] (\delay, \HLevel) -- +(0, \value);
+}
+
+\draw (-4, \RxLevel) node[right] {\footnotesize Полученный сигнал};
+\foreach \delay/\value [count=\i] in \ResponseFunction {
+    \pgfmathsetmacro{\RxOpacity}{\value}
+    \pgfmathsetmacro{\OffsetY}{-(\i - 1) * \SubcarriersDistance}
+    \draw[dashed, opacity=\RxOpacity] (\delay, \RxLevel +  \OffsetY) -- (\delay, \HLevel);
+    \foreach \col in {0, 1, ..., 15} {
+            \draw[fill=lemonchiffon, opacity=\RxOpacity]
+            (\delay + \col * \OfdmSymbolDuration, \RxLevel + \OffsetY) 
+            rectangle 
+            +(\OfdmSymbolDuration, \SubcarriersDistance) node[midway] 
+            {\pgfmathparse{int(1 + \col)} \pgfmathresult};
+    }
+}
+\end{tikzpicture}
+\caption{Передача на одной поднесущей с короткими импульсами}
+\end{figure}
+
+
+\begin{figure}
+\centering
+\begin{tikzpicture}
+% System parameters
+\def\SubcarriersDistance{0.3}
+\def\NumberOfSubcarriers{3}
+\def\OfdmSymbolDuration{3}
+\def\ResponseFunction{0.5/1, 1/0.5, 1.6/0.2}
+
+
+% Drawing parameters
+\def\TxLevel{2.5}
+\def\HLevel{0}
+\def\RxLevel{-2.5}
+
+\draw (-4, \TxLevel) node[right] {\footnotesize Переданный сигнал};
+\foreach \row in {0, 1, 2} {
+    \foreach \col in {0, 1, 2} {
+        \draw[fill=lemonchiffon] (\col * \OfdmSymbolDuration, \TxLevel + \row * \SubcarriersDistance) rectangle +(\OfdmSymbolDuration, \SubcarriersDistance) node[midway] {\pgfmathparse{int((\row + 1 + \col * 3))} \pgfmathresult};
+    }
+}
+
+\draw (-4, \HLevel) node[right] {\footnotesize Отклик канала};
+\draw[->, >=latex] (0, \HLevel) -- +(4, 0) node[below right] {$\tau$};
+\draw[->, >=latex] (0, \HLevel) -- +(0, 2) node[right] {$|h(\tau)|$};
+\foreach \delay/\value in \ResponseFunction {
+    \draw[->, >=stealth, double] (\delay, \HLevel) -- +(0, \value);
+}
+
+\draw (-4, \RxLevel) node[right] {\footnotesize Полученный сигнал};
+\foreach \delay/\value [count=\i] in \ResponseFunction {
+    \pgfmathsetmacro{\RxOpacity}{\value}
+    \pgfmathsetmacro{\OffsetY}{-(\i - 1) * \NumberOfSubcarriers * \SubcarriersDistance}
+    \draw[dashed, opacity=\RxOpacity] (\delay, \RxLevel +  \OffsetY) -- (\delay, \HLevel);
+    \foreach \row in {0, 1, 2} {
+        \foreach \col in {0, 1, 2} {
+            \draw[fill=lemonchiffon, opacity=\RxOpacity]
+            (\delay + \col * \OfdmSymbolDuration, \RxLevel + \OffsetY + \row * \SubcarriersDistance) 
+            rectangle 
+            +(\OfdmSymbolDuration, \SubcarriersDistance) 
+            node[midway] {\pgfmathparse{int((\row + 1 + \col * 3))} \pgfmathresult};
+        }
+    }
+}
+\end{tikzpicture}
+\caption{Передача на нескольких поднесущих}
+\end{figure}
+
+
+Выясним, какой сигнал будет получен на выходе канала, с импульсной характеристикой $c(\tau, t)$ с положительной эквивалентой $c_{+}(\tau, t)$.  Будем считать, что канал импульсная характеристика канала приблизительно постоянна в окрестности интервала $[0, T_u]$, т.е. $c(\tau, t) \equiv c(\tau)$, и имеет вид
+\begin{equation}
+\notag
+c_{+}(\tau) = \Sum_{i = 0}^{M} \alpha_i e^{-j \varphi_i} \delta(\tau - \tau_i) = \Sum_{i = 0}^{M} c_i \delta(\tau - \tau_i).
+\end{equation}
+В таком случае сигнал на выходе имеет следующий вид:
+\begin{equation}
+\begin{gathered}
+r(t) = \Sum_{n = 0}^{N_c - 1} \Int_{0}^{t} c_{+}(\tau) s^{(n)}_{+}(t - \tau) d\tau
+= \Sum_{n = 0}^{N_c - 1} \Int_{0}^{t} \left[\Pi(t - \tau) \symb_n e^{j2\pi \Freq_n (t - \tau)} \Sum_{i = 0}^M c_i \delta(\tau - \tau_i) \right] d\tau = \\
+= \Sum_{n = 0}^{N_c - 1} \symb_n e^{j2\pi \Freq_n t} \Sum_{i = 0}^M \Int_{0}^{t} c_i \delta(\tau - \tau_i) \Pi(t - \tau)e^{-j 2\pi \Freq_n \tau} d\tau = \Sum_{n = 0}^{N_c - 1} \symb_n e^{j 2\pi \Freq_n t} \Sum_{i\colon \tau_i \leqslant t} c_i \Pi(t - \tau_i) e^{-j 2 \pi \Freq_n \tau_i}.
+\end{gathered}
+\end{equation}
+А теперь посмотрим внимательнее на то, что же представляет собой этот сигнал на выходе. В интервале $[\tau_M, T_u + \tau_0)$ этот сигнал равен
+\begin{gather*}
+r(t) = \Sum_{n = 0}^{N_c - 1} \symb_n e^{j 2\pi \Freq_n t} \Sum_{i\colon \tau_i \leqslant t} c_i \Pi(t - \tau_i) e^{-j 2 \pi \Freq_n \tau_i} = \frac{1}{\sqrt{T_u}}\Sum_{n = 0}^{N_c - 1} \symb_n e^{j 2\pi \Freq_n t} \Sum_{i = 0}^M c_i e^{-j 2 \pi \Freq_n \tau_i} = \\ = \frac{1}{\sqrt{T_u}}\Sum_{n = 0}^{N_c - 1} \symb_n H[n] e^{j 2\pi \Freq_n t},
+\end{gather*}
+где
+\begin{equation}
+H[n] = \Sum_{i = 0}^M c_i e^{-j 2 \pi \Freq_n \tau_i}.
+\end{equation}
+В то же время, в интервалах $[0, \tau_M)$ и $[T_u + \tau_0, T_u + \tau_M \text{ или $+\infty$})$ задействованы не все из $M+1$ сигналов: в интервале 
+$[0, \tau_M)$ как минимум нет сигнала с задержкой $\tau_M$, а в интервале $[T_u + \tau_0, T_u + \tau_M \text{ или $+\infty$})$ отсутствует сигнал с задержкой $\tau_0$. Таким образом, длительность интервала времени, в течение которого сигнал в канале представляет собой модулированную по амплитуде комплексную экспоненту, равен $T_u + \tau_0 - \tau_M < T_u$. Это наиболее просто понять из рис.~\ref{fig:phy:ofdm:cp:overlapping}. Следовательно, просто свертка данного сигнала в течение интервала длительности $T_u$, расположенного в произвольном месте интервала $[0, T_u + \tau_M)$ не даст нам ничего хорошего\footnote{О том, зачем нам важно получить $\symb_n' = \symb_n H[n]$, будет сказано дальше}:
+\begin{equation}
+\notag
+\symb_n' = \Int_{t_0}^{T_u + t_0} r(t) e^{-j 2\pi f_n t} \neq \symb_n H[n].
+\end{equation}
+Причин этому несколько:
+\begin{itemize}
+\item Во-первых, сигналы $r(t)$ и $e^{-j 2\pi f_n t}$ просто неортогональны: экспонента $e^{j 2\pi f_n t}$ передается в канале только в течение интервала $[\tau_M, T_u + \tau_0)$, чья длительность меньше $T_u$, а потому недостаточна для ортогональности.
+\item Во-вторых, в действительности не стоит забывать и о влияние предшествующего OFDM-символа\footnote{Только одного. Ситуация, когда несколько OFDM-символов накладываются совсем грустная. Собственно цель использования OFDM состоит в том, чтобы избавиться от такого наложения. И если этого не получилось сделать при текущих значениях параметров, значит надо брать большее значение $T_u$.}, чьи задержанные версии также будут вовлечены в процесс приема.
+\end{itemize}
+Можно рассмотреть и случай, когда эквивалентная низкочастотная характеристика является непрерывной $$c(\tau) = |c(\tau)|e^{j \arg\{c(\tau)\}},$$
+полагая, что $c(\tau)$ существенно отлична от $0$ при $0 \le \tau_0 < \tau \le \tau_d$ (т.е. $\tau_d$ соответствует $\tau_M$). Результат получится аналогичным: комплексная экспонента в интервале $[\tau_d, T_u + \tau_0)$ и нечто непонятное в остальные моменты времени.
+
+, по идее нужно, чтобы фактически сигнал $\symb_n e^{j 2\pi f_n t}$ начал передавать не в момент 0, а в момент $ $
+
+Чтобы получить комплексную экспоненту на частоте $f_n$ в течение интервала длительности хотя бы $T_u$, можно передавать исходную комплексную экспоненту $\symb_m e^{j 2\pi f_n t}$ еще в течение хотя бы $\tau_M - \tau_0$ секунд. Тогда получим экспоненту $\symb_n H[n] e^{j 2\pi f_n t}$ как минимум в течение $[\tau_M, T_u + \tau_M)$. Теперь в результате свертки получаем:
+\begin{equation}
+\notag
+\symb_n' = \Int_{\tau_M}^{T_u + \tau_M} r(t) e^{-j2\pi f_n t} = \symb_n H[n].
+\end{equation}
+В действительности, мы конечно не можем знать максимальную задержку $\tau_M$ совсем уж точно. Мы просто имеем некоторое ограничение $\tau_{max}$ на нее, вытекающее из соображений уб устройстве сети. Так что просто продолжаем передавать сигнал $s(t) = \sum_n \symb_n e^{j2\pi f_n t}$ еще в течение $\tau_{max}$ секунд. Прием же начинаем с момента $\tau_{max}$ и ведем в течение $T_u$ секунд. В конце получаем последовательность $\{\symb_n' = \symb_n H[n]\}_{n = 0}^{N_c - 1}$. Предполагая, что мы умеем оценивать коэффициенты $\{H[n]\}$ (пока что не задаемся вопросом как именно), можем без труда восстановить исходную последовательность $\{\symb_n\}_{n = 0}^{N_c - 1}$.
+
+Пока что как-то неявно предполагалось, что мы имеем дело с OFDM-передатчиками и приемниками, в которых OFDM реализован посредством $N_c$ генераторов. В таком случае все действительно можно делать так, как сказано в параграфе выше. Но в случае OFDM на основе IDFT/DFT оказывается лучше не передавать OFDM-символ дальше, а наоборот, начать передавать OFDM-символ немного раньше, скопировав часть его окончания длительности $\tau_{max}$ в начало. В чем же разница? Для OFDM-приемника на $N_c$ генераторах ее в общем-то и нет. Разве что сворачивать надо будет с 0 и до $T_u$. Что же касается OFDM на IDFT/DFT, то здесь имеем следующий момент. Не надо забывать о том, что мы дискретизируем входной сигнал в моменты с периодом $T_s$. В первом случае, мы начнем получать отсчеты с момента времени $k'T_s \ge \tau_{max}$, во втором же все останется как и было раньше: с момента 0 до $NT_s = T_u$. Потом от этой последовательности надо взять обратное преобразование Фурье. Вот тут-то и кроется хитрый момент. Во втором случае отсчеты идут в нужном порядке $r(0), r(T_s), \dots, r(NT_s)$. В первом нужно сначала их упорядочить в нужном порядке, так как сначала мы брали отсчеты не с 0, а с $k'T_s$. Чтобы в этом не было необходимости, лучше все-таки использовать вторую схему.
+
+Добавленная в начало часть OFDM-символа называется циклическим префиксом. Количество отсчетов $N_{CP}$ в этом префиксе должно выбираться так, чтобы выполнялось условие $N_{CP} T_s < \tau_{max}$.
+
+%Рассмотрим передачу одного OFDM-символа в промежутке $[mT_u, (m+1)T_u)$. Передаваемый OFDM-символ имеет вид\footnote{Либо использован OFDM-модулятор содержащий $N_c$ генераторов, либо же каким-бы то ни было образом сигнал удалось восстановить по отсчетам $s(k)$}
+%\begin{equation}
+%s^{(m)}(t) = \Sum_{k = 0}^{N_c - 1}s_k^{(m)}(t) = \Sum_{k = 0}^{N_c - 1} \symb_k^{{(m)}} g(t - mT_u) e^{j2\pi \Freq_k t},
+%\end{equation}
+%Выясним, какой сигнал будет получен на выходе канала с эквивалентной низкочастотной импульсной характеристикой $c(\tau, t)$. Рассмотрим случай, когда канал стационарный, т.е. $c(\tau, t) \equiv c(\tau) = \alpha(\tau)e^{-j \varphi(\tau)}$. В таком случае сигнал на выходе имеет следующий вид:
+%\begin{equation}
+%\begin{gathered}
+%r^{(m)}(t) = \Sum_{k = 0}^{N_c - 1} \Int_{0}^{t} c(\tau) s_k^{(m)}(t - \tau) d\tau
+%= \Sum_{k = 0}^{N_c - 1} \Int_{0}^{t - mT_u} \alpha(\tau)e^{-j \varphi(\tau)} \symb_k^{(m)} g(t - \tau - mT_u) e^{j2\pi \Freq_k (t - \tau - mT_u)} d\tau = \\
+%= \Sum_{k = 0}^{N_c - 1} \symb_k^{(m)} e^{j2\pi \Freq_k (t - mT_u)} \Int_{0}^{t - mT_u} \alpha(\tau)g(t - \tau - mT_u)e^{-j (2\pi \Freq_k \tau +  \varphi(\tau))} d\tau = \Sum_{k = 0}^{N_c - 1} \symb_k^{(m)} H_k(t - mT_u) e^{j 2\pi \Freq_k t}.
+%\end{gathered}
+%\end{equation}
+%Что примечательно, в случае стационарного канала каждая поднесущая в OFDM-символе искажается всегда одинаково. Математически это выражается в том, что $H_k$ зависит от разности $t - mT_u$, но не от абсолютного значения времени. Впрочем, это просто следствие положенной стационарности канала. Если же канал не стационарен, то $H_k$ зависит именно от текущего значения времени $t$. 
+
+%Далее посмотрим на прием OFDM-символа.
+%\begin{equation}
+%\label{phy:ofdm:cyclic_prefix:reception}
+%\begin{gathered}
+%\hat{\symb}_n = \Int_{\tau_0}^{T_u + \tau_0} r(t) e^{-j 2\pi \Freq_k t} =
+%\Sum_{k = 0}^{N_c - 1} \Int_{\tau_0}^{T_u + \tau_0} \symb_k H_k(t) e^{j 2\pi (\Freq_k - \Freq_n) t} dt \approx \symb_n H_n.
+%\end{gathered}
+%\end{equation}
+%Здесь $\tau_0$ --- задержка распространения сигнала по кратчайшему пути (достаточно часто задержка распространения сигнала по LoS-каналу). Действительно, интегрировать сигнал нужно в течение времени $T_u$, но начинать интегрирования не имеет смысла, пока сигнал еще не достиг приемника ($H_k(t) = 0$, если $t < \tau_0$). 
+%
+%В \eqref{phy:ofdm:cyclic_prefix:reception} предполагается, что 
+%\begin{equation}
+%\notag
+%\left|\Int_{\tau_0}^{T_u + \tau_0} H_k(t) e^{j2\pi m \DeltaFreq t} dt \right| << 1 , \forall k,~\forall m \neq 0.
+%\end{equation}
+%В общем случае это условие выполняется только тогда, когда характерное время изменения $H_k(t)$ много меньше $T_u = \frac{1}{\DeltaFreq}$.
+%
+%Ввиду задержки, вносимой каналом в распространения сигнала, а также наличием многолучевого распространения, функция $H_k(t)$ в общем случае может быть существенно отлична от нуля и для $t > T_u$. В результате <<старый>> OFDM-символ будет накладываться на новый, приводя к \emph{межсимвольной интерференции} (Inter-Symbol Interference, ISI). В результате при приеме символа $\symb_n^{(m)}$ получаем:
+%\begin{equation}
+%\notag
+%\hat{\symb}_{n}^{(m)} = \symb_n^{(m)} H_{n,0}  + \symb_n^{(m - 1)} H_{n,1} + \dots + \symb_n^{(m - L)} H_{n,L},
+%\end{equation}
+%где
+%\begin{equation}
+%\notag
+%H_{n,l} = \Int_{T_u l + \tau_0}^{T_u (l + 1) + \tau_0} H_n(t) dt,
+%\end{equation}
+%и $L$ --- память канала. В случае нестационарного канала $H_{n, l}$ зависит от времени, т.е. имеем дело с величинами $H_{n, l}(t)$. На практике существенно влияние только предыдущего OFDM-символа. Влияние остальных символов невелико. Таким образом, $L = 1$. В противном случае, если $L > 1$, система вообще перестает быть работоспособной.
+
+\begin{note}
+Интересно заметить, что частотная характеристика канала $C(f)$ может быть весьма замысловатой. В результате н. Тем не менее. Сигнал на выходе имеет вид
+\end{note}
+
+
+\subsection{Peak-to-Average Power Ratio}
+
+\subsection{Выводы}
+Основные преимущества OFDM
+\begin{itemize}
+\item Высокая спектральная эффективность.
+\item Устойчивость к межсимвольной интерференции ISI.
+\item Низкая сложность реализации передатчика и приемника (IFFT/FFT-реализация).
+\item Практически изначально свойственная поддержка MIMO.
+\item Хорошая производительность при наличии частотно-селективных замираний, связанная с возможностью планирования использования ресурсов в зависимости от текущего качества подканалов.
+\end{itemize}
+
+
+Чем же OFDM отличается от других способов передачи на нескольких поднесущих?
+\begin{itemize}
+\item OFDM использует сравнительно большое поднесущих, по сравнению с другими техниками передачи на нескольких поднесущих. Применяемая до OFDM передача на нескольких поднесущих использовали сравнительно небольшое их число. Так HSPA multi-carrier evolution to a 20 MHz overall transmission bandwidth consists of four (sub)carriers, each with a bandwidth of the order of 5 MHz.
+\item В OFDM передаваемые сигналы формируются из прямоугольных импульсов $g(t)$ длительности $T_u$, а спектры прямоугольных сигналов $\{g(t)e^{j2\pi \Freq_k t}\}_{k=0}^{N_c-1}$ плотно упакованы с расстоянием между соседними пиками равным $\Delta f = \frac{1}{T_u}$. ? Вещественные сигналы ортогональны в частном случае, когда $\Freq_c = l \Delta \Freq$, т.е. все частоты всех поднесущих $\{\Freq_n\}_{n = 0}^{N_c - 1}$ кратны $\Delta \Freq$. 
+
+%\begin{gather*}
+%\fourier{s(t)} = \frac{1}{2}\symb_I 
+%\left(
+%\frac{\sin(\pi (\Freq - \Freq_n)T_u)}{\pi (\Freq - \Freq_n)} + 
+%\frac{\sin(\pi (\Freq + \Freq_n)T_u)}{\pi (\Freq + \Freq_n)}
+%\right) + 
+%\frac{j}{2}\symb_Q 
+%\left(
+%\frac{\sin(\pi (\Freq - \Freq_n)T_u)}{\pi (\Freq - \Freq_n)} - 
+%\frac{\sin(\pi (\Freq + \Freq_n)T_u)}{\pi (\Freq + \Freq_n)}
+%\right) = \\
+%\frac{\symb_I + j\symb_Q}{2} \frac{\sin(\pi (\Freq - \Freq_n)T_u)}{\pi (\Freq - \Freq_n)}  + 
+%\frac{\symb_I - j\symb_Q}{2} \frac{\sin(\pi (\Freq + \Freq_n)T_u)}{\pi (\Freq + \Freq_n)} = 
+%\frac{\symb}{2} \frac{\sin(\pi (\Freq - \Freq_n)T_u)}{\pi (\Freq - \Freq_n)}  + 
+%\frac{\symb^*}{2} \frac{\sin(\pi (\Freq + \Freq_n)T_u)}{\pi (\Freq + \Freq_n)}.
+%\end{gather*}
+
+Далее мы будем рассматривать сигналы вида $\Re\{g(t)e^{j2\pi\Freq_n t}\}$, спектр которых целиком лежит в положительной области частот, где с точностью до коэффициента $\frac{1}{2}$ равен спектру соответствующих реальных сигналов\footnote{У вещественных сигналов еще есть <<хвосты>> из области отрицательных частот, но как уже было выяснено их влияние исчезающе мало}. При этом будем далее полагать, что $\Freq_c = 0$, т.е. фактически <<сдвинемся>> в начало координат. \TODO{Добавить рисунки спектров} 
+
+%Здесь не делается перехода к низкочастотному представлению сигналов. Просто вместо того, чтобы рассматривать частоты вида $\Freq_c + \Freq_n$ полагают, что . Это не влияет на ортогональность частотно модулированных прямоугольных сигналов. Почему при этом не имеет влияния часть спектра из отрицательной полосы, расположенная левее частоты $\Freq_c$.
+
+\item
+\end{itemize}
+
+\subsection{Задачи}
+\begin{task}
+Пусть $X_1, X_2, \dots , X_N$ независимые одинаково распределенные гауссовские случайные величины, $X_i \backsim \mathcal{N}(m, \sigma^2)$.
+\begin{enumerate}
+\item Пусть $U = \sum_n X_i$. Определите, чему равен SNR для $U$, определяемый следующим образом:
+$$
+(SNR)_U \MYdef \frac{(\Exp{U})^2}{2 \Var [U]}
+$$
+\item Пусть $V = \sum_n X_i^2$. Определите, чему равен SNR для $U$, определяемый следующим образом:
+$$
+(SNR)_V \MYdef \frac{(\Exp{V})^2}{2 \Var [V]}
+$$
+\item Изобразите на одном графике зависимости $(SNR)_U$ и $(SNR)_V$ от $m^2/\sigma^2$. Исходя из зависимостей какие выводы можно сделать касательно когерентного детектирования, square-law detection и combining of multichannel signals?
+\end{enumerate}
+\end{task}
+
+\begin{task}
+Оцените накладные расходы, связанные с использованием циклического префикса в терминах
+\begin{enumerate}
+	\item Extra channel bandwidth.
+	\item Extra signal energy.
+\end{enumerate}
+\end{task}
+
+\section{SC-FDMA}
+С одной стороны, идея использовать OFDMA как в нисходящем, так и в восходящем канале привлекательна с точки зрения единства физического уровня. С другой стороны, OFDMA обладает сравнительно большими значениями PARP, что приводит к как усложнению приеме-передающих контуров, так и к большому энергопотреблению. Первое негативно скажется на стоимости мобильных устройств, а второе --- на времени их автономной работы. Все это делает использование OFDMA в восходящем канале неэффективным. 
+
+Так какой же доступ использовать? В общем случае требования на множественный доступ в восходящем канале следующие:
+\begin{itemize}
+\item Возможность работы в широком диапазоне скоростей передачи данных.
+\item Достаточно большая пропускная способность в восходящем канале.
+\item Значительно меньшие по сравнению с OFDMA значения PARP, что позволяет избежать чрезмерного энергопотребления мобильных устройств.
+\end{itemize}
+Как мы выяснили, OFDMA не удовлетворяет последнему. Но существует ли доступ, удовлетворяющий всем этим требованиям?
+Оказывается да, и этот доступ получил называние SC-FDMA (Single Carrier Frequency Dividision Multiple Access). SC-FDMA позволяет понизить PARP, но все же не способен вести передачу на скоростях, доступных OFDMA. Таким образом, какую-то цену за стоимость и энергопотребление мобильных устройств мы все таки заплатили.
+
+\begin{figure}
+\centering
+\footnotesize
+
+\def\txLevel{3}
+\def\rxLevel{0}
+\def\SmX{2}
+\def\NdftX{1}
+\def\MdftX{1.2}
+\def\CpX{1}
+\def\DacX{1}
+\def\ChannelX{2}
+\def\nodeDistanceX{1}
+\def\blockY{1.8}
+\def\offsetX{4}
+\begin{subfigure}{\textwidth}
+\begin{tikzpicture}\tikzset{
+    line/.style = {draw, double, ->, >=latex},
+    block/.style = {rounded corners=3pt,
+    				rectangle,
+    				draw,
+    				text centered,
+    				minimum height=\blockY cm},
+}
+
+
+
+\node[block, text width=\SmX cm, anchor=south west] at (\offsetX, \txLevel) (TXSM) {Subcarrier Mapping};
+\node[block, left = \nodeDistanceX of TXSM, text width=\MdftX cm] (TXMDFT) {M-point DFT};
+\node[left = \nodeDistanceX of TXMDFT] (TXINPUT) {$\{x_n\}$};
+\node[block, right = \nodeDistanceX of TXSM, text width=\NdftX cm] (TXNIDFT) {N-point IDFT};
+\node[block, right = \nodeDistanceX of TXNIDFT, text width=\CpX cm] (TXCP) {Add CP/PS};
+\node[block, right = \nodeDistanceX of TXCP, text width=\DacX cm] (TXDAC) {DAC /~RF};
+\draw[line] (TXINPUT) -- (TXMDFT);
+\draw[line] (TXMDFT) -- (TXSM);
+\draw[line] (TXSM) -- (TXNIDFT);
+\draw[line] (TXNIDFT) -- (TXCP);
+\draw[line] (TXCP) -- (TXDAC);
+
+\node[block, fill=grey1, minimum height=1cm, minimum width=2cm] at (15, {(\txLevel + \rxLevel + \blockY) / 2}) (Channel) {Channel};
+
+\node[block, text width=\SmX cm, anchor=south west] at (\offsetX, \rxLevel) (RXSM) {Subcarrier Demapping (Equalization)};
+\node[block, left = \nodeDistanceX of RXSM, text width=\MdftX cm] (RXMDFT) {M-point DFT};
+\node[left = \nodeDistanceX of RXMDFT] (RXOUTPUT) {$\{\hat{x}_n\}$};
+\node[block, right = \nodeDistanceX of RXSM, text width=\NdftX cm] (RXNDFT) {N-point DFT};
+\node[block, right = \nodeDistanceX of RXNDFT, text width=\CpX cm] (RXCP) {Remove CP};
+\node[block, right = \nodeDistanceX of RXCP, text width=\DacX cm] (RXDAC) {RF /~ADC};
+\draw[line] (RXMDFT) -- (RXOUTPUT);
+\draw[line] (RXSM) -- (RXMDFT);
+\draw[line] (RXNDFT) -- (RXSM);
+\draw[line] (RXCP) -- (RXNDFT);
+\draw[line] (RXDAC) -- (RXCP);
+
+\draw[line] (TXDAC.east) -- (TXDAC.east-|Channel.north) -- (Channel.north);
+\draw[line] (Channel.south) -- (RXDAC.east-|Channel.south) -- (RXDAC.east);
+\end{tikzpicture}
+\caption{\label{fig:phy:scfdma:scfdma_processing} SC-FDMA}
+\end{subfigure}
+\vspace{40pt}
+
+\begin{subfigure}{\textwidth}
+\begin{tikzpicture}\tikzset{
+    line/.style = {draw, double, ->, >=latex},
+    block/.style = {rounded corners=3pt,
+    				rectangle,
+    				draw,
+    				text centered,
+    				minimum height=\blockY cm},
+}
+
+
+
+\node[block, text width=\SmX cm, anchor=south west] at (\offsetX, \txLevel) (TXSM) {Subcarrier Mapping};
+\node[left = \nodeDistanceX of TXSM, text width=\MdftX cm] (TXMDFT) {};
+\node[left = \nodeDistanceX of TXMDFT] (TXINPUT) {$\{x_n\}$};
+\node[block, right = \nodeDistanceX of TXSM, text width=\NdftX cm] (TXNIDFT) {N-point IDFT};
+\node[block, right = \nodeDistanceX of TXNIDFT, text width=\CpX cm] (TXCP) {Add CP/PS};
+\node[block, right = \nodeDistanceX of TXCP, text width=\DacX cm] (TXDAC) {DAC /~RF};
+\draw[line] (TXINPUT) -- (TXSM);
+\draw[line] (TXSM) -- (TXNIDFT);
+\draw[line] (TXNIDFT) -- (TXCP);
+\draw[line] (TXCP) -- (TXDAC);
+
+\node[block, fill=grey1, minimum height=1cm, minimum width=2cm] at (15, {(\txLevel + \rxLevel + \blockY) / 2}) (Channel) {Channel};
+
+\node[block, text width=\SmX cm, anchor=south west] at (\offsetX, \rxLevel) (RXSM) {Subcarrier Demapping (Equalization)};
+\node[left = \nodeDistanceX of RXSM, text width=\MdftX cm] (RXMDFT) {};
+\node[left = \nodeDistanceX of RXMDFT] (RXOUTPUT) {$\{\hat{x}_n\}$};
+\node[block, right = \nodeDistanceX of RXSM, text width=\NdftX cm] (RXNDFT) {N-point DFT};
+\node[block, right = \nodeDistanceX of RXNDFT, text width=\CpX cm] (RXCP) {Remove CP};
+\node[block, right = \nodeDistanceX of RXCP, text width=\DacX cm] (RXDAC) {RF /~ADC};
+\draw[line] (RXSM) -- (RXOUTPUT);
+\draw[line] (RXNDFT) -- (RXSM);
+\draw[line] (RXCP) -- (RXNDFT);
+\draw[line] (RXDAC) -- (RXCP);
+
+\draw[line] (TXDAC.east) -- (TXDAC.east-|Channel.north) -- (Channel.north);
+\draw[line] (Channel.south) -- (RXDAC.east-|Channel.south) -- (RXDAC.east);
+\end{tikzpicture}
+\caption{\label{fig:phy:scfdma:ofdma_processing} OFDMA}
+\end{subfigure}
+\caption{\label{fig:phy:scfdma:ofdma_scfdma} Общая структура передатчика и приемника для SC-FDMA и OFDMA}
+\end{figure}
+
+На рис.~\ref{fig:phy:scfdma:ofdma_scfdma} показаны принципиальные схемы устройства приемника и передатчика для SC-FDMA и OFDMA. Как видно, SC-FDMA очень похож на OFDMA за исключением одного дополнительного DFT на передатчике и IDFT на приемнике. В остальном же устройство SC-FDMA и OFDMA приемников и передатчиков идентично. 
+
+\section{NOMA}
+\subsection{Сети 4G и 5G}
+Сети 4-го поколения (4G) разворачиваются повсеместно. 
+
+Растет число пользователей, и, следовательно, объемы передаваемых данных. Все эти факторы приводят к тому, что на сотовые сети накладываются все более и более жесткие требования. Работа над сетями LTE продолжается в виде релизов. С момента своего появления сети LTE долго развивались, фактически став сетями 4G только с появлением LTE Advanced (LTE-A) -- LTE Release TODO.
+Основная причина состоит в росте требований к таким сетям: возникают новые приложения, типа Machine Type Communication (MTC) и massive MTC (mMTC), сверхнадежная передача данных с низкими задержками (Ultra Reliable Low Latency Communication, URLLC), TODO Посмотреть другие гранты. Работы, проводимые в рамках релизов LTE, также направлены и на разработку сетей 5-го поколения --- сетей 5G. Сети 5G призваны поддержовать 
+гораздо более жесткие требования к качеству обслуживания. В частности, 1), 2), 3)
+
+На данный момент активно ведутся работы по разработке сетей 5G. Одним из основных направлений этих работ является разработка методов множественного доступа.
+
+ компонентов сетей 5G, необходимый для выполнения возросших требований к сетям пятого поколения (5G), включающих в себя требования на низкую задержку, высокую надежность, связность узлов сети, справедливое распределение ресурсов между пользователями и высокую пропускную способность. 
+
+\subsection{Множественный доступ}
+В беспроводных сетях методы множественного доступа указывают, как устройство () передает данные в выделенной ему единице канальных ресурсов, где формально канальные ресурсы представляется в виде многомерного пространства (частота, время, мощность, код и т.д.). В основном канальные ресурсы рассматриваются в виде частотно-временной сетки (двумерное пространство), и каждое устройство получает в свое распоряжение некоторый элемент этого пространства -- ресурсный блок. При этом метод множественного доступа, во-первых,  содержит набор ограничений на то, какие это могут быть блоки (например, могут ли они перекрываться или нет), и, во-вторых, указывает процедуры формирования сигнала для передачи данных устройствам/устройствами в выделенных блоках. Методы множественного доступа отличаются от алгоритмов планирования ресурсов: планирование подразумевает распределение доступных канальных ресурсов (ресурсных блоков) между пользователями с учетом ограничений, накладываемых используемым методом доступа. При этом планировщик при распределении ресурсов исходит из некоторых внешних критериев. TODO
+
+%Метод множественного доступа -- один из ключевых факторов, влияющих на производительность технологии беспроводной передачи данных. 
+
+Работы над методами множественного доступа для сетей 5G направлены, в первую очередь, на достижение большей по сравнению с существующими методами доступа спектральной эффективности -- объема переданных данных на единицу частотно-временных ресурсов (TODO или канальных ресурсов, если еще и мощность вовлечена).
+
+Методы множественного доступа можно формально разделить на две основные группы по их требованию на ортогональность сигналов, передаваемых устройствам/устройствами в выделенных  ресурсных блоках. Методы множественного доступа, в которых сигналы ортогональны, называются ортогональными, или OMA (англ.: Orthogonal Multiple Access). Примерами таких методов являются TDMA (англ.: Time Division Multiple Access), в котором пользователям выделяются неперекрывающиеся интервалы времени, и FDMA (англ.: Frequency Division Multiple Access), в котором пользователям выделяются неперекрывающиеся полосы частот. Другим более актуальным примером является OFDMA (англ.: Orthogonal Frequency Division Multiple Access), используемые в сетях LTE Advanced. OFDMA предполагает представление канальных ресурсов в виде частотно-временной сетки. Каждый пользователь получает в свое распоряжение один или несколько ресурсных блоков, причем согласно OFDMA один ресурсный блок может быть назначен только одному устройству.
+
+Второй группой являются неортогональные методы множественного доступа, или NOMA (англ.: Non-Orthogonal Multiple Access). В отличие от OMA, где сигналы ортогональны (и, следовательно, возможен независимый прием данных пользователями), в NOMA пользователи могут получить в свое распоряжение один и тот же ресурсный блок. 
+%Основная идея NOMA состоит в обслуживании сразу нескольких устрйств в одном ресурсном блоке, что позволяет достигнуть большей спектральной эффективности по сравнению с OMA~\cite{} TODO.
+Основная идея NOMA состоит в передаче данных сразу нескольким/ими устройствам/устройствами в одном ресурсном блоке (в одном временном слоте, на одной поднесущей, или с использованием одного TODO расширяющего кода).
+При этом возможность извлечения устройствами своих сигналов из суперпозиции исходных неортогональных сигналов достигается за счет использования дополнительных параметров передачи, таких как мощность, код, направление передачи и т.п. (т.е. использования измерений, отличных от частоты и времени).
+%Данная процедура называется последовательным подавлением интерференции (Successive Interference Cancellation, SIC)
+Обслуживание сразу нескольких пользователей в одном ресурсном блоке позволяет NOMA достигнуть большей спектральной эффективности по сравнению с OMA~\cite{} TODO. Именно поэтому NOMA рассматривается как один из ключевых компонентов будущих сетей 5G. 
+
+Задача планирования ресурсов тесно связана с используемым методом доступа, так как последний определяет ограничение формат и расположение ресурсных блоков, выделяемых устройствам. Большинство существующих работ по алгоритмам планирования в сетях LTE-A и 5G предполагают использование OFDMA. Существующие драфты TODO предполагают совместное использование методов OMA и NOMA. Для этого можно использовать переменную длительность слота. В рамках данного проекта планируется разработка алгоритма планирования при использовании NOMA, а также при совместном использовании OMA и NOMA. Анализ этих алгоритмов.
+
+Разработка методов NOMA, а также алгоритмов распределения канальных ресурсов между пользователями сетей при использовании методов NOMA является одной из основных задач при разработке сетей 5G, решение которой позволит выполнить многократно возросшие требования к таким сетям.
+
+\paragraph{Общая формулировка задач.}
+Целью данного проекта является разработка и анализ методов NOMA [TODO]
+В рамках данного проекта планируется анализ существующих методов NOMA
+
+Целью данного проекта является разработка математического аппарата для анализа существующих и разработки новых методов совместного существования беспроводных локальных и сотовых сетей, работающих в одном диапазоне нелицензируемой части спектра.
+
+Для достижения поставленной цели в ходе проекта будут решаться следующие задачи.
+\begin{itemize}
+\item Задача 1. Анализ взаимодействия методов доступа к среде в нисходящем канале сетей LTE-LAA и Wi-Fi
+\item Задача 2. Оценка эффективности методов доступа к среде в восходящем канале LTE-LAA
+\item Задача 3. Анализ методов объединения подканалов передачи данных в сетях LTE-LAA и Wi-Fi
+\end{itemize}
+Более подробное описание задач и методов, предлагаемых для их решения, приведены в разделе 4.7. 
+
+\subsection{Разновидности NOMA (Существующие работы)}
+%\subsection{NOMA в 5G}
+%Недавно в 3GPP-LTE-A (3rd Generation Partnership Project Long-Term Evolution Advanced) был предложен MUST (англ.: MultiUser Superposition Transmission) --- 
+
+OFDMA --- хорошо изучен и много где используется. Данный тип OMA рассматривается как один из основных для применения в сетях 5G. Вопрос: как исползовать множество поднесущих совместно с NOMA? В результате возникает вопрос эффективного совместного использования NOMA на множестве поднесущих.
+
+MC-NOMA (Multi-Carrier NOMA) может рассматриваться как разновидность NOMA, в которой пользователи поделены на группы (кластеры). Каждая группа пользователей обслуживается в своем ресурсном блоке, причем эти ресурсные блоки ортогональны (в том смысле, что сигналы, передаваемые в них, ортогональны). Подобное разделение на группы призвано понизить вычислительную сложность процедур, используемых в NOMA. H-NOMA (H-NOMA) представляет собой подход к балансировке сложности NOMA и ее эффективности.
+
+Использование MC-NOMA в системе с OFDMA является ввиду естественным ходом в виду наличия поднесущих. 
+
+Суммарная пропускная способность выше~\cite{ding2014impact}. [30-32]. 
+
+Существуют несколько работ, в которых предложены алгоритмы совместной группировки пользователей, выделения поднесущих и выбор мощностей передачи. lowec-omplexity в [2) 30].
+
+LS, SCMA, PDMA
+
+MC-NOMA --- это подкласс методов NOMA. К MC-NOMA можно отнести LDS, SCMA, PDMA --- все это одного поля ягоды. 
+
+Задача комбинирования различных методов NOMA.
+
+	
+
+	
+	
+	
+	
+	Существует множество работ, посвященных использованию NOMA [1 - TODO]. 
+	
+	
+	
+	
+	\paragraph{MIMO-NOMA}
+	Дизайн MIMO-NOMA гораздо сложнее SISO-NOMA, главным образом из-за следующих двух причин. Во-первых, не всегда понятно, может ли MIMO-NOMA достигнуть максимума производительности сети, даже если учесть тот факт, что MIMO-NOMA опережает MIMO-OMA [38]. [39]. 
+	Во-вторых, упорядочивание пользователей в MIMO-NOMA сложная задача. В SISO-MIMO пользовательские качества канала - скаляры. Однако в случае множества антенны, качества каналов -- вектоыр или матрицы, так что их упорядочивание в принципе невозможно. [43] - случайно формирование диаграмм. [43-48].
+	
+	Разложить MIMO-NOMA на множество  SISO-NOMA подканалов, что значительно уменьшит сложность системы.
+	
+	\paragraph{Practical Implementation}
+	
+	Кодирование и модуляция
+	
+	Network-Coded Multiple Access (NCMA)
+	
+	LPMA 
+	
+	Кросс-уровневое взаимодействие
+	
+	
+	
+	
+	\subsection{Актуальность исследования.}
+	Неортогональный множественный доступ NOMA 
+	
+	\textbf{Рост объемов данных, передаваемых по сотовым сетям. Переход от LTE к LTE-А}
+	
+	\textbf{Сети 5G. Возросшие требования, новые вызовы.}
+	
+	\textbf{Неортогональный множественный доступ как один из методов выполнения требований к сетям 5G.}
+	
+	На настоящий момент множественный доступ в сетях 5G является одной из основных тем исследований, 
+	так как технология множественного доступа иди в ногу со временем с экспоненциально растущими объемами мультимедийных данных, передаваемых по беспроводным сетям~\cite{li2014network, huawei2013vision}.
+	
+	\textbf{Идея NOMA}
+	Основная идея NOMA состоит в том, что сигналы, предназначенные различным пользователям. Пользователи с лучшими канальными условиями выполняют процедуру последовательного устранения интерференции SIC (англ.: Successive Interference Cancellation) для устранения сообщений, предназначенных пользователям с худшими канальными условиями, в результате получая предназначенное им сообщение.
+
+	Основная идея NOMA состоит в использовании разницы между канальными условиями пользователей. Базовая станция передает сигнал, являющийся суперпозицией сигналов обоих пользователей, однако смешанных с разными мощностями. В результате пользователь с хорошими канальными условиями оказывается способен провести процедуру последовательного устранения интерференции и извлечь из смеси сигнал, предназначенный ему. С точки зрения пользователя с худшими канальными условиями, сигнал первого пользователя воспринимается как шум.
+	
+	Сигнал для пользователя, испытывающего худшие канальные условия, передается с большей мощностью, что позволяет удаленному пользователю декодировать сигнал, рассматривая сигнал первого пользователя как шум. Первому пользователю требуется предварительно извлечь сигнал второго пользователя из смеси, чтобы декодировать сигнал, переданный ему.
+	
+	\textbf{Преимущества NOMA}
+	
+	NOMA рассматривается как возможность достижения компромисса между справедливым распределением ресурсов и суммарной пропускной способностью. В частном случае двух пользователей в нисходящем канале при использовании OMA для достижения максимальной пропускной способности следовало выделить все канальные ресурсы пользователю с лучшими канальными условиями, не обслуживая пользователя с худшими условиями. NOMA позволяет не только достичь большей пропускной способности, чем OMA, но и достигнуть более справедливого распределения ресурсов. Данная возможность NOMA представляется одной из наиболее важных для сетей 5G, так как сети 5G рассматриваются как ``Интернета Вещей'' с миллионами устройств. С OMA объединение в сеть тысяч сенсоров потребовало бы такого же порядка ортогональных ресурсных блоков, в то время как NOMA может использовать один ресурсный блок для обслуживания сразу нескольких сенсоров. Однако в контексте ``Интернета Вещей'' данная особенность NOMA не является существенным недостатком --- сенсоры не требуют больших скоростей.
+	
+	\textbf{Недостатоки NOMA}
+	
+	NOMA может быть расширена на случай, когда на базовой станции установлено несколько антенн. Появляется MIMO NOMA. Наличие нескольких антенн позволяет испольовать из для формирования диаграммы направленности (beamforming), для улучшения SINR[10] или для пространственного мультиплексирования [11].
+	
+	Первая опция NOMA-BF (BeamForming) может использовать для улучшения спектральной эффективности путем увеличения SINR. 
+	NOMA может быть использована в каждом кластере диаграммы направленности. В [8] показано, как использовать данный подход на 2N пользователей в одной частоте и временном слоте с N лучами при использовании ZF-формирования для подавления интерференции между кластерами. Двухэтапный подход предложен в [9] для многоадресного формирования. В [10] показано, что делать в случае множества антенн на получателях.
+	
+	NOMA-SM (Spartial Multiplexing) [11]
+	
+	[Есть еще Cooperative NOMA, 12, 13, 14, 1]
+	
+	NOMA может рассматриваться как частный случай Cognitive Radio стетей. При использовании OMA пользователь A получает в свое распоряжение частотно-временной ресурсный блок, который никем более не используется. Использование NOMA эквивалентно использовании концепции когнитивного радио. Аналогия с когнитивным радио предоставляет не только указание к реализации NOMA [14], но и возможность достичь компромисса между пропускной способностью и справедливым распределением ресурсов. Однако ``справедливость'' распределения ресурсов может быть сформулирована в терминах множества метрик. В частности, ``справделивым'' может считаться распределение ресурсов, при котором выполнены требования пользователей к качеству обслуживания (например, на минимальную пропускную способность).
+	
+	В MIMO-сценариях сложно упорядочить пользователей согласно их канальным условиям. следовательно сложно разработать подходящую политику выделения мощности [8].
+	
+	Обслуживание вторичных пользователей - снижение задержки.
+	
+	Стандартизация NOMA. Активная работа по стандартизации, касательно реализации NOMA в сетях 5. В частности, 3GPP рассматривает в версии 13 (LTE Release 13), многопользовательский неортогональный доступ и сигнальные схемы [5]. Было предложено множество схем передачи как MUST. Три категории [15]. 
+	1) Категория 1. Суперпозиция с адаптивным выбором мощности на каждую компоненту и негреевским соответствием.
+	2) Категория 2. Суперпозиция с адаптивным выбором мощности на каждую компоненту и греевским соответствием.
+	3) ???
+	
+	ДРугие темы касательно неортогональной передачи: CSI схемы, ARQ, HARG дизайн и СКК все еще в процессе обсуждения.
+	Кроме MUST также есть SCMA (Sparse Code Multiple Access), PDMA (Pattern Division Multiple Access), MUSA (Multiuser shared multiple access) [6, 7].
+	
+	\paragraph{Основные открытые вопросы:}
+	
+	1) Группировка пользователей. NOMA может быть использована для одновременной передачи данных более чем двум пользователям. Однако, использование суперпозиционного кодирования и SIC значительно увеличивают сложность NOMA. Поэтому возникает задача группировки пользователей по их канальным условиям с целью снижения сложности NOMA в обслуживании каждой из групп пользователей. Однако в NOMA очень сложно определить лучший способ кластеризации пользователей. Итоговая комбинаторная проблема является NP-сложной. Поэтому одной из наиболее актуальных задач является разработка алгоритмов кластеризации пользователей.
+	
+	2) На данный момент считается, что будущие сотовые сети будут использовать более одной технологии множественного доступа. Эта тенденция подкрепляется NOMA в 3GPP-LTE-A (MUST). В частности, MUST ---- это гибрид между OFDMA и NOMA, где NOMA используется, когда пользователи обладают существенно отличающимися CSI (один пользователь расположен близко к базовой станции, а второй на границе соты). Таким образом возникает задача изучения взаимодействия NOMA с другими схемами множественного доступа, включая не только OMA схемы, но и новые - предложенные для 5G MA. Для этого могут быть использованы подходы теории игр. Оптимизация использования частотных и временных ресурсов, кодов и мощностей.
+	
+	3) MIMO-NOMA. Несмотря на формирование диаграмм направленности, все еще остается множество проблем. В частности, оптимальная аллокация пользователей и формирование диагармм направленности не принимают во внимание вычислительную сложность данных процессов, которая может быть весьма велика. Совместная передача и прием также важная тема, которой еще не посвящено достаточного внимания. Основная сложность NOMA с пространственным мультиплексированием состоит в сложности приемников на получателях. Пользователь должен быть способен принимать множество сигналов, что может быть вычислительно трудно. Расширение NOMA с пространственным мультиплексированием на более чем 2 пользователя с множеством поднесущих также требует эффективной кластеризации пользователей и выделения ресурсов в многомерном пространстве (частоты, время, пространство, мощность), что аналитически и вычислительно сложно.
+	
+	4) Ошибки в определении CSI. В большинстве исследований по NOMA полагается, что информация о качестве канала, полученная из CSI, точна. Однако на практике это неверно ввиду ограниченности числа пилотных поднесущие. В результате спектральная эффективность, достигаемая на практике, меньше заявленных значений. В результате важной задачей является оценка такого, насколько неточность в оценке канала сказывается на итоговой спектральной эффективности, достигаемой с использованием NOMA.. Другой пример крайне нереалистичных предположений --- SCI на передатчике. Получение данных оценок --- существенные накладные расходы. Использование только несколькоих битов в качестве отклика --- многообещающее решение для NOMA-систем, так как упорядочивание пользователей по канальным условиям --- достаточно для использования NOMA в большинстве сценариев.
+	
+	5) Кросс-уровневое взаимодействие. повышение спектральная эффективность, уменьшение энергозатрат, достижение массивная связность (massive connectivity), уменьшение задержек (low latency). Например, дизайн СКК важен для достижения выгод NOMA на физическом уровне, однако не менее важно как подобный gain распространяется на верхние уровни и дизайн соответствующих протоколов. Основные проблемы - планирвоание ресурсов и кластеризация, power allocation, pilot and retransmission schemes design.
+	
+	6) Использование принципов беспроводной передачи энергии в NOMA. SWIPT (англ.: Simultaneous Wireless Information and Power Transfer)
+	
+
+\subsection{Сценарии}
+
+П
+
+Пользователи. 
+\begin{itemize}
+\item Нет QoS-требований. Максимизируем общую пропускную способность.
+\item Каждый пользователь предъявляет требования к качеству обслуживания: скорость передачи данных пользователем должна быть не меньше некоторого значения. 
+\end{itemize}
+
+\begin{itemize}
+	\item Выбор power allocation coefficient. В следующих работах выставляется вручную~\cite{ding2014performance}. В следующих работах выставляется автоматически~\cite{}.
+	\item
+\end{itemize}
+
+\paragraph{Сценарий 1.} Одна базовая станция и $N$ пользователей. Заданы качества каналов. Пользователи могут быть упорядочены. 
+
+Исследование эффективности NOMA в условиях передачи насыщенного трафика
+	
+	
+\subsection{Статьи}
+
+\paragraph{System-level performance evaluation of downlink non-orthogonal multiple access (NOMA)~\cite{saito2013system}}
+
+\paragraph{On the Performance of Non-Orthogonal Multiple Access in 5G Systems with Randomly Deployed Users~\cite{ding2014performance}}
+Были найдены outage probability (вероятность нарушения QoS-требования) и ergodic sum rate (пропускная способность). Все устройства комбинируются в NOMA, группировки нет. Аппроксимации. Power allocation coefficients вручную.
+
+TODO: Посмотреть ссылку [3]
+
+\paragraph{Impact of User Pairing on 5G Non-Orthogonal Multiple Access~\cite{ding2014impact}}
+Есть CR-NOMA, есть F-NOMA. Разработать компромисс~\cite{ding2014impact}. Только два пользователя в сети. Частный случай. Неполный анализ.
+
+\paragraph{Optimal Joint Power and Subcarrier Allocation for Full-Duplex Multicarrier Non-Orthogonal Multiple Access Systems~\cite{sum2017optimal}}
+
+\paragraph{On Optimal Power Allocation for Downlink Non-Orthogonal Multiple Access Systems~\cite{zhu2017optimal}}
+
+\paragraph{A Mathematical Proof of the Superiority of NOMA Compared to Conventional OMA~\cite{ding2016mathematical}}
+
+\cite{dohler2017fundamential}
+
+\chapter{Оценка канала. Восстановление сигнала}
+
+\chapter{Многоантенные системы}
+
+\section{MIMO}
+
+
+
+\bibliographystyle{ugost2008}
+\bibliography{../bib/phy.bib}
+
+\end{document}
