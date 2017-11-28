@@ -17,7 +17,7 @@ class TwoLayerNet:
     The outputs of the second fully-connected layer are the scores for each class.
     """
 
-    def __init__(self, input_size, hidden_size, output_size, use_relu=False, std=None, random_state=None):
+    def __init__(self, input_size, hidden_size, output_size, use_relu=True, std=None, random_state=None):
         """
         Initialize the model. Weights are initialized to small random values and
         biases are initialized to zero. Weights and biases are stored in the
@@ -120,13 +120,13 @@ class TwoLayerNet:
         grads = {}
         grad_output2 = (probas - np.eye(C)[y]) / N                         # [B, C]
         grads['W2'] = np.dot(X_output_relu.T, grad_output2) + reg * W2     # ([H, B] x [B, C]) = [H, C]
-        grads['b2'] = np.sum(grad_output2, axis=0, keepdims=True)         # [B, C] -> [1, C]
-        # ReLU
+        grads['b2'] = np.sum(grad_output2, axis=0, keepdims=True)          # [B, C] -> [1, C]
+        # ReLU 
         grad_output1 = np.dot(grad_output2, W2.T)                          # [B, C] x [C, H] x  = [B, H]
         if self.use_relu:
             grad_output1[mask] = 0.0                                       # ReLU
-        grads['W1'] = np.dot(X_input1.T, grad_output1) + reg * W1      # ([H, B] x [B, D]).T = [D, H]
-        grads['b1'] = np.sum(grad_output1, axis=1)[None, :]               # [H, B] -> [H,] -> [1, H]
+        grads['W1'] = np.dot(X_input1.T, grad_output1) + reg * W1          # ([H, B] x [B, D]).T = [D, H]
+        grads['b1'] = np.sum(grad_output1, axis=0, keepdims=True)          # [H, B] -> [H,] -> [1, H]
         return loss, grads
 
     def train(self, X, y, X_val, y_val,
@@ -197,8 +197,8 @@ class TwoLayerNet:
 
         return {
           'loss_history':      self.loss_history,
-          'train_acc_history': self.ltrain_acc_history,
-          'val_acc_history':   self.lval_acc_history,
+          'train_acc_history': self.train_acc_history,
+          'val_acc_history':   self.val_acc_history,
         }
 
     def update_parameters(self, grads):
