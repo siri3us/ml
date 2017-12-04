@@ -2,7 +2,7 @@
 
 import numpy as np
 
-def affine_forward(x, w, b):
+def affine_forward(x, w, b, debug=False, layer_name=''):
     """
     Computes the forward pass for an affine (fully-connected) layer.
 
@@ -20,11 +20,19 @@ def affine_forward(x, w, b):
     - out: output, of shape (N, M)
     - cache: (x, w, b)
     """
-    x = x.reshape((x.shape[0], -1))
+    if debug:
+        assert isinstance(x, np.ndarray)
+        assert isinstance(w, np.ndarray)
+        assert isinstance(b, np.ndarray)
+        assert x.ndim >= 2
+    if x.ndim > 2:
+        x = x.reshape((x.shape[0], -1))
     out = np.dot(x, w) + b[None, :]
+    if debug:
+        assert not np.any(np.isnan(out)), 'Output of affine layer {} contains nans.'.format(layer_name)
+        assert not np.any(np.isinf(out)), 'Output of affine layer {} contains infs.'.format(layer_name)
     cache = (x, w, b)
     return out, cache
-
 
 def affine_backward(dout, cache):
     """
@@ -138,7 +146,7 @@ def svm_loss(x, y):
     return loss, dx
 
 
-def softmax_loss(x, y):
+def softmax_loss(x, y, debug=False):
     """
     Computes the loss and gradient for softmax classification.
 
@@ -154,11 +162,15 @@ def softmax_loss(x, y):
     """
     N = x.shape[0]
     shifted_logits = x - np.max(x, axis=1, keepdims=True)
-    Z = np.sum(np.exp(shifted_logits), axis=1, keepdims=True)
-    log_probs = shifted_logits - np.log(Z)
+    Z = np.sum(np.exp(shifted_logits), axis=1, keepdims=True)   
+    log_probs = np.maximum(shifted_logits - np.log(Z), -100)
     probs = np.maximum(np.exp(log_probs), 1e-40)
     loss = -np.sum(log_probs[np.arange(N), y]) / N
-    
+    if debug: 
+        assert not np.isnan(loss)
+        assert not np.isinf(loss)
+        assert not np.any(np.isnan(probs))
+        assert not np.any(np.isinf(probs))
     dx = probs.copy()
     dx[np.arange(N), y] -= 1
     dx /= N

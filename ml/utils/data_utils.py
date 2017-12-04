@@ -51,7 +51,7 @@ def load_CIFAR10(ROOT):
 def get_CIFAR10_data(train_size=49000, test_size=1000, val_size=1000, ordered=True, 
                      substract_mean=False, image_data_format='channels_last',
                      ravel=False, bias_trick=False, random_state=1, 
-                     cifar10_dir='/datasets/CIFAR10'):
+                     cifar10_dir='/datasets/CIFAR10', scaler=None):
     """
     Load the CIFAR-10 dataset from disk and perform preprocessing to prepare it for classifiers.
     Inputs:
@@ -90,6 +90,9 @@ def get_CIFAR10_data(train_size=49000, test_size=1000, val_size=1000, ordered=Tr
     assert train_size + val_size <= X_tr.shape[0], 'Number of train samples is {} while {} samples requested'.format(
         X_tr.shape[0], train_size + val_size)
     assert test_size <= X_ts.shape[0], 'Number of test samples is {} while {} samples requested'.format(X_ts.shape[0], test_size)
+    if scaler is not None:
+        X_tr = scaler(X_tr)
+        X_ts = scaler(X_ts)
     
     # subsample the data
     if ordered:

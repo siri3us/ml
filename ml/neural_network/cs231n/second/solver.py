@@ -86,10 +86,9 @@ class Solver:
         - num_epochs: The number of epochs to run for during training.
         - print_every: Integer; training losses will be printed every print_every iterations.
         - verbose: Boolean; if set to false then no output will be printed during training.
-        - num_train_samples: Number of training samples used to check training accuracy; default is 1000; 
-            set to None to use entire training set.
-        - num_val_samples: Number of validation samples to use to check val accuracy; default is None, 
-            which uses the entire validation set.
+        - num_train_samples: Number of training samples used to check training accuracy; default is None, which uses the entire training set.
+        - num_val_samples: Number of validation samples to use to check val accuracy; default is None, which uses the entire validation set.
+        - seed: Used to initialize an internal random generator; default is 0.
         - checkpoint_name: If not None, then save model checkpoints here every epoch.
         """
         self.model = model
@@ -99,24 +98,20 @@ class Solver:
         self.y_val   = data['y_val']
 
         # Unpack keyword arguments
-        self.update_rule = kwargs.pop('update_rule', 'sgd')
+        self.update_rule  = kwargs.pop('update_rule', 'sgd')
         self.optim_config = kwargs.pop('optim_config', {})
-        self.lr_decay = kwargs.pop('lr_decay', 1.0)
-        self.batch_size = kwargs.pop('batch_size', 100)
-        self.num_epochs = kwargs.pop('num_epochs', 10)
-        self.num_train_samples = kwargs.pop('num_train_samples', 1000)
-        self.num_val_samples = kwargs.pop('num_val_samples', None)
-        self.random_state = kwargs.pop('random_state', None)
+        self.lr_decay     = kwargs.pop('lr_decay', 1.0)
+        self.batch_size   = kwargs.pop('batch_size', 100)
+        self.num_epochs   = kwargs.pop('num_epochs', 10)
+        self.num_train_samples = kwargs.pop('num_train_samples', None)
+        self.num_val_samples   = kwargs.pop('num_val_samples', None)
+        self.seed              = kwargs.pop('seed', 0)
+        self.gen = np.random.RandomState(self.seed)
         
         self.checkpoint_name = kwargs.pop('checkpoint_name', None)
         self.print_every = kwargs.pop('print_every', 10)
         self.verbose = kwargs.pop('verbose', True)
 
-        if self.random_state is None:
-            self.gen = np.random
-        else:
-            self.gen = np.random.RandomState(self.random_state)
-        
         # Throw an error if there are extra keyword arguments
         if len(kwargs) > 0:
             extra = ', '.join('"%s"' % k for k in sorted(list(kwargs.keys())))
