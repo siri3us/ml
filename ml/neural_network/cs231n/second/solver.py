@@ -84,7 +84,8 @@ class Solver:
         - lr_decay: A scalar for learning rate decay; after each epoch the learning rate is multiplied by this value.
         - batch_size: Size of minibatches used to compute loss and gradient during training.
         - num_epochs: The number of epochs to run for during training.
-        - print_every: Integer; training losses will be printed every print_every iterations.
+        - print_every_iter: Integer; training losses will be printed every print_every_iter iterations.
+        - print_every_epoch: Integer; training losses will be printed every print_every_epoch epochs.
         - verbose: Boolean; if set to false then no output will be printed during training.
         - num_train_samples: Number of training samples used to check training accuracy; default is None, which uses the entire training set.
         - num_val_samples: Number of validation samples to use to check val accuracy; default is None, which uses the entire validation set.
@@ -109,8 +110,9 @@ class Solver:
         self.gen = np.random.RandomState(self.seed)
         
         self.checkpoint_name = kwargs.pop('checkpoint_name', None)
-        self.print_every = kwargs.pop('print_every', 10)
-        self.verbose = kwargs.pop('verbose', True)
+        self.print_every_iter = kwargs.pop('print_every_iter', 10000000)
+        self.print_every_epoch = kwargs.pop('print_every_epoch', 10000000)
+        self.verbose = kwargs.pop('verbose', False)
 
         # Throw an error if there are extra keyword arguments
         if len(kwargs) > 0:
@@ -237,7 +239,7 @@ class Solver:
             self._step()
 
             # Maybe print training loss
-            if self.verbose and (t + 1) % self.print_every == 0:
+            if self.verbose and (t + 1) % self.print_every_iter == 0:
                 print('(Iteration {}/{}) loss: {}'.format(t + 1, num_iterations, self.loss_history[-1]))
 
             # At the end of every epoch, increment the epoch counter and decay
@@ -247,7 +249,7 @@ class Solver:
                 self.epoch += 1
                 for k in self.optim_configs:
                     self.optim_configs[k]['learning_rate'] *= self.lr_decay
-
+            
             # Check train and val accuracy on the first iteration, the last
             # iteration, and at the end of each epoch.
             first_it = (t == 0)
@@ -263,7 +265,7 @@ class Solver:
                 self.val_acc_history.append(val_acc)
                 self._save_checkpoint()
 
-                if self.verbose:
+                if self.verbose and (self.epoch % self.print_every_epoch == 0):
                     print('(Epoch {}/{}) train acc: {}; val_acc: {}'.format(
                            self.epoch, self.num_epochs, train_acc, val_acc))
 

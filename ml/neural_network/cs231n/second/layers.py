@@ -179,7 +179,7 @@ def softmax_loss(x, y, debug=False):
     
     
     
-def batchnorm_forward(x, gamma, beta, bn_param):
+def batchnorm_forward(X, gamma, beta, bn_param, debug=False):
     """
     Forward pass for batch normalization.
 
@@ -193,7 +193,7 @@ def batchnorm_forward(x, gamma, beta, bn_param):
     an exponential decay based on the momentum parameter:
 
     running_mean = momentum * running_mean + (1 - momentum) * sample_mean
-    running_var = momentum * running_var + (1 - momentum) * sample_var
+    running_var  = momentum * running_var  + (1 - momentum) * sample_var
 
     Note that the batch normalization paper suggests a different test-time
     behavior: they compute sample mean and variance for each feature using a
@@ -218,56 +218,44 @@ def batchnorm_forward(x, gamma, beta, bn_param):
     - cache: A tuple of values needed in the backward pass
     """
     mode = bn_param['mode']
-    eps = bn_param.get('eps', 1e-5)
+    eps  = bn_param.get('eps', 1e-5)
     momentum = bn_param.get('momentum', 0.9)
 
-    N, D = x.shape
-    running_mean = bn_param.get('running_mean', np.zeros(D, dtype=x.dtype))
-    running_var = bn_param.get('running_var', np.zeros(D, dtype=x.dtype))
+    N, D = X.shape
+    running_mean = bn_param.get('running_mean', np.zeros(D, dtype=X.dtype))
+    running_var = bn_param.get('running_var', np.zeros(D, dtype=X.dtype))
 
+    if debug:
+        assert isinstance(gamma, np.ndarray)
+        assert isinstance(beta, np.ndarray)
     out, cache = None, None
     if mode == 'train':
-        #######################################################################
-        # TODO: Implement the training-time forward pass for batch norm.      #
-        # Use minibatch statistics to compute the mean and variance, use      #
-        # these statistics to normalize the incoming data, and scale and      #
-        # shift the normalized data using gamma and beta.                     #
-        #                                                                     #
-        # You should store the output in the variable out. Any intermediates  #
-        # that you need for the backward pass should be stored in the cache   #
-        # variable.                                                           #
-        #                                                                     #
-        # You should also use your computed sample mean and variance together #
-        # with the momentum variable to update the running mean and running   #
-        # variance, storing your result in the running_mean and running_var   #
-        # variables.                                                          #
-        #######################################################################
-        pass
-        #######################################################################
-        #                           END OF YOUR CODE                          #
-        #######################################################################
+        sample_mean = np.mean(X, axis=0)
+        sample_var = np.var(X, axis=0)
+        running_mean = momentum * running_mean + (1 - momentum) * sample_mean
+        running_var = momentum * running_var + (1 - momentum) * sample_var
+        
+        X_norm = (X - sample_mean[None, :]) / (np.sqrt(sample_var)[None, :] + eps)
+        out = gamma[None, :] * X_norm + beta[None, :]
+        cache = X, X_norm, sample_mean, sample_var, gamma, beta, eps
+        if debug:
+            assert isinstance(X_norm, np.ndarray)
+            assert isinstance(sample_var, np.ndarray)
     elif mode == 'test':
-        #######################################################################
-        # TODO: Implement the test-time forward pass for batch normalization. #
-        # Use the running mean and variance to normalize the incoming data,   #
-        # then scale and shift the normalized data using gamma and beta.      #
-        # Store the result in the out variable.                               #
-        #######################################################################
-        pass
-        #######################################################################
-        #                          END OF YOUR CODE                           #
-        #######################################################################
+        out = gamma[None, :] * ((X - running_mean[None, :]) / (np.sqrt(running_var[None, :]) + eps)) + beta[None, :]
     else:
         raise ValueError('Invalid forward batchnorm mode "%s"' % mode)
 
     # Store the updated running means back into bn_param
     bn_param['running_mean'] = running_mean
     bn_param['running_var'] = running_var
+    if debug:
+        assert isinstance(out, np.ndarray)
 
     return out, cache
 
 
-def batchnorm_backward(dout, cache):
+def batchnorm_backward(dout, cache, debug=False):
     """
     Backward pass for batch normalization.
 
@@ -285,15 +273,41 @@ def batchnorm_backward(dout, cache):
     - dbeta: Gradient with respect to shift parameter beta, of shape (D,)
     """
     dx, dgamma, dbeta = None, None, None
-    ###########################################################################
-    # TODO: Implement the backward pass for batch normalization. Store the    #
-    # results in the dx, dgamma, and dbeta variables.                         #
-    ###########################################################################
-    pass
-    ###########################################################################
-    #                             END OF YOUR CODE                            #
-    ###########################################################################
+    X, X_norm, mean, var, gamma, beta, eps = cache
+    B, D = dout.shape
+    assert dout.ndim == 2
+    assert dout.shape == X_norm.shape
+    
+    std_inv = 1.0 / (np.sqrt(var) + eps)
+    X_mu = X - mean[None, :]
+    
+    dLY = dout
+    assert dLY.shape == (B, D)
 
+    dLZ = np.multiply(gamma[None, :], dLY) # B x D
+    assert dLZ.shape == (B, D)
+
+    dLsigma2 = -0.5 * std_inv**3 * np.sum(np.multiply(X_mu, dLZ), axis=0)
+    assert dLsigma2.shape == (D, )
+
+    dLmu = -np.sum(dLZ * std_inv[None, :], axis=0) - (dLsigma2 * np.mean(2 * X_mu, axis=0))
+    assert dLmu.shape == (D, )
+
+    dgamma = np.sum(np.multiply(X_norm, dLY), axis=0)
+    assert dgamma.shape == (D, )
+
+    dbeta = np.sum(dLY, 0)
+    assert dbeta.shape == (D, )
+
+    dx = dLZ * std_inv[None, :] + 2.0 * dLsigma2[None, :] * X_mu / B + (1.0 / B) * dLmu[None, :]
+
+    if debug:
+        assert isinstance(dgamma, np.ndarray)
+        assert isinstance(dbeta, np.ndarray)
+        assert isinstance(dx, np.ndarray)
+        assert dgamma.shape == (D,)
+        assert dbeta.shape == (D,)
+        assert dx.shape == (B, D)
     return dx, dgamma, dbeta
 
 
