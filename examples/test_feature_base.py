@@ -1,10 +1,16 @@
+# -*- coding: utf-8 -*-
+
 import numpy as np
 import unittest
 import numbers
 import copy
 from scipy.sparse import csr_matrix, csc_matrix
 from collections import Counter
-from ml.features import FeatureBase
+    
+import sys
+sys.path.append('../')
+from ml.feature import FeatureBase
+        
         
 class TestFeatureBase(unittest.TestCase):
     def setUp(self):

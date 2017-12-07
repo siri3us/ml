@@ -8,15 +8,26 @@ from scipy.sparse import csr_matrix, csc_matrix
 from collections import Counter
 from ..core.helpers import Checker, Printer
       
+FEATURE_PREFIXES = \
+{'CAT': '',
+ 'NUM': '',
+ 'LE' : '',    # LabelEncoded feature
+ 'OHE': 'Ohe', # OneHotEncoded feature
+ 'CTR': 'Ctr', # Counter feature
+ 'LOO': 'Loo', # LeaveOneOut feature
+ 'FIL': 'Fil'}
+      
 class FeatureKernel:
     """
-    FeatureKernel - класс, реализующий базовые операции, класса FeatureBase. 
-    Данные операции включают в себя: 
+    FeatureKernel - класс, реализующий общий функционал класса FeatureBase. 
+    Является одним из аттрибутов экземпляров класса FeatureBase (SparseFeatureBase и DenseFeatureBase).
+    Реализуемые операции включают в себя: 
         1) проверку корректности значений признака 
         2) вывод сообщений о некорректности значений
         3) предобработку и постобработку признаков
         4) получение характеристик признаков (размера, формата и т.п.)
     """
+    
     def __init__(self, owner):
         self._owner = owner
         self._printers = owner._printers
@@ -27,21 +38,22 @@ class FeatureKernel:
         
     def _is_numeric(self, values, name=None):
         """
-        Возвращает True, если тип признак числовой. Используется только в конструкторе NumericalFeature.
+        Возвращает True, если тип признак числовой. Иначе возвращает False. 
+        Данная проверка производится только в конструкторе NumericalFeature.
         Аргументы:
-            :param values - значения признака (np.ndarray, csr_matrix, csc_matrix)
-            :param name   - имя признака (str)
+            :param values - значения признака (np.ndarray, csr_matrix, csc_matrix).
+            :param name   - имя признака (str).
         """
         return isinstance(values.dtype.type(), numbers.Number)
     
     def _check_numeric(self, values, name=None, throw=True):
         """
         Возвращает True, если тип признак числовой. Иначе возвращает False или вызывает исключение
-        (в зависимости от параметра throw) .
+        (в зависимости от параметра throw).
         Аргументы:
-            :param values - значения признака (np.ndarray, csr_matrix, csc_matrix)
-            :param name   - имя признака (str)
-            :param throw  - если True, то вызывает исключение, если признак не числовой (bool)
+            :param values - значения признака (np.ndarray, csr_matrix, csc_matrix).
+            :param name   - имя признака (str).
+            :param throw  - если True, то вызывает исключение, если признак не числовой (bool).
         """
         if not self._is_numeric(values):
             if throw:
@@ -52,10 +64,10 @@ class FeatureKernel:
     
     def _is_constant(self, values, name=None):
         """
-        Проверяет значения признака на константность. 
+        Если значения признака идентичны для всех объектов, то возвращает True. В противном случае возвращает False. 
         Аргументы:
-            :param values - значения признака в виде np.ndarray
-            :param name   - имя признака (str)
+            :param values - значения признака в виде np.ndarray.
+            :param name   - имя признака (str).
         """
         assert isinstance(values, np.ndarray)
         counter = Counter()
@@ -68,11 +80,11 @@ class FeatureKernel:
     def _check_constant(self, values, name=None, throw=True):
         """
         Возвращает True, если значения признака идентичны для всех объетов. Иначе возращает False или 
-        вызывает исключение (в зависимости от параметра throw)
+        вызывает исключение (в зависимости от параметра throw).
         Аргументы:
-            :param values - значения признака (np.ndarray, csr_matrix, csc_matrix)
-            :param name   - имя признака (str)
-            :param throw  - если True, то вызывает исключение, если признак не константный (bool)
+            :param values - значения признака (np.ndarray, csr_matrix, csc_matrix).
+            :param name   - имя признака (str).
+            :param throw  - если True, то вызывает исключение, если признак не константный (bool).
         """
         if self._is_constant(values):
             if throw:
@@ -81,7 +93,7 @@ class FeatureKernel:
         return True
     
     def _is_shaped(self, values, name=None):
-        self._undefined_method('_is_shapd')
+        self._undefined_method('_is_shaped')
     def _check_shaped(self, values, name=None, throw=True):
         self._undefined_method('_check_shaped')
     
@@ -98,11 +110,23 @@ class FeatureKernel:
         self._undefined_method('_preprocess')
         
     def _undefined_method(self, method_name):
-        error_msg = 'Method "{}" of the abstract class "{}"'\
-            'must be redefined in derivative classes.'.format(method_name, type(self).__name__)
+        error_msg = 'Method "{}" of the abstract class "{}" must be redefined in derivative classes.'.format(method_name, type(self).__name__)
         assert False, error_msg
 
+
 class SparseFeatureKernel(FeatureKernel):
+    """
+    Данный класс реализует базовые операции для работы с разряженными столбцами признаков. Наследник класса FeatureKernel.
+    Переопределенные методы класса FeatureKernel:
+        _is_shaped    - проверка размерности.
+        _check_shaped - проверка размерности.
+        _is_constant  - проверка константности.
+        _preprocess   - преобразование входных данных к внутреннему формату хранения.
+        _get_length   - возвращает количество объектов
+        _get_values   - возвращает значения признаков в разряженном (csc_matrix) или плотном (np.ndarray) формате
+        _get_dense    - возвращает DenseFeatureBase
+        _get_sparse   - возвращает SparseFeatureBase
+    """
     def __init__(self, owner):
         super().__init__(owner)
 
@@ -112,8 +136,7 @@ class SparseFeatureKernel(FeatureKernel):
     def _check_shaped(self, values, name=None, throw=True):
         if not self._is_shaped(values, name):
             if throw:
-                error_msg = "Given sparse feature vector must have shape of type (1, size), but has {}".format(
-                    values.shape)
+                error_msg = "Given sparse feature vector must have shape of type (1, size), but has {}".format(values.shape)
                 raise ValueError(self._error_msg(error_msg))
             return False
         return True
@@ -125,23 +148,26 @@ class SparseFeatureKernel(FeatureKernel):
     
     ########################################################################
     def _preprocess(self, values, name):
+        """
+        Данный метод преобразует входной разряженный формат хранения в csr_matrix размера [1, n_samples].
+        Аргументы:
+            :param values - значения признака (csr_matrix, csc_matrix).
+            :param name   - имя признака (str).
+        """
         self._printers[self._owner.METHODS](self._method_msg('_preprocess'))
         assert isinstance(values, (csr_matrix, csc_matrix))
         init_shape = values.shape
-        if len(init_shape) != 2:
-            error_msg = "Feature \"{}\" has shape {} but must have a shape of length 2.".format(
-                name, init_shape)
+        if values.ndim != 2:
+            error_msg = "Feature \"{}\" has shape {} but must have a shape of length 2.".format(name, init_shape)
             raise ValueError(self._error_msg(error_msg))
         if (init_shape[0] == 1) & (init_shape[1] > 1):
             new_values = values.tocsr() 
         elif (init_shape[0] > 1) & (init_shape[1] == 1):
             new_values = values.transpose().tocsr()
         else:
-            error_msg = "Feature \"{}\" has incorrect shape {}. Must be either (1, n) or (n, 1)".format(
-                name, shape, tuple(reversed(shape)))
+            error_msg = "Feature \"{}\" has incorrect shape {}. Must be either (1, n) or (n, 1)".format(name, shape, tuple(reversed(shape)))
             raise ValueError(self._error_msg(error_msg))
-        info_msg = "Feature \"{}\" is transformed from shape {} to csr_matrix of shape {}".format(
-            name, init_shape, new_values.shape)
+        info_msg = "Feature \"{}\" is transformed from shape {} to csr_matrix of shape {}".format(name, init_shape, new_values.shape)
         self._printers[self._owner.FORMAT_CHANGE_LEVEL](self._info_msg(info_msg))
         info_msg = '_preprocess returns {}'.format(type(new_values))
         self._printers[self._owner.METHODS](self._info_msg(info_msg))
@@ -149,8 +175,17 @@ class SparseFeatureKernel(FeatureKernel):
     
     ########################################################################
     def _get_length(self):
+        """
+        Возвращает количество объектов.
+        """
         return self._owner._values.shape[1]
     def _get_values(self, sparse=True, *args, **kwargs):
+        """
+        Возвращает значения признака в форме np.ndarray или csc_matrix.
+        Аргументы:
+            :param sparse - если True, то возвращает признаки в виде csc_matrix размера [n_samples, 1];
+                            иначе возвращает np.ndarray размера [n_samples, 1].
+        """
         if sparse:
             return self._owner._values.transpose().tocsc()
         else:
@@ -168,6 +203,17 @@ class SparseFeatureKernel(FeatureKernel):
 
 
 class DenseFeatureKernel(FeatureKernel):
+    """
+    Данный класс реализует базовые операции для работы с плотными столбцами признаков. Наследник класса FeatureKernel.
+    Переопределенные методы класса FeatureKernel:
+        _is_shaped    - проверка размерности.
+        _check_shaped - проверка размерности.
+        _preprocess   - преобразование входных данных к внутреннему формату хранения.
+        _get_length   - возвращает количество объектов
+        _get_values   - возвращает значения признаков в разряженном (csc_matrix) или плотном (np.ndarray) формате
+        _get_dense    - возвращает DenseFeatureBase
+        _get_sparse   - возвращает SparseFeatureBase
+    """
     def __init__(self, owner):
         super().__init__(owner)
         
@@ -325,19 +371,19 @@ class FeatureBase(Checker):
     
     ########################################################################
     def _get_categorical_name(self, name):
-        return self.CAT_PREFIX + name
+        return FEATURE_PREFIXES['CAT'] + name
     def _get_numerical_name(self, name):
-        return self.NUM_PREFIX + name
+        return FEATURE_PREFIXES['NUM'] + name
     def _get_counter_name(self, name):
-        return self.CTR_PREFIX + name
+        return FEATURE_PREFIXES['CTR'] + name
     def _get_loo_name(self, name):
-        return self.LOO_PREFIX + name
+        return FEATURE_PREFIXES['LOO'] + name
     def _get_filtered_name(self, name, threshold):
-        return self.FIL_PREFIX + '{}_'.format(threshold) + name
+        return FEATURE_PREFIXES['FIL'] + '{}_'.format(threshold) + name
     def _get_label_encoded_name(self, name):
-        return self.LE_PREFIX + name
+        return FEATURE_PREFIXES['LE'] + name
     def _get_ohe_name(self, name):
-        return self.OHE_PREFIX + name
+        return FEATURE_PREFIXES['OHE'] + name
 
     ########################################################################
     def to_dense(self):
@@ -355,9 +401,9 @@ class FeatureBase(Checker):
     ########################################################################
     def deepcopy(self):
         """
-        Функция глубокого копирования объекта. При необходимости копирования должна вызываться ТОЛЬКО она.
+        Выполняет глубокое копирования объекта. При необходимости копирования должна вызываться ТОЛЬКО она.
         Функция copy.deepcopy выполняет некорректное копирование из-за переопределения операции работы с атрибутами
-        в классе FeatureBase/
+        в классе FeatureBase.
         """
         return FeatureBase(copy.deepcopy(self._values), self._name, self._verbose)    
     
