@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-import unittest
+import pandas as pd
 import numbers
 import copy
 from scipy.sparse import csr_matrix, csc_matrix
 from collections import Counter
+from .exceptions import UnknownFeatureError
 from ..core.helpers import Checker, Printer
       
 FEATURE_PREFIXES = \
@@ -88,7 +89,7 @@ class FeatureKernel:
         """
         if self._is_constant(values):
             if throw:
-                raise ValueError(self._error_msg("Given feature {} is constant".format(name)))
+                raise ConsantFeatureError(name, type(self).__name__)
             return False
         return True
     
@@ -364,11 +365,31 @@ class FeatureBase(Checker):
         assert False, 'Setting "shape" is not allowed'
     def get_name(self):
         return self._name
-    def get_values(self, *args, **kwargs):
-        return self._kernel._get_values(*args, **kwargs)
     def get_shape(self):
         return self._shape
     
+    # Функции для получения значений в различных форматах
+    def get_values(self, *args, **kwargs):
+        return self._kernel._get_values(*args, **kwargs)
+    def get_array(self):
+        return self.get_values(sparse=False)
+    def get_csc_matrix(self):
+        return self.get_values(sparse=True)
+    def get_data_frame(self):
+        values = self.get_values(sparse=False).flatten()
+        return pd.DataFrame({self.get_name(): values})
+    def get_series(self):
+        values = self.get_values(sparse=False)
+        return pd.Series(values.flatten(), name=self.get_name())
+    def as_data_frame(self):
+        return self.get_data_frame()
+    def as_series(self):
+        return self.get_series()
+    def as_array(self):
+        return self.get_array()
+    def as_csc_matrix(self):
+        return self.get_csc_matrix()
+        
     ########################################################################
     def _get_categorical_name(self, name):
         return FEATURE_PREFIXES['CAT'] + name

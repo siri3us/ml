@@ -423,7 +423,7 @@ class CategoricalFeature(FeatureBase):
         feature_values = []
         for label in sorted(self._label2cat.keys()):
             if label != unique_label:
-                feature_names.append(self._label2cat[label])
+                feature_names.append(str(self._label2cat[label]))
                 feature_values.append(ohe_values[:, label])
         features = [NumericalFeature(fvalues, fname) for fvalues, fname in zip(feature_values, feature_names)]
         from .aggregated_feature import AggregatedFeature

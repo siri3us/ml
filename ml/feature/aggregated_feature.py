@@ -4,6 +4,8 @@ import numpy as np
 import pandas as pd
 import scipy
 from collections import defaultdict, Counter, OrderedDict
+
+from .feature_base import FeatureBase
 from .exceptions import *
 from ..core.helpers import Checker, Printer
 

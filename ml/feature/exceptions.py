@@ -2,29 +2,61 @@
 
 import numpy as np
 import collections
-from .feature_base import FeatureBase
+
+class FeatureShapeError(Exception):
+    def __init__(self, fname, shape, exp_shape, calee=None):
+        super().__init__()
+        self.fname = fname; self.shape = shape; self.exp_shape = exp_shape; self.calee = calee
+        self.str = 'Feature "{}" has shape {} while expected {}.'.format(fname, shape, exp_shape)
+        if calee is not None:
+           self.str = type(calee).__name__ + ': ' + self.str
+    def __str__(self):
+        return self.str
+    def message(self):
+        return self.str
+
+
+class FeatureLengthError(Exception):
+    def __init__(self, fname, length, exp_length, calee=None):
+        super().__init__()
+        self.fname = fname; self.length = length; self.exp_length = exp_length; self.calee = calee
+        self.str = 'Feature "{}" has length {} while expected {}.'.format(fname, length, exp_length)
+        if calee is not None:
+           self.str = type(calee).__name__ + ': ' + self.str
+    def __str__(self):
+        return self.str
+    def message(self):
+        return self.str
 
 
 class UnknownFeatureError(Exception):
-    def __init__(self, fname, cname):
+    def __init__(self, fname, calee=None):
         super().__init__()
-        assert isinstance(feature, FeatureBase)
-        self.str = 'Class "{}" does not contain feature "{}".'.format(cname, fname)
+        self.str = 'Unknown feature "{}".'.format(cname)
+        if calee is not None:
+            self.str = type(calee).__name__ + ': ' + self.str 
     def __str__(self):
         return self.str
     def message(self):
         return self.str
     
 class ConstantFeatureError(Exception):
-    def __init__(self, fname, cname=None):
+    def __init__(self, fname, calee=None):
         super().__init__()
-        assert isinstance(feature, FeatureBase)
         self.str = 'Feature "{}" is constant'.format(fname)
-        if isinstance(cname, str):
-            self.str += ': not allowed in an instance of class "{}".'.format(cname)
-        else:
-            self.str += '.'
+        if calee is not None:
+            self.str += type(calee).__name__ + ': ' + self.str
     def __str__(self):
         return self.str
     def message(self):
         return self.str
+        
+class NumericalFeatureError(Exception):
+    def __init__(self, fname, cname=None):
+        super().__init__()
+    def __str__(self):
+        return self.str
+    def message(self):
+        return self.str
+        
+        

@@ -33,16 +33,16 @@ class Checker(Printer):
             self._printers[v] = Printer(v, self)
     def _check_type(self, n, name, *types):
         if not isinstance(n, tuple(types)):
-            raise TypeError('Param \"{}\" must have one of the types \"{}\"'.format(name, *types))
+            raise TypeError('Param "{}" must have one of the types "{}", not "{}".'.format(name, *types, type(n)))
         return True
     def _check_numeric(self, n, name):
         if not isinstance(n, numbers.Number):
-            raise TypeError("Param \"{}\" must be a number".format(name))
+            raise TypeError('Param "{}" must be a number'.format(name))
         return True 
     def _check_int(self, n, name):
         self._check_numeric(n, name)
         if not n == int(n):
-            raise TypeError("Param \"{}\" must be an integer number".format(name))
+            raise TypeError('Param "{}" must be an integer number'.format(name))
         return True
     def _check_positive(self, n, name):
         self._check_numeric(n, name)

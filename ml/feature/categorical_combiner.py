@@ -10,8 +10,8 @@ from .categorical_feature import CategoricalFeature
 
 class CategoricalCombiner(Checker):
     """
-    get_all_combinations
-    get_combined_feature
+    get_all_combinations(features, degree, hash) - создает комбинированные признаки
+    get_combined_feature(features, hash) - создает комбинированный признак из принаков features
     """
     METHOD = 4
     def __init__(self, treat_const='none', verbose=0):
@@ -60,9 +60,11 @@ class CategoricalCombiner(Checker):
         Возвращает всевозможные комбинации степени degree из признаков 
         Константные признаки согласно политике treat_const
         Аргументы:
-            :param features - признаки для комбинирования; все должны быть CategoricalFeature
+            :param features - признаки для комбинирования; все должны быть CategoricalFeature; list, np.ndarray, dict
             :param degree   - степень комбинаций; каждый новый признак - это комбинация degree признаков
             :param hash     - функция превращения комбинации признаков в значение нового признака
+        Возвращает:
+            Возвращает OrderedDict с парами (имя признака, признак)
         """
 
         _features = self._preprocess_features(features)
