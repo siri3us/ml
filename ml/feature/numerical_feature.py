@@ -6,8 +6,6 @@ import copy
 import numbers
 from scipy.sparse import csc_matrix, csr_matrix
 from .feature_base import FeatureBase
-from .categorical_feature import CategoricalFeature
-
 
 class NumericalFeature(FeatureBase):
     def __init__(self, values, name, verbose=0):
@@ -30,5 +28,6 @@ class NumericalFeature(FeatureBase):
             values = self._values
         cat_values = np.array(pd.cut(values, bins, right=right))
         cat_name = self._get_categorical_name(self._name)
-        return CategorialFeature(cat_values, cat_name)
+        from .categorical_feature import CategoricalFeature
+        return CategoricalFeature(cat_values, cat_name)
 

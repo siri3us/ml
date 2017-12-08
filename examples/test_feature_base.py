@@ -119,3 +119,32 @@ class TestFeatureBase(unittest.TestCase):
             
 if __name__ == '__main__':
     unittest.main()
+    
+    
+for sparse in [True, False]:
+    values = [0, 1, 0, 0, 0, 1, 1.1, 1, 0, 4, 1, 7, 0, 0, 0]
+    values = np.array(values)
+    if sparse:
+        values = csc_matrix(values)
+        values.eliminate_zeros()
+    name = 'f'
+    feature = FeatureBase(values, name)
+
+    fvalues = feature.values
+    _fvalues = feature._values
+    if sparse:
+        print('SPARSE =', sparse)
+        print('str(feature) =', feature)
+        print('feature.values.shape = {}\nfeature.values = {}'.format(fvalues.shape, fvalues.tocsr()))
+        print('feature._values.shape = {}\nfeature._values = {}'.format(_fvalues.shape, _fvalues.tocsr()))
+        print('[Dense ]:', feature.get_values(sparse=False).flatten())
+        print('[Sparse]:', feature.get_values(sparse=True).tocsr())
+    else:
+        print('\n\n\nSPARSE =', sparse)
+        print('str(feature) =', feature)
+        print('feature.values.shape = {}\nfeature.values = {}'.format(fvalues.shape, fvalues.flatten()))
+        print('feature._values.shape = {}\nfeature._values = {}'.format(_fvalues.shape, _fvalues.flatten()))
+        print('[Dense ]:', feature.get_values(sparse=False).flatten())
+        print('[Sparse]:', feature.get_values(sparse=True).tocsr())
+    print('feature.shape = {}, feature.name = {}'.format(feature.shape, feature.name))
+    print('is_numeric = ', feature.is_numeric())

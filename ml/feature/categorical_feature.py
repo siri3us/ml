@@ -1,20 +1,32 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-import unittest
 import copy
 import numbers
-from collections import defaultdict
+from collections import defaultdict, OrderedDict, Counter
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 from sklearn.model_selection import StratifiedKFold, KFold, train_test_split
 from itertools import product, chain
 
 from .feature_base import *
 
+
+
 class CategoricalFeature(FeatureBase):
     """
     Класс для хранения категориальных признаков. На данный момент доступна только реализация с 
     dense хранением данных. 
+    
+    Список методов:
+        deepcopy
+        set_label2cat
+        set_cat2label
+        get_cat_values
+        get_filter_feature
+        get_counter_feature
+        get_loo_feature
+        get_le_feature
+        get_ohe_feature
     """
     ################################################################################### 
 
@@ -121,12 +133,11 @@ class CategoricalFeature(FeatureBase):
             self._printers[self.CAT_FEATURE_INIT](msg_init + ': feature "{}" is already label encoded'.format(name))
         else:
             self._printers[self.CAT_FEATURE_INIT](msg_init + ': label encoding feature "{}"'.format(name))
-        self._label_encode()
-  
         # These values are used for filtering rare values
         self._threshold = None
         self._unique_label = None
-    
+        self._label_encode()
+
         assert self._properties['is_label_encoded'], 'By the end of constructor feature "{}" is not label encoded. Something is wrong.'.format(self.name)
         assert self._properties['is_numeric'], 'By the end of the constructor feature "{}" is not numeric. Something is wrong'.format(self.name)
         
@@ -249,6 +260,7 @@ class CategoricalFeature(FeatureBase):
         for n, value in enumerate(self._values):
             new_values[n] = counts[value]
         new_name = self._get_counter_name(self._name)
+        from .numerical_feature import NumericalFeature
         return NumericalFeature(new_values, new_name)
 
     def get_loo_feature(self, Y_train, cv, alpha=0.01, seed=1234, scale=0.01):
@@ -294,6 +306,7 @@ class CategoricalFeature(FeatureBase):
         else:
             X_new = X_new_train * multipliers
         new_name = self._get_loo_name(self._name)
+        from .numerical_feature import NumericalFeature
         return NumericalFeature(X_new, new_name)
         
     ############################################################
@@ -369,6 +382,7 @@ class CategoricalFeature(FeatureBase):
         ohe_name = self._get_ohe_name(self._name)
         counter = Counter(self._values)
         
+        from .numerical_feature import NumericalFeature
         if self._properties['is_constant']:
             # No sense of OHE for constant feature
             assert np.sum(self._values) == 0
@@ -412,9 +426,9 @@ class CategoricalFeature(FeatureBase):
                 feature_names.append(self._label2cat[label])
                 feature_values.append(ohe_values[:, label])
         features = [NumericalFeature(fvalues, fname) for fvalues, fname in zip(feature_values, feature_names)]
+        from .aggregated_feature import AggregatedFeature
         return AggregatedFeature(features, ohe_name, verbose=self._verbose, copy=False)
         
     def get_properties(self):
         return copy.deepcopy(self._properties)
-        
 
