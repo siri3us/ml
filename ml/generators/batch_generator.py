@@ -1,21 +1,24 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-import random
+from ..core import Checker
 
-class BatchGenerator:
-    # TODO inherit from Checker
-    def __init__(self, *arrays, batch_size=128, 
-                 shuffle=True, infinite=False, fixed_batch_size=False,
+class BatchGenerator(Checker):
+    def __init__(self, *arrays, 
+                 batch_size=128, 
+                 shuffle=True, 
+                 infinite=False, 
+                 fixed_batch_size=False,
                  random_state=0):
         """
         Arguments:
             arrays           - 
             batch_size       - batch size
-            shuffle          - if True, data is shuffled
+            shuffle          - if True, data is shuffled before passing
             infinite         - if True, generation never ends (no StopIteration rised)
-            fixed_batch_size - if True, only batches of batch_size samples are returned 
-            random_state     - random state
+            fixed_batch_size - if True, only batches of batch_size samples are returned; in situations when array_size is not a multiple of batch_size,
+                (array_size % batch_size) samples are not returned during passing through arrays.
+            random_state     - seed used to initialize an internal random generator
         """
         # Setting and checking arrays
         self.arrays = list(arrays)
@@ -47,15 +50,17 @@ class BatchGenerator:
         return self
     
     def __next__(self):
-        if self.curr_pos >= self.n_samples:
+        if self.curr_pos >= self.n_samples: # in case of inifinite generation this condition is never satisfied (see below)
             raise StopIteration
 
+        # Obtaining next batches over arrays
         batches = []
         self.next_pos = min(self.curr_pos + self.batch_size, self.n_samples)
         for array in self.arrays:
             batches.append(array[self.indices[self.curr_pos : self.next_pos]])
         self.curr_pos = self.next_pos
 
+        # Calculating next batch size
         next_batch_size = min(self.curr_pos + self.batch_size, self.n_samples) - self.curr_pos  
         if self.fixed_batch_size:
             if next_batch_size < self.batch_size:
@@ -68,6 +73,6 @@ class BatchGenerator:
                 if next_batch_size == 0:
                     self.restart()
                     
-        if len(batches) == 1:
+        if len(batches) == 1: # There is only one array passed to the generator
             return batches[0]
         return batches

@@ -360,34 +360,22 @@ def dropout_forward(x, dropout_param):
     - cache: tuple (dropout_param, mask). In training mode, mask is the dropout
       mask that was used to multiply the input; in test mode, mask is None.
     """
-    p, mode = dropout_param['p'], dropout_param['mode']
-    if 'seed' in dropout_param:
-        np.random.seed(dropout_param['seed'])
-
+    p = dropout_param['p']
+    mode = dropout_param['mode']
+    gen = dropout_param['gen']
+    seed = dropout_param.get('seed', None)
+    if seed is not None:
+        gen.seed(seed)
     mask = None
     out = None
 
     if mode == 'train':
-        #######################################################################
-        # TODO: Implement training phase forward pass for inverted dropout.   #
-        # Store the dropout mask in the mask variable.                        #
-        #######################################################################
-        pass
-        #######################################################################
-        #                           END OF YOUR CODE                          #
-        #######################################################################
+        mask = gen.choice([0., 1.], size=x.shape, p=[p, 1 - p])
+        out = np.multiply(x, mask)
     elif mode == 'test':
-        #######################################################################
-        # TODO: Implement the test phase forward pass for inverted dropout.   #
-        #######################################################################
-        pass
-        #######################################################################
-        #                            END OF YOUR CODE                         #
-        #######################################################################
-
+        out = (1 - p) * x
     cache = (dropout_param, mask)
     out = out.astype(x.dtype, copy=False)
-
     return out, cache
 
 
@@ -400,18 +388,12 @@ def dropout_backward(dout, cache):
     - cache: (dropout_param, mask) from dropout_forward.
     """
     dropout_param, mask = cache
+    p = dropout_param['mode']
     mode = dropout_param['mode']
 
     dx = None
     if mode == 'train':
-        #######################################################################
-        # TODO: Implement training phase backward pass for inverted dropout   #
-        #######################################################################
-        pass
-        #######################################################################
-        #                          END OF YOUR CODE                           #
-        #######################################################################
+        dx = np.multiply(mask, dout)
     elif mode == 'test':
-        dx = dout
+        dx = (1 - p) * dout
     return dx
-

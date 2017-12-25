@@ -77,20 +77,20 @@ class Solver:
           'y_val':   Array, shape (N_val,) of labels for validation images
 
         Optional arguments:
-        - update_rule: A string giving the name of an update rule in optim.py. Default is 'sgd'.
-        - optim_config: A dictionary containing hyperparameters that will be passed to the chosen update rule.
+        - update_rule:       A string giving the name of an update rule in optim.py. Default is 'sgd'.
+        - optim_config:      A dictionary containing hyperparameters that will be passed to the chosen update rule.
             Each update rule requires different hyperparameters (see optim.py) but all update rules require a
            'learning_rate' parameter so that should always be present.
-        - lr_decay: A scalar for learning rate decay; after each epoch the learning rate is multiplied by this value.
-        - batch_size: Size of minibatches used to compute loss and gradient during training.
-        - num_epochs: The number of epochs to run for during training.
-        - print_every_iter: Integer; training losses will be printed every print_every_iter iterations.
-        - print_every_epoch: Integer; training losses will be printed every print_every_epoch epochs.
-        - verbose: Boolean; if set to false then no output will be printed during training.
+        - lr_decay:          A scalar for learning rate decay; after each epoch the learning rate is multiplied by this value.
+        - batch_size:        Size of minibatches used to compute loss and gradient during training.
+        - num_epochs:        The number of epochs to run for during training.
+        - print_every_iter:  Integer; training losses will be printed every print_every_iter iterations; default is 1000000000.
+        - print_every_epoch: Integer; training losses will be printed every print_every_epoch epochs; default is 1000000000.
+        - verbose:           Boolean; if set to False then no output will be printed during training; default is False.
         - num_train_samples: Number of training samples used to check training accuracy; default is None, which uses the entire training set.
-        - num_val_samples: Number of validation samples to use to check val accuracy; default is None, which uses the entire validation set.
-        - seed: Used to initialize an internal random generator; default is 0.
-        - checkpoint_name: If not None, then save model checkpoints here every epoch.
+        - num_val_samples:   Number of validation samples to use to check val accuracy; default is None, which uses the entire validation set.
+        - seed:              Used to initialize an internal random generator; default is 0.
+        - checkpoint_name:   If not None, then save model checkpoints here every epoch.
         """
         self.model = model
         self.X_train = data['X_train']
@@ -106,12 +106,12 @@ class Solver:
         self.num_epochs   = kwargs.pop('num_epochs', 10)
         self.num_train_samples = kwargs.pop('num_train_samples', None)
         self.num_val_samples   = kwargs.pop('num_val_samples', None)
-        self.seed              = kwargs.pop('seed', 0)
-        self.gen = np.random.RandomState(self.seed)
+        self.seed = kwargs.pop('seed', 0)
+        self.gen  = np.random.RandomState(self.seed)
         
         self.checkpoint_name = kwargs.pop('checkpoint_name', None)
-        self.print_every_iter = kwargs.pop('print_every_iter', 10000000)
-        self.print_every_epoch = kwargs.pop('print_every_epoch', 10000000)
+        self.print_every_iter = kwargs.pop('print_every_iter', 1000000000)
+        self.print_every_epoch = kwargs.pop('print_every_epoch', 1000000000)
         self.verbose = kwargs.pop('verbose', False)
 
         # Throw an error if there are extra keyword arguments
@@ -135,15 +135,18 @@ class Solver:
         self.epoch = 0
         self.best_val_acc = 0
         self.best_params = {}
-        self.loss_history = []
-        self.train_acc_history = []
-        self.val_acc_history = []
+        self.train_loss_history = []
+        self.train_acc_history  = []
+        self.val_loss_history = []
+        self.val_acc_history  = []
 
         # Make a deep copy of the optim_config for each parameter
         self.optim_configs = {}
         for p in self.model.params:
             d = {k : v for k, v in self.optim_config.items()}
             self.optim_configs[p] = d
+
+    def _accuracy(self):
 
     def _step(self):
         """
@@ -157,7 +160,7 @@ class Solver:
 
         # Compute loss and gradient
         loss, grads = self.model.loss(X_batch, y_batch)
-        self.loss_history.append(loss)
+        self.train_loss_history.append(loss)
 
         # Perform a parameter update
         for p, w in self.model.params.items():
@@ -171,17 +174,18 @@ class Solver:
         if self.checkpoint_name is None:
             return
         checkpoint = {
-          'model':             self.model,
-          'update_rule':       self.update_rule,
-          'lr_decay':          self.lr_decay,
-          'optim_config':      self.optim_config,
-          'batch_size':        self.batch_size,
-          'num_train_samples': self.num_train_samples,
-          'num_val_samples':   self.num_val_samples,
-          'epoch':             self.epoch,
-          'loss_history':      self.loss_history,
-          'train_acc_history': self.train_acc_history,
-          'val_acc_history':   self.val_acc_history,
+          'model':              self.model,
+          'update_rule':        self.update_rule,
+          'lr_decay':           self.lr_decay,
+          'optim_config':       self.optim_config,
+          'batch_size':         self.batch_size,
+          'num_train_samples':  self.num_train_samples,
+          'num_val_samples':    self.num_val_samples,
+          'epoch':              self.epoch,
+          'train_loss_history': self.train_loss_history,
+          'train_acc_history':  self.train_acc_history,
+          'val_loss_history':   self.val_loss_history,
+          'val_acc_history':    self.val_acc_history,
         }
         filename = '{}_epoch_{}.pkl'.format(self.checkpoint_name, int(self.epoch))
         if self.verbose:
