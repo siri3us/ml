@@ -33,8 +33,8 @@ class Solver:
                     update_rule='sgd',
                     optim_config={
                       'learning_rate': 1e-3,
+                      'learning_rate_decay': 0.95,
                     },
-                    lr_decay=0.95,
                     num_epochs=10, batch_size=100,
                     print_every=100)
     solver.train()
@@ -81,7 +81,7 @@ class Solver:
         - optim_config:      A dictionary containing hyperparameters that will be passed to the chosen update rule.
             Each update rule requires different hyperparameters (see optim.py) but all update rules require a
            'learning_rate' parameter so that should always be present.
-        - lr_decay:          A scalar for learning rate decay; after each epoch the learning rate is multiplied by this value.
+           'learning_rate_decay': A scalar for learning rate decay; after each epoch the learning rate is multiplied by this value.
         - batch_size:        Size of minibatches used to compute loss and gradient during training.
         - num_epochs:        The number of epochs to run for during training.
         - print_every_iter:  Integer; training losses will be printed every print_every_iter iterations; default is 1000000000.
@@ -101,7 +101,6 @@ class Solver:
         # Unpack keyword arguments
         self.update_rule  = kwargs.pop('update_rule', 'sgd')
         self.optim_config = kwargs.pop('optim_config', {})
-        self.lr_decay     = kwargs.pop('lr_decay', 1.0)
         self.batch_size   = kwargs.pop('batch_size', 100)
         self.num_epochs   = kwargs.pop('num_epochs', 10)
         self.num_train_samples = kwargs.pop('num_train_samples', None)
@@ -109,8 +108,8 @@ class Solver:
         self.seed = kwargs.pop('seed', 0)
         self.gen  = np.random.RandomState(self.seed)
         
-        self.checkpoint_name = kwargs.pop('checkpoint_name', None)
-        self.print_every_iter = kwargs.pop('print_every_iter', 1000000000)
+        self.checkpoint_name   = kwargs.pop('checkpoint_name', None)
+        self.print_every_iter  = kwargs.pop('print_every_iter', 1000000000)
         self.print_every_epoch = kwargs.pop('print_every_epoch', 1000000000)
         self.verbose = kwargs.pop('verbose', False)
 
@@ -135,32 +134,36 @@ class Solver:
         self.epoch = 0
         self.best_val_acc = 0
         self.best_params = {}
+        self.loss_history = []
         self.train_loss_history = []
         self.train_acc_history  = []
-        self.val_loss_history = []
+        self.val_loss_history = []                  
         self.val_acc_history  = []
-
+        self.history = {'loss_history': self.loss_history,
+                        'train_loss_history': self.train_loss_history,
+                        'train_acc_history': self.train_acc_history,
+                        'val_loss_history': self.val_loss_history,
+                        'val_acc_history': self.val_acc_history}
+        
         # Make a deep copy of the optim_config for each parameter
         self.optim_configs = {}
         for p in self.model.params:
             d = {k : v for k, v in self.optim_config.items()}
             self.optim_configs[p] = d
 
-    def _accuracy(self):
-
     def _step(self):
         """
         Make a single gradient update. This is called by train() and should not be called manually.
         """
         # Make a minibatch of training data
-        num_train = self.X_train.shape[0]
+        num_train  = self.X_train.shape[0]
         batch_mask = self.gen.choice(num_train, self.batch_size)
         X_batch = self.X_train[batch_mask]
         y_batch = self.y_train[batch_mask]
 
         # Compute loss and gradient
         loss, grads = self.model.loss(X_batch, y_batch)
-        self.train_loss_history.append(loss)
+        self.loss_history.append(loss)
 
         # Perform a parameter update
         for p, w in self.model.params.items():
@@ -176,12 +179,12 @@ class Solver:
         checkpoint = {
           'model':              self.model,
           'update_rule':        self.update_rule,
-          'lr_decay':           self.lr_decay,
           'optim_config':       self.optim_config,
           'batch_size':         self.batch_size,
           'num_train_samples':  self.num_train_samples,
           'num_val_samples':    self.num_val_samples,
-          'epoch':              self.epoch,
+          'n_epoch':            self.n_epoch,
+          'loss_history':       self.loss_history,
           'train_loss_history': self.train_loss_history,
           'train_acc_history':  self.train_acc_history,
           'val_loss_history':   self.val_loss_history,
@@ -193,7 +196,7 @@ class Solver:
         with open(filename, 'wb') as f:
             pickle.dump(checkpoint, f)
 
-    def check_accuracy(self, X, y, num_samples=None, batch_size=100):
+    def eval(self, X, y, num_samples=None, batch_size=100, eval_func=None):
         """
         Check accuracy of the model on the provided data.
 
@@ -221,64 +224,95 @@ class Solver:
         num_batches = N // batch_size
         if N % batch_size != 0:
             num_batches += 1
-        y_pred = []
+        scores = []
         for i in range(num_batches):
             start = i * batch_size
-            end = (i + 1) * batch_size
-            scores = self.model.loss(X[start:end])
-            y_pred.append(np.argmax(scores, axis=1))
-        y_pred = np.hstack(y_pred)
-        acc = np.mean(y_pred == y)
-        return acc
+            end   = (i + 1) * batch_size
+            batch_scores = self.model.loss(X[start:end])
+            scores.append(batch_scores)
+        scores = np.vstack(scores)
+        return eval_func(scores, y)
 
+    def _logloss(self, scores, y_true):
+        n_samples = scores.shape[0]
+        y_pred = scores - np.max(scores, axis=1, keepdims=True)
+        y_pred = np.exp(y_pred)
+        y_pred /= np.sum(y_pred, axis=1, keepdims=True)
+        y_pred = np.clip(y_pred, 1e-18, 1 - 1e-18)
+        return -np.mean(np.log(y_pred[np.arange(n_samples), y_true]))
+        
+    def _accuracy(self, scores, y_true):
+        y_pred = np.argmax(scores, axis=1)
+        #print(y_pred.shape, y_true.shape)
+        return np.mean(y_pred == y_true)
+    
+    def _update_history(self):
+        train_acc  = self.eval(self.X_train, self.y_train, num_samples=self.num_train_samples,
+                              batch_size=self.batch_size,  eval_func=self._accuracy)
+        train_loss = self.eval(self.X_train, self.y_train, num_samples = self.num_train_samples,
+                              batch_size=self.batch_size,  eval_func=self._logloss)
+        
+        val_acc    = self.eval(self.X_val, self.y_val, num_samples=self.num_val_samples,
+                              batch_size=self.batch_size,  eval_func=self._accuracy)
+        val_loss   = self.eval(self.X_val, self.y_val, num_samples=self.num_val_samples,
+                               batch_size=self.batch_size, eval_func=self._logloss)
+
+        self.train_acc_history.append(train_acc)
+        self.val_acc_history.append(val_acc)
+        self.train_loss_history.append(train_loss)
+        self.val_loss_history.append(val_loss)
+    
     def train(self):
         """
         Run optimization to train the model.
         """
         num_train = self.X_train.shape[0]
-        iterations_per_epoch = max(num_train // self.batch_size, 1)
-        num_iterations = self.num_epochs * iterations_per_epoch
+        num_iter_per_epoch = int(np.ceil(float(num_train) / self.batch_size))
+        num_all_iterations = num_iter_per_epoch * self.num_epochs
+        if self.verbose:
+            print('num of epochs = {}\nnum of iterations = {}\niterations per epoch = {}'.format(
+                self.num_epochs, num_all_iterations, num_iter_per_epoch))
+        n_all_iter = 0
+        
+        self._update_history() # Initial model quality
+        for n_epoch in range(self.num_epochs):
+            self.n_epoch = n_epoch
+            for n_iter in range(num_iter_per_epoch):
+                self._step()
+                # Maybe print training loss
+                if self.verbose & ((n_all_iter + 1) % self.print_every_iter == 0):
+                    msg = '(Iteration {}/{}) loss: {}'.format(n_all_iter + 1, num_all_iterations, 
+                                                              self.loss_history[-1])
+                    print(msg)
+                n_all_iter += 1
 
-        for t in range(num_iterations):
-            self._step()
+            self._update_history()
+            
+            # Keep track of the best model
+            val_acc = self.val_acc_history[-1]
+            if val_acc > self.best_val_acc:
+                self.best_val_acc = val_acc
+                self.best_params  = {}
+                for k, v in self.model.params.items():
+                    self.best_params[k] = v.copy()
 
             # Maybe print training loss
-            if self.verbose and (t + 1) % self.print_every_iter == 0:
-                print('(Iteration {}/{}) loss: {}'.format(t + 1, num_iterations, self.loss_history[-1]))
-
-            # At the end of every epoch, increment the epoch counter and decay
-            # the learning rate.
-            epoch_end = (t + 1) % iterations_per_epoch == 0
-            if epoch_end:
-                self.epoch += 1
-                for k in self.optim_configs:
-                    self.optim_configs[k]['learning_rate'] *= self.lr_decay
+            if self.verbose & ((n_epoch + 1) % self.print_every_epoch == 0):
+                msg = '(Epoch {}/{}) train acc: {:.2}; val acc: {:.2}, train loss: {:.5}; val loss: {:.5}'.format(
+                    self.n_epoch + 1, self.num_epochs, 
+                    self.train_acc_history[-1],  self.val_acc_history[-1],
+                    self.train_loss_history[-1], self.val_loss_history[-1])
+                print(msg)
             
-            # Check train and val accuracy on the first iteration, the last
-            # iteration, and at the end of each epoch.
-            first_it = (t == 0)
-            last_it = (t == num_iterations - 1)
-            if first_it or last_it or epoch_end:
-                train_acc = self.check_accuracy(self.X_train, self.y_train, 
-                                                num_samples=self.num_train_samples,
-                                                batch_size=self.batch_size)
-                val_acc   = self.check_accuracy(self.X_val, self.y_val, 
-                                                num_samples=self.num_val_samples,
-                                                batch_size=self.batch_size)
-                self.train_acc_history.append(train_acc)
-                self.val_acc_history.append(val_acc)
-                self._save_checkpoint()
-
-                if self.verbose and (self.epoch % self.print_every_epoch == 0):
-                    print('(Epoch {}/{}) train acc: {}; val_acc: {}'.format(
-                           self.epoch, self.num_epochs, train_acc, val_acc))
-
-                # Keep track of the best model
-                if val_acc > self.best_val_acc:
-                    self.best_val_acc = val_acc
-                    self.best_params = {}
-                    for k, v in self.model.params.items():
-                        self.best_params[k] = v.copy()
+            # Save the model at the end of every epoch
+            self._save_checkpoint()
+            
+            # At the end of every epoch, increment the epoch counter and decay the learning rate.
+            for k in self.optim_configs:
+                optim_config = self.optim_configs[k]
+                lr_decay = optim_config.get('learning_rate_decay', 1.0)
+                optim_config['learning_rate'] *= lr_decay
 
         # At the end of training swap the best params into the model
         self.model.params = self.best_params
+        return self.model
