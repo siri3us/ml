@@ -107,25 +107,42 @@
 \subsection{Случай $\text{stride} = 1$}
 
 \begin{equation}
-\partder{\Loss}{\Input[c, h, w]}= \Sum_{(i, j) \in \FilterCoverageSet(h, w)} 
+\partder{\Loss}{\Input[c, h, w]}= \Sum_{(i, j) \in \AffectField(h, w)} 
 \partder{\Output[c, i, j]}{\Input[c, h, w]} \cdot \partder{\Loss}{\Output[c, i, j]}
 \end{equation}
 
+Введем вспомогательные термины. 
+
+\paragraph{Область действия.}
+Рассмотрим элемент $\Input[h, w]$ входа сверточного слоя ($h \in [0, H - 1]$, $w \in [0, W - 1]$). \textbf{Областью действия} $\AffectField(h, w)$ элемента $\Input[h, w]$ называется множество координат элементов матрицы $\Output$, которые зависят от элемента $I[h, w]$:
+\begin{equation}
+\AffectField(h, w) \triangleq \{(i, j)\colon i \in \AffectField(h), j\in \AffectField(w)\},
+\end{equation}
+где
 \begin{align}
-\FilterCoverageSet(h)& = \{i \colon \max\{0, h - \FilterSize[h]\} \le i \le \min\{h, H - \FilterSize[h]\}\}, \\
-\FilterCoverageSet(w)& = \{j \colon \min\{0, w - \FilterSize[w]\} \le j \le \max\{w, W - \FilterSize[w]\}\}.
+\AffectField(h)& = \{i \colon \max\{0, h - \FilterSize[h]\} \le i \le \min\{h, H - \FilterSize[h]\}\}, \\
+\AffectField(w)& = \{j \colon \min\{0, w - \FilterSize[w]\} \le j \le \max\{w, W - \FilterSize[w]\}\}.
 \end{align}
 
+\paragraph{Область восприимчивости.}
+Теперь рассмотрим элемент $\Output[i, j]$ выхода сверточного слоя ($i \in [0, H - \FilterSize_h]$, $j \in [0, W - \FilterSize_w]$). \textbf{Областью восприимчивости} $\ReceptiveField(h, w)$ элемента $\Output[i, j]$ называется множество координат элементов матрицы $\Input$, от которых зависит значение элемента $\Output[i, j]$:
 \begin{equation}
-\FilterCoverageSet(h, w) \triangleq \{(i, j)\colon i \in \FilterCoverageSet(h), j\in \FilterCoverageSet(w)\}.
+\label{eq:receptive_field}
+\ReceptiveField(i, j) = \{(h, w) \colon h \in \ReceptiveField(i), w \in \ReceptiveField(j)\},
 \end{equation}
+где
+\begin{align}
+\label{eq:receptive_field:add}
+\ReceptiveField(i) &= \{h \colon i \le h \le \min\{i + \FilterSize_h - 1, H - 1\}\}, \\
+\ReceptiveField(j) &= \{w \colon j \le w \le \min\{j + \FilterSize_w - 1, W - 1\}\}.
+\end{align}
 
 
 \begin{equation}
 \label{eq:conv:backprop:1}
-\partder{\Loss}{\Input[c, h, w]}= \Sum_{(i, j) \in \FilterCoverageSet(h, w)} 
+\partder{\Loss}{\Input[c, h, w]}= \Sum_{(i, j) \in \AffectField(h, w)} 
 \partder{\Output[c, i, j]}{\Input[c, h, w]} \cdot \partder{\Loss}{\Output[c, i, j]} = 
-\Sum_{(i, j) \in \FilterCoverageSet(h, w)} W[c, h - i, w - j] \partder{\Loss}{\Output[c, i, j]}
+\Sum_{(i, j) \in \AffectField(h, w)} W[c, h - i, w - j] \partder{\Loss}{\Output[c, i, j]}
 \end{equation}
 Уже здесь можно заметить, что нахождение производных по $\Input$ напоминает свертку производных по выходу $\partder{\Loss}{\Output}$
 с транспонированной (вдоль второго и третьего измерений) матрицей весов $W$.
@@ -150,11 +167,38 @@ W'[i, j] = W[c, \FilterSize[h] - 1 - i, \FilterSize[w] - 1 - j], \quad c \in [0,
 \end{equation}
 Фактически это эквивалентно тому, что матрица $\partder{\Loss}{\Output[c, i, j]}$ дополняется $\FilterSize[h] - 1$ вдоль второго измерения и $\FilterSize[w] - 1$ вдоль третьего измерения с каждой стороны. Полученная матрица имеет размер $(H + \FilterSize[h] - 1) \times (W + \FilterSize[w] - 1)$. 
 
-\subsection{Случай $\text{stride} = 2$}
+\subsection{Общий случай $\text{stride} \ge 1$}
+В данном случае размер матрицы $\Input$ как и ранее есть $H \times W$. В общем случае $\StrideSize_h \ge 1$ и/или $\StrideSize_w \ge 1$ для размеры $H' $ и $W'$ матрицы $\Output$ равны
+\begin{equation}
+H' = \frac{H - \FilterSize_h}{\StrideSize_h} + 1, \qquad W' = \frac{W - \FilterSize_w}{\StrideSize_w} + 1.
+\end{equation}
+Здесь как и ранее полагаем, что значения $H$, $W$, $\StrideSize$, $\FilterSize$ согласованы путем, например, предварительного дополнения входа сверточного слоя нулями, так что $H'$  и $W'$ --- целые числа.
+
+В данном случае требуется скорректировать ранее введенные области действия и восприимчивости.
+
+\paragraph{Область восприимчивости $\ReceptiveField(i, j)$}
+Рассмотрим элемент $\Output[i, j]$ ($i \in [0, H'- 1]$, $j \in [0, W' - 1]$). Этот элемент зависит элементов матрицы $\Input$, расположенных по следующим координатам $\{(h, w)\}$:
+\begin{gather*}
+h \in [i \cdot \StrideSize_h, i \cdot \StrideSize_h + \FilterSize_h - 1], \\
+w \in [j \cdot \StrideSize_w, j \cdot \StrideSize_w + \FilterSize_w - 1].
+\end{gather*}
+Заметим, что при всех допустимых $i \in [0, H'- 1]$ и $j \in [0, W' - 1]$ значения $h$ и $w$ лежат в допустимых множествах $[0, H - 1]$ и $[0, W - 1]$. Таким образом, область восприимчивости имеет вид:
+\begin{equation}
+\ReceptiveField(i, j) = \{(h, w)\colon h \in [i \cdot \StrideSize_h, i \cdot \StrideSize_h + \FilterSize_h - 1], w \in [j \cdot \StrideSize_w, j \cdot \StrideSize_w + \FilterSize_w - 1]\}, \quad i \in [0, H'- 1], j \in [0, W' - 1].
+\end{equation}
+
+\paragraph{Область влияния (действия).}
+Рассмотрим, на какие элементы матрицы $\Output$ влияет элемент $\Input[h, w]$. Чтобы элемент $\Input[h, w]$ влиял на $\Output[i, j]$, нужно, чтобы $(h, w) \in \ReceptiveField(i, j)$, т.е.
+\begin{equation}
+i \cdot \StrideSize_h \le h \le i \cdot \StrideSize_h + \FilterSize_h - 1, \qquad j \cdot \StrideSize_w \le w \le j \cdot \StrideSize_w + \FilterSize_w - 1.
+\end{equation}
+Осталось лишь определить все те пары $(i, j)$, для которых данное условие выполнено. 
+
+
 
 \begin{equation}
-\partder{\Loss}{\Input[c, h, w]}= \Sum_{(i, j) \in \FilterCoverageSet(h, w)} 
-\partder{\Output[c, i, j]}{\Input[c, h, w]} \cdot \partder{\Loss}{\Output[c, i, j]}
+\partder{\Loss}{\Input[h, w]}= \Sum_{(i, j) \in \AffectField(h, w; s)} 
+\partder{\Output[i, j]}{\Input[h, w]} \cdot \partder{\Loss}{\Output[i, j]}
 \end{equation}
 
 
