@@ -177,7 +177,7 @@ H' = \frac{H - \FilterSize_h}{\StrideSize_h} + 1, \qquad W' = \frac{W - \FilterS
 В данном случае требуется скорректировать ранее введенные области действия и восприимчивости.
 
 \paragraph{Область восприимчивости $\ReceptiveField(i, j)$}
-Рассмотрим элемент $\Output[i, j]$ ($i \in [0, H'- 1]$, $j \in [0, W' - 1]$). Этот элемент зависит элементов матрицы $\Input$, расположенных по следующим координатам $\{(h, w)\}$:
+Рассмотрим элемент $\Output[i, j]$ ($i \in [0, H'- 1]$, $j \in [0, W' - 1]$). Этот элемент зависит от элементов матрицы $\Input$, расположенных по следующим координатам $\{(h, w)\}$:
 \begin{gather*}
 h \in [i \cdot \StrideSize_h, i \cdot \StrideSize_h + \FilterSize_h - 1], \\
 w \in [j \cdot \StrideSize_w, j \cdot \StrideSize_w + \FilterSize_w - 1].
@@ -187,19 +187,85 @@ w \in [j \cdot \StrideSize_w, j \cdot \StrideSize_w + \FilterSize_w - 1].
 \ReceptiveField(i, j) = \{(h, w)\colon h \in [i \cdot \StrideSize_h, i \cdot \StrideSize_h + \FilterSize_h - 1], w \in [j \cdot \StrideSize_w, j \cdot \StrideSize_w + \FilterSize_w - 1]\}, \quad i \in [0, H'- 1], j \in [0, W' - 1].
 \end{equation}
 
-\paragraph{Область влияния (действия).}
+\paragraph{Область влияния (действия) $\AffectField(h, w)$.}
 Рассмотрим, на какие элементы матрицы $\Output$ влияет элемент $\Input[h, w]$. Чтобы элемент $\Input[h, w]$ влиял на $\Output[i, j]$, нужно, чтобы $(h, w) \in \ReceptiveField(i, j)$, т.е.
 \begin{equation}
 i \cdot \StrideSize_h \le h \le i \cdot \StrideSize_h + \FilterSize_h - 1, \qquad j \cdot \StrideSize_w \le w \le j \cdot \StrideSize_w + \FilterSize_w - 1.
 \end{equation}
 Осталось лишь определить все те пары $(i, j)$, для которых данное условие выполнено. 
+Из условий выше следует, что
+\begin{equation}
+\frac{h - \FilterSize_h + 1}{\StrideSize_h} \le i \le \frac{h}{\StrideSize_h}, \qquad \frac{w - \FilterSize_w + 1}{\StrideSize_w} \le j \le \frac{w}{\StrideSize_w}. 
+\end{equation}
+С граничными условиями, данные неравенства для определения области влияния $\AffectField(h, w)$ переходят в
 
+С учетом граничных условий, области влияния $\AffectField(h)$ и $\AffectField(w)$ вдоль высоты и ширины определяются как
+\begin{gather*}
+\AffectField(h; \StrideSize_h) = \left\{i \in \mathbb{Z} \colon \max\{\frac{h - \FilterSize_h + 1}{\StrideSize_h}, 0\} \le i \le \min\{\frac{h}{\StrideSize_h}, \frac{H - \FilterSize_h}{\StrideSize_h}\}\right\},\\
+\AffectField(w; \StrideSize_w) = \left\{j \in \mathbb{Z} \colon \max\{\frac{w - \FilterSize_w + 1}{\StrideSize_w}, 0\} \le j \le \min\{\frac{w}{\StrideSize_w}, \frac{W - \FilterSize_w}{\StrideSize_w}\}\right\}.\\
+\end{gather*}
+%Граничные условия активируются при следующих значениях $h$ и $w$ соответственно
+%\begin{gather*}
+%h \in [0, \FilterSize_h - 1) \cup [H - \FilterSize_h + 1, H),\\
+%w \in [0, \FilterSize_w - 1) \cup [W - \FilterSize_w + 1, W).
+%\end{gather*}
 
+Пусть $h = q_h\StrideSize_h + r_h$, $q_h \in \mathbb{Z}$, $r_h \in [0, \StrideSize_h - 1]$.
+\begin{equation*}
+\frac{h - \FilterSize_h + 1}{\StrideSize_h} = q_h + \frac{r_h}{\StrideSize_h} -\frac{\FilterSize_h - 1}{\StrideSize_h} \le i \le q_h + \frac{r_h}{\StrideSize_h} = \frac{h}{\StrideSize_h}.
+\end{equation*}
+
+\subsubsection{Производные функции потерь $\Loss$}
+\paragraph{Производная по входу $\Input$.}
+%\substack{i \in \AffectField(h; \StrideSize_h) \\ j \in \AffectField(w; \StrideSize_w)}}
+\begin{equation}
+\partder{\Loss}{\Input[h, w]}= \Sum_{(i, j) \in \AffectField(h, w; \StrideSize)} 
+\partder{\Output[i, j]}{\Input[h, w]} \cdot \partder{\Loss}{\Output[i, j]} =
+\Sum_{(i, j) \in \AffectField(h, w; \StrideSize)} \Weights[h - i \cdot \StrideSize_h, w - j \cdot \StrideSize_w] \cdot \partder{\Loss}{\Output[i, j]}.
+\end{equation}
+Так как множество $\AffectField(h, w; \StrideSize)$ уже найдено, то поточечное вычисление данной производной не представляет проблем.
+
+В случае наличия нескольких каналов производная по входу $\Input[c, h, w]$ вычисляется следующим образом:
+\begin{equation}
+\partder{\Loss}{\Input[c, h, w]}= \Sum_{l=0}^{\NumOfChannels' - 1}\Sum_{(i, j) \in \AffectField(h, w; \StrideSize)} 
+\partder{\Output[l, i, j]}{\Input[c, h, w]} \cdot \partder{\Loss}{\Output[i, j]} =
+\Sum_{(i, j) \in \AffectField(h, w; \StrideSize)} \Weights[c, h - i \cdot \StrideSize_h, w - j \cdot \StrideSize_w] \cdot \partder{\Loss}{\Output[l, i, j]}.
+\end{equation}
+
+\paragraph{Производная по весам $\Weights$.}
+В случае одного входного и выходного каналов производная по весу имеет вид:
+\begin{equation}
+\partder{\Loss}{\Weights[h, w]} = \Sum_{\substack{0 \le i' < H' \\ 0 \le j' < W'}} \partder{\Output[i', j']}{\Weights[h, w]} \cdot  \partder{\Loss}{\Output[i', j']} =  \Sum_{\substack{0 \le i' < H' \\ 0 \le j' < W'}} \Input[i' \cdot \StrideSizeH + h, j' \cdot \StrideSizeW + w] \cdot \partder{\Loss}{\Output[i', j']}.
+\end{equation}
+
+В случае наличия $\NumOfChannels\ge 1$ входных каналов и одного выходного производная принимает вид
+\begin{equation}
+\partder{\Loss}{\Weights[c, h, w]} = \Sum_{\substack{0 \le i' < H' \\ 0 \le j' < W'}} \partder{\Output[i', j']}{\Weights[c, h, w]} \cdot  \partder{\Loss}{\Output[i', j']} =  \Sum_{\substack{0 \le i' < H' \\ 0 \le j' < W'}} \Input[c, i' \cdot \StrideSizeH + h, j' \cdot \StrideSizeW + w] \cdot \partder{\Loss}{\Output[i', j']}.
+\end{equation}
+
+В наиболее общем случае $\NumOfChannels\ge 1$ входных каналов и одного выходного производная принимает вид
+\begin{gather}
+\partder{\Loss}{\Weights[c', c, h, w]} = \Sum_{\substack{0 \le i' < H' \\ 0 \le j' < W'}} \partder{\Output[c', i', j']}{\Weights[c', c, h, w]} \cdot  \partder{\Loss}{\Output[c', i', j']} = \Sum_{\substack{0 \le i' < H' \\ 0 \le j' < W'}} \Input[c, i' \cdot \StrideSizeH + h, j' \cdot \StrideSizeW + w] \cdot \partder{\Loss}{\Output[c', i', j']}.
+\end{gather}
+
+\paragraph{Производная по смещению $\Biases$.}
+Каждому каналу на выходе соответствует свое значение смещения.
 
 \begin{equation}
-\partder{\Loss}{\Input[h, w]}= \Sum_{(i, j) \in \AffectField(h, w; s)} 
-\partder{\Output[i, j]}{\Input[h, w]} \cdot \partder{\Loss}{\Output[i, j]}
+\partder{\Loss}{\Bias} = \Sum_{\substack{0 \le i' < H' \\ 0 \le j' < W'}} \partder{\Output[i', j']}{\Bias} \cdot \partder{\Loss}{\Output[i', j']} = \Sum_{\substack{0 \le i' < H' \\ 0 \le j' < W'}} \partder{\Loss}{\Output[i', j']}.
 \end{equation}
+
+\begin{equation}
+\partder{\Loss}{\Biases[c']} = \Sum_{\substack{0 \le i' < H' \\ 0 \le j' < W'}} \partder{\Output[c', i', j']}{\Biases[c']} \cdot \partder{\Loss}{\Output[c', i', j']} = \Sum_{\substack{0 \le i' < H' \\ 0 \le j' < W'}} \partder{\Loss}{\Output[c', i', j']}.
+\end{equation}
+
+\section{Слой Max Pooling}
+
+\subsection{Прямое распространение}
+
+
+
+\subsection{Обратное распространение}
 
 
 \bibliographystyle{ugost2008}
