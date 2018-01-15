@@ -1,4 +1,4 @@
-\documentclass{book}
+\documentclass{report}
 \usepackage[english, russian]{babel}
 \usepackage[utf8]{inputenc}
 \usepackage[margin=0.75in]{geometry}
@@ -23,6 +23,36 @@
 \usetikzlibrary{positioning}
 \usepackage{pgf}
 \usepackage{pgfplots}
+
+
+% Python style for highlighting
+\usepackage{listings}
+\definecolor{deepblue}{rgb}{0,0,0.5}
+\definecolor{deepred}{rgb}{0.6,0,0}
+\definecolor{deepgreen}{rgb}{0,0.5,0}
+\DeclareFixedFont{\ttb}{T1}{txtt}{bx}{n}{8} % for bold
+\DeclareFixedFont{\ttm}{T1}{txtt}{m}{n}{8}  % for normal
+\newcommand\pythonstyle{\lstset{
+		language=Python,
+		basicstyle=\ttm,
+		otherkeywords={self},             % Add keywords here
+		keywordstyle=\ttb\color{deepblue},
+		emph={MyClass,__init__},          % Custom highlighting
+		emphstyle=\ttb\color{deepred},    % Custom highlighting style
+		stringstyle=\color{deepgreen},
+		frame=tb,                         % Any extra options here
+		showstringspaces=false            % 
+	}}
+
+	
+% Python environment
+\lstnewenvironment{python}[1][]
+{
+	\pythonstyle
+	\lstset{#1}
+}
+{}
+	
 
 \definecolor{grey1}{RGB}{192,192,192}
 \definecolor{lemonchiffon}{RGB}{255,250,205}
@@ -93,12 +123,94 @@
 \author{Иванов Александр \\ ИППИ РАН}
 \date{}
 \maketitle
-	
 \tableofcontents
 	
 \include{commands}
 
 \chapter{Полносвязные Сети}
+
+\begin{itemize}
+	\item $\NumOfSamples$ --- размер батча
+	\item $\NumOfDims$ --- размерность вектора признаков
+\end{itemize}
+
+\section{Batch Normalization}
+
+Пусть $\boldx$ --- это вектор на входе слоя ($x \in \mathbb{R}^{\NumOfSamples}$). Тогда вектор $\boldy$ на выходе слоя есть
+$$
+\boldy = \gamma \cdot \frac{\boldx - \mu}{\sqrt{\sigma^2 + \eps}} + \boldbeta,
+$$
+где $$\mu = \frac{1}{\NumOfSamples}\Sum_{i=1}^\NumOfSamples x_i, \qquad \sigma^2 = \frac{1}{\NumOfSamples}\Sum_{i = 1}^\NumOfSamples (x_i - \mu)^2 = \frac{1}{\NumOfSamples} x_i^2 - \left(\frac{1}{\NumOfSamples} x_i \right)^2.$$
+
+Пусть дана производная функции потерь по $\boldy$, т.е. $\partial \Loss / \partial \boldy$. Найдем производные функции потерь по $\boldx$, $\boldbeta$, $\gamma$.
+Сначала найдем $\partial \Loss / \partial \boldx$:
+\begin{gather}
+\partder{\Loss}{\boldx} = \underbrace{\partder{\boldy}{\boldx}}_{\mathbb{R}^{\NumOfSamples \times \NumOfSamples}} \cdot \underbrace{\frac{\Loss}{\boldy}}_{\mathbb{R}^{\NumOfSamples}},
+\end{gather}
+где 
+\begin{equation}
+\partder{\boldy}{\boldx} = 
+\begin{pmatrix}
+\partder{y_1}{x_1} &\partder{y_2}{x_1} &\dots &\partder{y_\NumOfSamples}{x_1} \\
+\partder{y_1}{x_2} &\partder{y_2}{x_2} &\dots &\partder{y_\NumOfSamples}{x_2} \\
+\vdots 			   &\vdots 			   &\ddots &\vdots                        \\
+\partder{y_1}{x_\NumOfSamples} &\partder{y_2}{x_\NumOfSamples} &\dots &\partder{y_\NumOfSamples}{x_\NumOfSamples} \\
+\end{pmatrix}
+\end{equation}
+
+\begin{gather*}
+\partder{\boldy}{\boldx} = \gamma \partder{\left(\frac{\boldx - \mu}{\sqrt{\sigma^2 + \eps}}\right)}{\boldx}.
+\end{gather*}
+Рассмотрим производную 
+\begin{gather*}
+\partder{y_i}{x_j} = \gamma \partial\left(\frac{x_i - \mu}{\sqrt{\sigma^2 + \eps}}\right)/\partial x_j = 
+\gamma \partder{(x_i - \mu)}{x_j} \frac{1}{\sqrt{\sigma^2 + \eps}} - \frac{\gamma}{2} \frac{x_i - \mu}{(\sigma^2 + \eps)^{3/2}} \partder{(\sigma^2 + \eps)}{x_j} = \\
+= \gamma \left(\delta_{ij} - \frac{1}{\NumOfSamples}\right) \frac{1}{\sqrt{\sigma^2 + \eps}} - \frac{\gamma}{2} \frac{x_i - \mu}{(\sigma^2 + \eps)^{3/2}} \cdot 2 \left(\frac{x_j}{\NumOfSamples} -  \frac{\mu}{\NumOfSamples} \right) =  \gamma \left(\delta_{ij} - \frac{1}{\NumOfSamples}\right) \frac{1}{\sqrt{\sigma^2 + \eps}} - \gamma \frac{(x_i - \mu)(x_j - \mu)}{\NumOfSamples(\sigma^2 + \eps)^{3/2}}.
+\end{gather*}
+Таким образом
+\begin{gather*}
+\partder{\boldy}{\boldx} = \frac{\gamma}{\sqrt{\sigma^2 + \eps}} \left(\left(\boldI - \frac{1}{\NumOfSamples}\boldE\right) -  \frac{\boldC}{\sigma^2 + \eps}\right),
+\end{gather*}
+где $\boldC = \frac{1}{\NumOfSamples}(\boldx - \boldmu)(\boldx - \boldmu)^T$, $\boldI$ --- единичная матрица размера $\NumOfSamples \times \NumOfSamples$, $\boldE$ --- матрица, полностью состящая из единиц, размера $\NumOfSamples \times \NumOfSamples$. Тогда
+\begin{gather*}
+\partder{\Loss}{\boldx} = \frac{\gamma}{\sqrt{\sigma^2 + \eps}} \left(  \left(\boldI - \frac{1}{\NumOfSamples}\boldE\right) -  \frac{\boldC}{\sigma^2 + \eps}\right) \partder{\Loss}{\boldy} = 
+\frac{\gamma}{\sqrt{\sigma^2 + \eps}} \left(\partder{\Loss}{\boldy} - \bolde \cdot \overline{\partder{\Loss}{\boldy}} - \frac{\boldx - \mu}{\NumOfSamples(\sigma^2 + \eps)} \cdot \langle \boldx - \mu, \frac{\Loss}{\boldy}\rangle \right),
+\end{gather*}
+где $\bolde$ --- столбец из единиц размерности $\NumOfSamples$, $\overline{\partder{\Loss}{\boldy}}$ --- среднее значение элементов вектора $\partder{\Loss}{\boldy}$. Обозначив через $\boldz$ ``стандартизованный'' вектор $\boldx$ ($\boldz = (\boldx - \mu) / \sigma$), получим
+\begin{gather*}
+\partder{\Loss}{\boldx} =\frac{\gamma}{\sqrt{\sigma^2 + \eps}} \left(\partder{\Loss}{\boldy} - \bolde \cdot \overline{\partder{\Loss}{\boldy}} - \frac{\boldx - \mu}{\NumOfSamples(\sigma^2 + \eps)} \cdot \langle \boldx - \mu, \frac{\Loss}{\boldy}\rangle \right) = 
+\frac{\gamma}{\sqrt{\sigma^2 + \eps}} \left(\partder{\Loss}{\boldy} - \bolde \cdot \overline{\partder{\Loss}{\boldy}}  - \frac{\boldz}{\NumOfSamples} \cdot \langle \boldz, \frac{\Loss}{\boldy}\rangle \right).
+\end{gather*}
+
+Теперь найдем производные $\partial \Loss / \partial \boldbeta$ и $\partial \Loss / \partial \gamma$:
+\begin{gather*}
+\partder{\Loss}{\boldbeta} = \partder{\boldy}{\boldbeta} \partder{\Loss}{\boldy} = \boldI \partder{\Loss}{\boldy} = \partder{\Loss}{\boldy}, \\
+\partder{\Loss}{\gamma} = \left(\partder{\boldy}{\gamma}\right)^T \partder{\Loss}{\boldy} = \frac{\boldx - \mu}{\sqrt{\sigma + \eps}}
+\end{gather*}
+
+\subsection{Реализация в Python}
+
+Представленная ниже реализация предполагает, что 
+\begin{itemize}
+	\item $\boldX \in \mathbb{R}^{\NumOfSamples \times \NumOfDims}$ --- матрица объектов-признаков
+	\item $\boldZ \in \mathbb{R}^{\NumOfSamples \times \NumOfDims}$ --- ``стандартизованная'' вдоль оси 0 матрица $\boldX$, т.е. выход слоя \texttt{BatchNormalization}
+	\item $\boldmu \in \mathbb{R}^{\NumOfSamples}$ --- средние значения для признаков
+	\item $\boldsigma \in \mathbb{R}^{\NumOfSamples}$ --- стандартные отклонения для признаков
+\end{itemize}
+
+\begin{python}
+def batchnorm_backward_alt(output_grad, cache):
+  X, Z, mu, sigma, gamma, beta, eps = cache
+  N, D = X.shape
+  X_grad = gamma / np.sqrt(sample_var + eps)[None, :] *\ 
+           ((output_grad - np.mean(output_grad, axis=0)[None, :]) -\
+           Z * np.mean(np.multiply(Z, output_grad), axis=0)[None, :]) 
+  beta_grad = np.sum(output_grad, axis=0)
+  gamma_grad = np.sum(np.multiply(X_norm, output_grad), axis=0)
+  return X_grad, gamma_grad, beta_grad
+\end{python}
+
+
 
 \chapter{Сверточные Сети}
 
