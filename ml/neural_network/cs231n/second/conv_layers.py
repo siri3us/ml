@@ -100,12 +100,7 @@ def conv_backward_naive(Y_grad, cache):
     n_samples, n_channels, image_h,  image_w = X.shape
     n_filters, = b.shape
     n_filters, n_channels, filter_h, filter_w = W.shape
-    
-    #print('Y_grad.shape', Y_grad.shape)
-    #print('X.shape', X.shape)
-    #print('W.shape', W.shape)
-    #print('b.shape', b.shape)
-    
+
     X_grad = np.zeros(X.shape, dtype=np.float64)
     W_grad = np.zeros(W.shape, dtype=np.float64)
     b_grad = np.zeros(b.shape, dtype=np.float64)

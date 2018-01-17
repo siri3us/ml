@@ -252,7 +252,29 @@ def batchnorm_backward_alt(output_grad, cache):
   return X_grad, gamma_grad, beta_grad
 \end{python}
 
+\section{MulticlassLogLoss}
+На вход данного уровня поступает вектор $\boldp \in \mathbb{R}^{\NumOfDims}$ или же в случае использования батчей матрица $\boldP \in \mathbb{R}^{\NumOfSamples \times \NumOfDims}$. Данный уровень обычно является последним уровнем нейронной сети и используется для оценки вероятностей принадлежности объектов к классам. Поэтому далее будем считать, что $\NumOfDims = \NumOfClasses$, где $\NumOfClasses$ --- количество классов в выборке.
 
+\begin{gather*}
+\Loss = \frac{1}{\NumOfSamples} \Sum_{n = 1}^{\NumOfSamples} \Sum_{k = 1}^{\NumOfClasses} y_k^{(n)} \log p_n^{(k)} = \frac{1}{\NumOfSamples} \Sum_{n=1}^{\NumOfSamples} \Loss_n.
+\end{gather*}
+
+\begin{gather*}
+\partder{\Loss}{p_n^{(k)}} = \frac{1}{\NumOfSamples} \frac{y_n^{(k)}}{p_n^{(k)}}
+\end{gather*}
+\begin{gather*}
+\partder{\Loss}{\boldp_n} = [0, \dots,  \frac{1}{\NumOfSamples} \frac{y_n^{(k_n^*)}}{p_n^{(k_n*)}}, \dots, 0], 
+\end{gather*}
+где $k_n^*$ --- это истинный класс объекта $n$. Таким образом $\partder{\Loss}{\boldP}$ --- это матрица размера $\NumOfSamples \times \NumOfClasses$, имеющая вид
+\begin{gather*}
+\partder{\Loss}{\boldP} = \frac{1}{\NumOfSamples}
+\begin{bmatrix}
+\frac{y_{1, k^*_1}}{p_{1, k^*_1}} &\dots  &0 &\dots  &0 \\
+0 &\dots  &\frac{y_{2, k^*_2}}{p_{2, k^*_2}} &\dots  &0 \\
+\vdots &\vdots  &\vdots &\ddots  &\vdots \\
+0 &\dots  &0 &\dots  &\frac{y_{\NumOfSamples, k^*_\NumOfSamples}}{p_{\NumOfSamples, k^*_\NumOfSamples}} \\
+\end{bmatrix}
+\end{gather*}
 
 \chapter{Сверточные Сети}
 
@@ -413,11 +435,26 @@ i \cdot \StrideSize_h \le h \le i \cdot \StrideSize_h + \FilterSize_h - 1, \qqua
 \partder{\Loss}{\Biases[c']} = \Sum_{\substack{0 \le i' < H' \\ 0 \le j' < W'}} \partder{\Output[c', i', j']}{\Biases[c']} \cdot \partder{\Loss}{\Output[c', i', j']} = \Sum_{\substack{0 \le i' < H' \\ 0 \le j' < W'}} \partder{\Loss}{\Output[c', i', j']}.
 \end{equation}
 
+\subsection{Альтернативная реализация}
+Пусть 
+\begin{itemize}
+	\item $\boldX$ --- входной тензор сверточного слоя
+	\item $\boldY$ --- тензор на выходе сверточного слоя
+	\item Свертка считается в режиме \texttt{VALID}
+\end{itemize}
+
+Для начала рассмотрим случай двумерного входного тензора, т.е.
+\begin{itemize}
+	\item $\boldX$ имеет размер $\InputH \times \InputW$
+	\item $\boldY$ имеет размер $\OutputH \times \OutputW$
+\end{itemize}
+
+Пусть сначала считается полная свертка с $\StrideSizeH = \StrideSizeW = 1$, тогда на выходе сначала получим тензор $\boldZ$ размера $(\InputH - \FilterSizeH + 1) \times (\InputW - \FilterSizeW + 1)$. Однако не все его значения нам нужны
+
+
 \section{Слой Max Pooling}
 
 \subsection{Прямое распространение}
-
-
 
 \subsection{Обратное распространение}
 
