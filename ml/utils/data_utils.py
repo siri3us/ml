@@ -172,6 +172,52 @@ def get_CIFAR10_data(train_size=49000, test_size=1000, val_size=1000, ordered=Tr
             'X_test':  X_test,  'y_test':  y_test}
 
 
+def get_MNIST_data(train_size=69000, val_size=1000,  
+                   substract_mean=False, normalize_by=None, 
+                   mnist_dir='datasets/MNIST', random_state=1, verbose=False, dtype=np.float64):
+    """
+    
+    """
+    filename = mnist_dir + 'mnist.npz'
+    if os.path.exists(filename):
+        with np.load(filename, 'r') as data:
+            X = data['X']
+            y = data['y']
+    else:
+        from sklearn.datasets import fetch_mldata
+        mnist = fetch_mldata("mnist-original")
+        X, y = mnist.data, mnist.target
+        np.savez(filename, X=X, y=y)
+        
+    # splitting
+    assert train_size + val_size <= X.shape[0]
+    from sklearn.utils import resample
+    X, y = resample(X, y, n_samples=train_size + val_size, replace=False, random_state=random_state)
+    X_train, X_val, y_train, y_val = train_test_split(X, y, train_size=train_size, random_state=random_state + 1)
+    
+    # Conversions
+    X_train = X_train.astype(dtype, copy=False)
+    X_val = X_val.astype(dtype, copy=False)
+    y_train = y_train.astype(np.int32)
+    y_val = y_val.astype(np.int32)
+    
+    # centering
+    if substract_mean:
+        mean_image = X_train.mean(axis=0, keepdims=True)
+        X_train -= mean_image
+        X_val -= mean_image
+
+    # normalizing  
+    if normalize_by is not None:
+        X_train /= normalize_by
+        X_val /= normalize_by
+    if verbose:
+        print('X_train.shape = {}, y_train.shape = {}'.format(X_train.shape, y_train.shape))
+        print('X_val.shape = {},   y_val.shape = {}'.format(X_val.shape, y_val.shape))
+    return {'X_train': X_train, 'y_train': y_train,
+            'X_val': X_val, 'y_val': y_val}
+            
+
 def load_tiny_imagenet(path, dtype=np.float32, subtract_mean=True):
     """
     Load TinyImageNet. Each of TinyImageNet-100-A, TinyImageNet-100-B, and
