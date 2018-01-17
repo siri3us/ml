@@ -134,6 +134,48 @@
 	\item $\NumOfDims$ --- размерность вектора признаков
 \end{itemize}
 
+\section{Dense Layer}
+
+\paragraph{Векторный вид}
+
+\begin{gather}
+\boldy^T = \boldx^T \boldW + \boldb^T \\
+\boldy = \boldW^T \boldx + \boldb
+\end{gather}
+
+\begin{gather}
+\partder{\Loss}{\boldx} = \partder{\boldy}{\boldx} \partder{\Loss}{\boldy} = \boldW \partder{\Loss}{\boldy}
+\end{gather}
+
+\begin{gather*}
+\partder{\Loss}{\boldw_i} = \partder{\boldy}{\boldw_i} \partder{\Loss}{\boldy} = \partder{y_i}{\boldw_i} \partder{\Loss}{y_i} = \boldx \cdot \partder{\Loss}{y_i} \Rightarrow \partder{\Loss}{\boldW} = \boldx \left(\partder{\Loss}{\boldy}\right)^T
+\end{gather*}
+
+\begin{gather*}
+\partder{\Loss}{\boldb} = \partder{\boldy}{\boldb} \partder{\Loss}{\boldy} = \partder{\Loss}{\boldy}.
+\end{gather*}
+
+
+\paragraph{Матричный вид}
+
+\begin{gather*}
+\boldY = \boldX \boldW + \boldB, 
+\end{gather*}
+где 
+$$\boldB = [\underbrace{\boldb, \boldb, \dots, \boldb}_{\NumOfSamples}]^T \in \mathbb{R}^{\NumOfSamples \times \NumOfDims}.$$
+В таком случае 
+\begin{gather*}
+\partder{\Loss}{\boldX} = [\partder{\Loss}{\boldx_1}, \dots, \partder{\Loss}{\boldx_\NumOfSamples}]^T = [\boldW  \partder{\Loss}{\boldy_1}, \dots,  \boldW \partder{\Loss}{\boldy_{\NumOfSamples}}]^T =  [\partder{\Loss}{\boldy_1}, \dots,  \partder{\Loss}{\boldy_{\NumOfSamples}}]^T \boldW^T =  \partder{\Loss}{\boldY} \boldW^T.
+\end{gather*}
+
+\begin{gather*}
+\partder{\Loss}{\boldw_i} = \Sum_{k=1}^{\NumOfSamples} \partder{y_i^{(k)}}{\boldw_i} \partder{\Loss}{y_i^{(k)}} = \Sum_{k=1}^{\NumOfSamples} \boldx^{(k)} \partder{\Loss}{y_i^{(k)}} \Rightarrow \partder{\Loss}{\boldW} = \Sum_{k=1}^{\NumOfSamples} \boldx^{(k)} \left(\partder{\Loss}{\boldy^{(k)}}\right)^T = \boldX^T \partder{\Loss}{\boldY}.
+\end{gather*}
+
+\begin{gather*}
+\partder{\Loss}{\boldb} = \Sum_{k=1}^{\NumOfSamples} \partder{\boldy^{(k)}}{\boldb} \partder{\Loss}{\boldy^{(k)}} = \Sum_{k=1}^{\NumOfSamples} \partder{\Loss}{\boldy^{(k)}}
+\end{gather*}
+
 \section{Batch Normalization}
 
 Пусть $\boldx$ --- это вектор на входе слоя ($x \in \mathbb{R}^{\NumOfSamples}$). Тогда вектор $\boldy$ на выходе слоя есть
