@@ -50,8 +50,8 @@ def load_CIFAR10(ROOT):
 
 def get_CIFAR10_data(train_size=49000, test_size=1000, val_size=1000, ordered=True, 
                      substract_mean=False, image_data_format='channels_last',
-                     ravel=False, bias_trick=False, random_state=1, 
-                     cifar10_dir='/datasets/CIFAR10', scaler=None):
+                     ravel=False, bias_trick=False, random_state=1, verbose=False, normalize_by=None,
+                     cifar10_dir='datasets/CIFAR10', scaler=None):
     """
     Load the CIFAR-10 dataset from disk and perform preprocessing to prepare it for classifiers.
     Inputs:
@@ -65,6 +65,8 @@ def get_CIFAR10_data(train_size=49000, test_size=1000, val_size=1000, ordered=Tr
         bias_trick        - add dimenston 3073 to each image with value 1
         random_state      - random_state
         cifar10_dir       - CIFAR10 dataset batch directory
+        verobse
+        normalize_by
     Returns: 
         if val_size=0 returns a tuple with the following elements
             X_train, y_train, X_test, y_test
@@ -147,7 +149,21 @@ def get_CIFAR10_data(train_size=49000, test_size=1000, val_size=1000, ordered=Tr
             X_test = np.hstack([X_test, np.ones((X_test.shape[0], 1))])
             if val_size > 0:
                 X_val = np.hstack([X_val, np.ones((X_val.shape[0], 1))])
-                
+    if verbose:
+        print('Training data shape: ', X_train.shape)
+        print('Training labels shape: ', y_train.shape)
+        if val_size > 0:
+            print('Validation data shape: ', X_val.shape)
+            print('Validation labels shape: ', y_val.shape)
+        print('Test data shape: ',   X_test.shape)
+        print('Test labels shape: ', y_test.shape)
+           
+    if normalize_by is not None:
+        X_train /= normalize_by
+        X_test /= normalize_by
+        if val_size > 0:
+            X_val /= normalize_by
+                    
     if val_size > 0:
         return {'X_train': X_train, 'y_train': y_train, 
                 'X_val':   X_val,   'y_val':   y_val, 

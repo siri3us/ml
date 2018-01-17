@@ -6,6 +6,7 @@
 \usepackage{amsthm, amsmath, amsfonts, amssymb}
 %\usepackage{bbold}
 \usepackage{dsfont}
+\usepackage{xspace}
 \usepackage{mathtools}
 \usepackage{hyperref}
 \usepackage{graphicx}
@@ -174,6 +175,28 @@ $$\boldB = [\underbrace{\boldb, \boldb, \dots, \boldb}_{\NumOfSamples}]^T \in \m
 
 \begin{gather*}
 \partder{\Loss}{\boldb} = \Sum_{k=1}^{\NumOfSamples} \partder{\boldy^{(k)}}{\boldb} \partder{\Loss}{\boldy^{(k)}} = \Sum_{k=1}^{\NumOfSamples} \partder{\Loss}{\boldy^{(k)}}
+\end{gather*}
+
+\section{SoftMax}
+
+\subsection{Forward propagation}
+
+\subsection{Backward propagation}
+
+\begin{gather*}
+\partder{\Loss}{\boldx} = \partder{\boldy}{\boldx} \partder{\Loss}{\boldy}
+\end{gather*}
+
+\begin{gather*}
+\partder{y_i}{x_j} = \partial \left(\frac{e^{x_j}}{\Sum_d e^{x_d}}\right) / \partial x_j = \frac{1}{\Sum_{d=1}^{\NumOfDims} e^{x_d}} \partder{e^{x_i}}{x_j} - \frac{e^{x_i}}{\left(\Sum_{d=1}^{\NumOfDims} e^{x_d}\right)^2} \partder{\left(\Sum_{d=1}^{\NumOfDims} e^{x_d}\right)}{x_j} = \frac{e^{x_i}\delta_{ij}}{\Sum_{d=1}^{\NumOfDims} e^{x_d}} - \frac{e^{x_i}}{\Sum_{d=1}^{\NumOfDims} e^{x_d}} \cdot \frac{e^{x_j}}{\Sum_{d=1}^{\NumOfDims} e^{x_d}} = y_j \delta_{ij} - y_i y_j.
+\end{gather*}
+Таким образом,
+\begin{gather*}
+\partder{\boldy}{\boldx} = \diag[y_1, y_2, \dots, y_\NumOfDims] - \boldy \boldy^T
+\end{gather*}
+\begin{gather*}
+\partder{\Loss}{\boldx} = \partder{\boldy}{\boldx} \partder{\Loss}{\boldy} = \left(\diag[y_1, y_2, \dots, y_\NumOfDims] - \boldy \boldy^T\right) \partder{\Loss}{\boldy} = \diag[y_1, y_2, \dots, y_\NumOfDims] \partder{\Loss}{\boldy} - \boldy \cdot \left\langle \boldy, \partder{\Loss}{\boldy} \right\rangle = \\
+= \boldy \otimes \partder{\Loss}{\boldy} - \boldy \left\langle \boldy, \partder{\Loss}{\boldy} \right\rangle
 \end{gather*}
 
 \section{Batch Normalization}
