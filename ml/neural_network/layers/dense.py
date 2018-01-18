@@ -7,9 +7,8 @@ from ..initializers import *
 from ..regularizers import *
 from ..decorators import *
 
-
 class Dense(Layer):
-    def __init__(self, units, use_bias=True, W_init=None, b_init=None, W_reg=None, b_reg=None):
+    def __init__(self, units, use_bias=True, W_init=None, b_init=None, W_reg=None, b_reg=None, name=None):
         """
         Inputs:
         - units - Integer or Long, dimensionality of the output space.
@@ -17,13 +16,13 @@ class Dense(Layer):
         - b_initializer
         - seed - used for initializers!!!
         """
-        super().__init__()
+        super().__init__(name=name)
         self.units = units
         self.use_bias = use_bias
         self.W_init = W_init
         self.b_init = b_init
-        self.W_reg = W_reg
-        self.b_reg = b_reg
+        self.W_reg  = W_reg
+        self.b_reg  = b_reg
         
     def __repr__(self):
         if hasattr(self, 'W'):
@@ -32,47 +31,54 @@ class Dense(Layer):
             input_size = '?'
             output_size = self.units
         return 'Dense({}->{})'.format(input_size, output_size)   
-    
-    # Initialization
-    def _initialize(self, params):
-        # Params check and name initialization
-        params = super()._initialize(params)
-        # Initializing params and grads
-        params = self._initialize_W(params)
-        params = self._initialize_b(params)
-        # Regularization
-        if self.W_reg is None: self.W_reg = EmptyRegularizer()
-        if self.b_reg is None: self.b_reg = EmptyRegularizer()
+   
+    # INITIALIZATION
+    def _initialize_seed(self, params):
+        self.seed = params.setdefault('seed', 0)
+        self.generator = np.random.RandomState(self.seed)
+        params['seed'] += 1
+        return params
+
+    def _initialize_input_shape(self, params):
+        assert 'input_shape' in params, '"input_shape" is not provided though must be.'
+        input_shape = params['input_shape']
+        assert len(input_shape) == 2, 'input to Dense layer must be a 2-dim tensor.'
+        self.input_shape = input_shape
         return params
     
+    def _initialize_params(self, params):
+        self._initialize_W(params)
+        self._initialize_b(params)
+        self._initializer_regularization(params)
+        return params
     def _initialize_W(self, params):
-        input_shape, seed, dtype = params['input_shape'], params['seed'], params['dtype']
-        if self.W_init is None:
-            self.W_init= NormalInitializer(seed=seed)
-        elif isinstance(self.W_init, np.ndarray):
-            assert self.W_init.shape == (input_shape[1], self.units)
-            self.W_init = DeterministicInitializer(self.W_init)
-        self.W = self.W_init(shape=(input_shape[1], self.units), dtype=dtype)
-        self.grad_W = np.zeros_like(self.W, dtype=dtype)
-        params['seed'] = seed + 1
-        params['input_shape'] = (input_shape[0], self.units) # Input shape for the next layer
-        self.output_shape = params['input_shape']
+        n_features = self.input_shape[1]
+        W_shape = (n_features, self.units)
+        self.W_initializer = get_kernel_initializer(init=self.W_init, generator=self.generator, dtype=self.dtype)
+        self.W = self.W_initializer(W_shape)
+        self.grad_W = np.zeros_like(self.W, dtype=self.dtype)
         return params
-        
     def _initialize_b(self, params):
-        dtype = params['dtype']
-        if self.b_init is None:
-            self.b_init = ZerosInitializer()
-        elif isinstance(self.b_init, np.ndarray):
-            assert self.b_init.shape == (self.units,)
-            self.b_init = DeterministicInitializer(self.b_init)
-        self.b = self.b_init(shape=(self.units,), dtype=dtype)
-        self.grad_b = np.zeros_like(self.b, dtype=dtype)
+        self.b_initializer = get_bias_initializer(init=self.b_init, dtype=self.dtype)
+        self.b = self.b_initializer((self.units,))
+        self.grad_b = np.zeros_like(self.b, dtype=self.dtype)
+        return params
+    def _initializer_regularization(self, params):
+        if self.W_reg is None:
+            self.W_reg = EmptyRegularizer()
+        if self.b_reg is None:
+            self.b_reg = EmptyRegularizer()
         return params
     
+    def _initialize_output_shape(self, params):
+        self.output_shape = (self.input_shape[0], self.units) # Input shape for the next layer
+        params['input_shape'] = self.output_shape
+        return params
+    
+    # PROPAGATION
     # Forward propagation
     def update_output(self, input):
-        self.output = np.dot(input, self.W)  # [B x I] x [I x O] = [B x O]
+        self.output = np.dot(input, self.W)  # [N x D] x [D x H] = [N x H]
         if self.use_bias:
             self.output += self.b[None, :]
         return self.output
@@ -88,7 +94,7 @@ class Dense(Layer):
             self.grad_b = np.sum(grad_output, axis=0)
             if self.b_reg: self.grad_b += self.b_reg.grad(self.b)
         
-        
+
     @check_initialized
     def get_regularization_loss(self):
         loss = 0.0

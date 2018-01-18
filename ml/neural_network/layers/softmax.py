@@ -4,8 +4,8 @@ import numpy as np
 from ..sequential import Layer
 
 class SoftMax(Layer):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, name=None):
+        super().__init__(name=name)
     
     def update_output(self, input):
         self.output = np.subtract(input, input.max(axis=1, keepdims=True))

@@ -28,15 +28,9 @@ class Model(Layer):
             sets names
             runs parameters initialization
         """
-        self.input_shape = config['input_shape']
-        self.dtype = config.setdefault('dtype', np.float64)
-        self.seed  = config.setdefault('seed', 0)
-        self.names = config.setdefault('names', {})
-        self.debug = config.setdefault('debug', False)
-        self.grad_clip = config.setdefault('grad_clip', np.inf)
-        self.config = config
-        config = self.sequential.initialize(config)
-        config = self.criterion.initialize(config)
+        self._initialize(config)
+        self.sequential.initialize(config)
+        self.criterion.initialize(config)
         from copy import deepcopy
         self.config = deepcopy(config)
         self.compiled = True

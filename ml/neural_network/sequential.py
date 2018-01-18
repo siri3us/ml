@@ -6,8 +6,8 @@ from .layer import Layer
 from .decorators import *
 
 class Sequential(Layer):
-    def __init__(self, layers=[]):
-        super().__init__()
+    def __init__(self, layers=[], name=None):
+        super().__init__(name=name)
         self.layers = []
         for layer in layers:
             self.add(layer)
@@ -19,10 +19,10 @@ class Sequential(Layer):
  
     # Initialization
     def _initialize(self, params):
-        params = super()._initialize(params)
+        super()._initialize(params)
         for layer in self.layers:
             params = layer.initialize(params)
-        self.output_shape = self.layers[-1].output_shape
+        self.output_shape = params['input_shape']
         return params
 
     # Forward propagation

@@ -5,8 +5,12 @@ from .layer import Layer
 from .decorators import *
 
 class Criterion(Layer):
-    def __init__ (self):
-        super().__init__()
+    def __init__ (self, name=None):
+        super().__init__(name=name)
+    def _initialize_output_shape(self, params):
+        self.output_shape = (1, 1) # It is just a number
+        return params
+        
     @check_initialized
     def forward(self, input, target):
         self._forward_enter_callback()
@@ -14,23 +18,20 @@ class Criterion(Layer):
         self.update_output(input, target)
         self._forward_exit_callback()
         return self.output
-    def update_output(self, input, target):
-        assert False, 'Not implemented.'
-        
+
     @check_initialized
     def backward(self, input, target):
         self._backward_enter_callback()
         input = input.astype(self.dtype, copy=False) # Decorator is not used here!
         self.update_grad_input(input, target)
+        self._clip_gradients()
         self._backward_exit_callback()
         return self.grad_input
-    def update_grad_input(self, input, target):
-        assert False, 'Not implemented' 
-        
+
         
 class MSECriterion(Criterion):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, name=None):
+        super().__init__(name=name)
         
     def update_output(self, input, target):   
         self.output = np.mean((input - target) ** 2)
@@ -42,15 +43,14 @@ class MSECriterion(Criterion):
         
       
 class MulticlassLogLoss(Criterion):
-    def __init__(self, proba_clip=1e-20):
-        super().__init__()
+    def __init__(self, proba_clip=1e-20, name=None):
+        super().__init__(name=name)
         self.proba_clip = proba_clip
         assert proba_clip <= 1e-6
         
     def _initialize(self, params):
         super()._initialize(params)
-        input_shape = params['input_shape']
-        self.n_classes = input_shape[1]
+        self.n_classes = self.input_shape[1]
         return params
     
     def _check_input_target(self, input, target):

@@ -43,22 +43,17 @@ class BatchNormalization(Layer):
     - out: of shape (N, D)
     - cache: A tuple of values needed in the backward pass
     """
-    def __init__(self, momentum=0.9, eps=1e-5):
-        super().__init__()
+    def __init__(self, momentum=0.9, eps=1e-5, name=None):
+        super().__init__(name=name)
         self.momentum = momentum
         self.eps = eps
-        
-    def _initialize(self, params):
-        # Check params and initialize name
-        params = super()._initialize(params)
-        input_shape = params['input_shape']
-        dtype = params['dtype']
-        n_features = input_shape[1]
-        self.running_mean = np.zeros(n_features, dtype=dtype)
-        self.running_var = np.zeros(n_features, dtype=dtype)
-        self.gamma = np.ones(n_features, dtype=dtype)
-        self.beta = np.zeros(n_features, dtype=dtype)
-        return params
+
+    def _initialize_params(self, params):
+        n_features = self.input_shape[1]
+        self.running_mean = np.zeros(n_features, dtype=self.dtype)
+        self.running_var = np.zeros(n_features, dtype=self.dtype)
+        self.gamma = np.ones(n_features, dtype=self.dtype)
+        self.beta = np.zeros(n_features, dtype=self.dtype)
 
     # Forward propagation
     def update_output(self, input):
@@ -91,13 +86,13 @@ class BatchNormalization(Layer):
     @check_initialized
     def get_params(self, copy=False):
         if copy:
-            return OrderedDict([(self.name + '/gamma', self.gamma.copy()), (self.name + '/beta', self.beta.copy())])
-        return OrderedDict([(self.name + '/gamma', self.gamma), (self.name + '/beta', self.beta)])
+            return OrderedDict([(self.name + ':gamma', self.gamma.copy()), (self.name + ':beta', self.beta.copy())])
+        return OrderedDict([(self.name + ':gamma', self.gamma), (self.name + ':beta', self.beta)])
     @check_initialized
     def get_grad_params(self, copy=False):
         if copy:
-            return OrderedDict([(self.name + '/gamma', self.grad_gamma.copy()), (self.name + '/beta', self.grad_beta.copy())])
-        return OrderedDict([(self.name + '/gamma', self.grad_gamma), (self.name + '/beta', self.grad_beta)])
+            return OrderedDict([(self.name + ':gamma', self.grad_gamma.copy()), (self.name + ':beta', self.grad_beta.copy())])
+        return OrderedDict([(self.name + ':gamma', self.grad_gamma), (self.name + ':beta', self.grad_beta)])
     @check_initialized
     def zero_grad_params(self):
         self.grad_gamma = np.zeros_like(self.gamma).astype(self.dtype, copy=False)
