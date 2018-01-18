@@ -65,6 +65,7 @@ class MulticlassLogLoss(Criterion):
         
     def update_output(self, input, target):
         # Checks and conversions
+        assert self.n_classes == input.shape[1]
         self._check_input_target(input, target)
         if target.ndim == 2:
             target = np.argmax(target, axis=1)

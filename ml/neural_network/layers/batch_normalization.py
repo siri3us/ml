@@ -59,9 +59,9 @@ class BatchNormalization(Layer):
     def update_output(self, input):
         if self.training:
             self.sample_mean = np.mean(input, axis=0)
-            self.sample_var = np.var(input, axis=0)
+            self.sample_var  = np.var(input, axis=0)
             self.running_mean = self.momentum * self.running_mean + (1 - self.momentum) * self.sample_mean
-            self.running_var = self.momentum * self.running_var + (1 - self.momentum) * self.sample_var
+            self.running_var  = self.momentum * self.running_var  + (1 - self.momentum) * self.sample_var
             self.normed_input = (input - self.sample_mean[None, :]) / np.sqrt(self.sample_var + self.eps)[None, :]
             self.output = self.gamma[None, :] * self.normed_input + self.beta[None, :]
         else:

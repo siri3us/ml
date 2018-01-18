@@ -59,7 +59,7 @@ def eval_numerical_gradient_array(f, x, df, h=1e-5):
 
 def rel_error(x, y):
     """ returns relative error """
-    return np.max(np.abs(x - y) / (np.maximum(1e-8, np.abs(x) + np.abs(y))))
+    return np.max(np.abs(x - y) / (np.maximum(1e-12, np.abs(x) + np.abs(y))))
 
 class GradientsChecker:
     """

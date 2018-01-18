@@ -34,7 +34,7 @@ class NormalInitializer(Initializer):
             stddev = 1.0 / np.sqrt(np.prod(shape[1:]))
         else:
             assert False
-        return self.generator.normal(-stddev, stddev, size=shape).astype(self.dtype, copy=False)
+        return self.generator.normal(loc=0.0, scale=stddev, size=shape).astype(self.dtype, copy=False)
 
 def get_kernel_initializer(init=None, dtype=None, generator=None):
     if init is None:

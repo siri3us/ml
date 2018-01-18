@@ -14,6 +14,7 @@ class Dropout(Layer):
         
     # initialization
     def _initialize_seed(self, params):
+        if self.debug: print('setting: ', params)
         self.seed = params.setdefault('seed', 0)
         self.generator = np.random.RandomState(self.seed)
         params['seed'] += 1
