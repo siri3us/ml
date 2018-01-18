@@ -6,8 +6,8 @@ from scipy.special import expit, logit
 
 
 class Tanh(Layer):
-    def __init__(self):
-         super().__init__()
+    def __init__(self, name=None):
+         super().__init__(name=name)
     
     def update_output(self, input):
         self.output = np.tanh(input)
@@ -19,8 +19,8 @@ class Tanh(Layer):
         
 
 class ReLU(Layer):
-    def __init__(self):
-         super().__init__()
+    def __init__(self, name=None):
+         super().__init__(name=name)
     
     def update_output(self, input):
         self.output = np.maximum(input, 0)
@@ -32,8 +32,8 @@ class ReLU(Layer):
         
         
 class LeakyReLU(Layer):
-    def __init__(self, slope=0.03):
-        super().__init__()
+    def __init__(self, slope=0.03, name=None):
+        super().__init__(name=name)
         self.slope = slope
         
     def update_output(self, input):
@@ -48,8 +48,8 @@ class LeakyReLU(Layer):
 
     
 class ELU(Layer):
-    def __init__(self, alpha=1.0):
-        super().__init__()
+    def __init__(self, alpha=1.0, name=None):
+        super().__init__(name=name)
         self.alpha = alpha
         
     def update_output(self, input):
@@ -65,8 +65,8 @@ class ELU(Layer):
     
 
 class SoftPlus(Layer):
-    def __init__(self, limit=20):
-        super().__init__()
+    def __init__(self, limit=20, name=None):
+        super().__init__(name=name)
         self.limit = limit
     
     def update_output(self, input):

@@ -5,19 +5,17 @@ from ..sequential import Layer
 
 
 class Dropout(Layer):
-    def __init__(self, p=0.5):
-        super().__init__()
+    def __init__(self, p=0.5, name=None):
+        super().__init__(name=name)
         self.p = p
         self.mask = None
     def __repr__(self):
         return super().__repr__() + '({})'.format(self.p)
         
     # initialization
-    def _initialize(self, params):
-        # Check params and initialize name
-        params = super()._initialize(params)
-        seed = params['seed']
-        self.gen = np.random.RandomState(seed)
+    def _initialize_seed(self, params):
+        self.seed = params.setdefault('seed', 0)
+        self.generator = np.random.RandomState(self.seed)
         params['seed'] += 1
         return params
     
@@ -28,7 +26,7 @@ class Dropout(Layer):
     # Forward propagation
     def update_output(self, input):
         if self.training:
-            self.mask = self.gen.choice([0, 1], p=[self.p, 1 - self.p], size=input.shape)
+            self.mask = self.generator.choice([0, 1], p=[self.p, 1 - self.p], size=input.shape)
             self.output = np.multiply(self.mask, input)
         else:
             self.output = (1 - self.p) * input
