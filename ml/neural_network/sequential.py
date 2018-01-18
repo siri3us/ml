@@ -16,6 +16,8 @@ class Sequential(Layer):
         self.layers.append(layer)
     def __repr__(self):
         return '->'.join([str(layer) for layer in self.layers])
+    def __getitem__(self, n_layer):
+        return self.layers[n_layer]
  
     # Initialization
     def _initialize(self, params):

@@ -9,13 +9,16 @@ from .decorators import *
 class Model(Layer):
     def __init__(self, sequential, criterion):
         super().__init__()
+        if isinstance(sequential, list):
+            sequential = Sequential(sequential)
         assert isinstance(sequential, Sequential)
         assert isinstance(criterion, Criterion)
         self.sequential = sequential
         self.criterion = criterion
     def __repr__(self):
         return str(self.sequential) + '->[' + str(self.criterion) + ']'
-    
+    def __getitem__(self, n_layer):
+        return self.sequential[n_layer]
     # Initialization
     def initialize(self):
         assert False, '"initialize" method is not defined for Model'
