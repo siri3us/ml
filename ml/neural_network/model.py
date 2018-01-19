@@ -15,6 +15,7 @@ class Model(Layer):
         assert isinstance(criterion, Criterion)
         self.sequential = sequential
         self.criterion = criterion
+        self.compiled = False
     def __repr__(self):
         return str(self.sequential) + '->[' + str(self.criterion) + ']'
     def __getitem__(self, n_layer):
