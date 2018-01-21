@@ -2,6 +2,7 @@
 
 from .layers import *
 from .conv_layers_fast import *
+from scipy.signal import correlate2d
 
 from itertools import product
 import numpy as np
@@ -139,6 +140,56 @@ def conv_backward_naive(Y_grad, cache):
         b_grad[n_filter] += np.sum(Y_grad[:, n_filter, :, :])
     
     return X_grad, W_grad, b_grad    
+
+
+def conv_forward_vector(X, W, b, conv_param):
+    pad = conv_param['pad'] # Obtaining 'pad'
+    stride = conv_param['stride'] # Obtaining 'stride'
+    n_samples, n_channels, input_h, input_w = X.shape
+    n_filters, n_channels, filter_h, filter_w = W.shape
+    padded_input_h, padded_input_w = input_h + 2 * pad, input_w + 2 * pad
+    assert (padded_input_h - filter_h) % stride == 0, 'Incorrect height padding'
+    assert (padded_input_w - filter_w) % stride == 0, 'Incorrect width padding'
+    output_h = 1 + (padded_input_h - filter_h) // stride
+    output_w = 1 + (padded_input_w - filter_w) // stride
+    
+    out = np.zeros((n_samples, n_filters, output_h, output_w), dtype=np.float64)
+    for n_sample, n_channel in product(range(n_samples), range(n_channels)):
+        x = np.pad(X[n_sample, n_channel], ((pad, pad), (pad, pad)), mode='constant')
+        for n_filter in range(n_filters):
+            c = correlate2d(x, W[n_filter, n_channel], mode='valid')
+            out[n_sample, n_filter] += c[::stride, ::stride]
+    out += b[None, :, None, None]
+    cache = (X, W, b, conv_param)
+    return out, cache
+    
+    
+def conv_backward_vector(grad_Y, cache):
+    X, W, b, conv_param = cache
+    pad = conv_param['pad']
+    stride = conv_param['stride']
+    n_samples, n_channels, input_h, input_w  = X.shape
+    n_samples, n_filters, output_h, output_w = grad_Y.shape
+    n_filters, n_channels, filter_h, filter_w = W.shape
+    padded_input_h, padded_input_w = input_h + 2 * pad, input_w + 2 * pad
+    full_output_h, full_output_w = padded_input_h - filter_h + 1, padded_input_w - filter_w + 1 # output size for stride=1
+
+    grad_X = np.zeros((n_samples, n_channels, input_h, input_w), dtype=np.float64)
+    grad_W = np.zeros_like(W).astype(np.float64, copy=False)
+    grad_b = np.zeros_like(b).astype(np.float64, copy=False)
+    full_grad_Y = np.zeros((n_samples, n_filters, full_output_h, full_output_w), dtype=np.float64)
+    full_grad_Y[:, :, ::stride, ::stride] = grad_Y
+
+    W = W[:, :, ::-1, ::-1]
+    for n_sample in range(n_samples):
+        x = np.pad(X[n_sample], [(0, 0), (pad, pad), (pad, pad)], mode='constant')
+        for n_filter, n_channel in product(range(n_filters), range(n_channels)):
+            grad_x = correlate2d(full_grad_Y[n_sample, n_filter], W[n_filter, n_channel], mode='full')
+            grad_X[n_sample, n_channel] += grad_x[pad:padded_input_h - pad, pad:padded_input_w - pad]
+            grad_W[n_filter, n_channel] += correlate2d(x[n_channel], full_grad_Y[n_sample, n_filter], mode='valid')
+    for n_filter in range(n_filters):
+        grad_b[n_filter] += np.sum(full_grad_Y[:, n_filter, :, :])
+    return grad_X, grad_W, grad_b
 
 
 def max_pool_forward_naive(X, pool_param):
