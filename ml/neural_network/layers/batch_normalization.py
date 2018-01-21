@@ -47,15 +47,35 @@ class BatchNormalization(Layer):
         super().__init__(name=name)
         self.momentum = momentum
         self.eps = eps
+        self._is_NCHW_input = False
 
     def _initialize_params(self, params):
-        n_features = self.input_shape[1]
-        self.running_mean = np.zeros(n_features, dtype=self.dtype)
-        self.running_var = np.zeros(n_features, dtype=self.dtype)
-        self.gamma = np.ones(n_features, dtype=self.dtype)
-        self.beta = np.zeros(n_features, dtype=self.dtype)
-
+        self.n_features = self.input_shape[1]
+        self.running_mean = np.zeros(self.n_features, dtype=self.dtype)
+        self.running_var = np.zeros(self.n_features, dtype=self.dtype)
+        self.gamma = np.ones(self.n_features, dtype=self.dtype)
+        self.beta = np.zeros(self.n_features, dtype=self.dtype)
+       
     # Forward propagation
+    def _NCHW_to_ND(self, X):
+        X = np.transpose(X, [0, 2, 3, 1])
+        self._NHWC_shape = X.shape
+        return X.reshape((-1, X.shape[3]))
+    def _ND_to_NCHW(self, X):
+        return X.reshape(self._NHWC_shape).transpose(0, 3, 1, 2)
+
+    def _forward_preprocess(self, input):
+        input = super()._forward_preprocess(input)
+        self._is_NCHW_input = False
+        if input.ndim == 4:
+            self._is_NCHW_input = True
+            input = self._NCHW_to_ND(input)
+        return input
+    def _forward_postprocess(self):
+        super()._forward_postprocess()
+        if self._is_NCHW_input:
+            self.output = self._ND_to_NCHW(self.output)
+
     def update_output(self, input):
         if self.training:
             self.sample_mean = np.mean(input, axis=0)
@@ -67,7 +87,17 @@ class BatchNormalization(Layer):
         else:
             normed_input = (input - self.running_mean[None, :]) / (np.sqrt(self.running_var[None, :] + self.eps))
             self.output = self.gamma[None, :] * normed_input + self.beta[None, :]
-        return self.output
+
+    def _backward_preprocess(self, input, grad_output):
+        input, grad_output = super()._backward_preprocess(input, grad_output)
+        if self._is_NCHW_input:
+            input = self._NCHW_to_ND(input)
+            grad_output = self._NCHW_to_ND(grad_output)
+        return input, grad_output
+    def _backward_postprocess(self):
+        super()._backward_postprocess()
+        if self._is_NCHW_input:
+            self.grad_input = self._ND_to_NCHW(self.grad_input) 
 
     # Backward propagation
     def update_grad_input(self, input, grad_output):
@@ -97,4 +127,3 @@ class BatchNormalization(Layer):
     def zero_grad_params(self):
         self.grad_gamma = np.zeros_like(self.gamma).astype(self.dtype, copy=False)
         self.grad_beta = np.zeros_like(self.beta).astype(self.dtype, copy=False)
-    

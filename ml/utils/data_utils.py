@@ -50,7 +50,7 @@ def load_CIFAR10(ROOT):
 
 def get_CIFAR10_data(train_size=49000, test_size=1000, val_size=1000, ordered=True, 
                      substract_mean=False, image_data_format='channels_last',
-                     ravel=False, bias_trick=False, random_state=1, verbose=False, normalize_by=None,
+                     ravel=False, bias_trick=False, random_state=0, verbose=False, normalize_by=None,
                      cifar10_dir='datasets/CIFAR10', scaler=None):
     """
     Load the CIFAR-10 dataset from disk and perform preprocessing to prepare it for classifiers.
@@ -108,10 +108,12 @@ def get_CIFAR10_data(train_size=49000, test_size=1000, val_size=1000, ordered=Tr
     else:
         if val_size > 0:
             X_train, X_tr, y_train, y_tr = train_test_split(X_tr, y_tr, train_size=train_size, stratify=y_tr, random_state=random_state)
-            X_val, y_val = resample(X_tr, y_tr, n_samples=val_size, replace=False, random_state=random_state + 1)
+            random_state += 1
+            X_val, y_val = resample(X_tr, y_tr, n_samples=val_size, replace=False, random_state=random_state)
         else:
             X_train, y_train = resample(X_tr, y_tr, n_samples=train_size, replace=False, random_state=random_state)
-        X_test,  y_test = resample(X_ts, y_ts, n_samples=test_size, replace=False, random_state=random_state + 1)
+            random_state += 1
+        X_test,  y_test = resample(X_ts, y_ts, n_samples=test_size, replace=False, random_state=random_state)
     
     assert X_train.shape[0] == train_size
     assert y_train.shape[0] == train_size

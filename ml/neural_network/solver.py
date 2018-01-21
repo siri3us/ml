@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
+from tqdm import tqdm
 from collections import defaultdict, Counter, OrderedDict
 from .layer import Layer
 from .sequential import Sequential
@@ -9,7 +10,7 @@ from .optimizers import *
 
 class Solver:
     def __init__(self, model, data, model_config=None, optim_config=None, batch_size=100, n_epochs=10, 
-                 verbose=False, print_every_iter=None, print_every_epoch=None,
+                 verbose=False, print_every_iter=None, print_every_epoch=None, use_tqdm=False,
                  checkpoint_name=None, seed=0):
         """
         Construct a new Solver instance.
@@ -43,6 +44,7 @@ class Solver:
         self.num_epochs = n_epochs
 
         self.verbose = verbose
+        self.use_tqdm = use_tqdm
         if print_every_iter is None: 
             self.print_every_iter = 1000000000
         else: 
@@ -217,9 +219,13 @@ class Solver:
         self._update_history() # Initial model quality
         for n_epoch in range(self.num_epochs):
             self.n_epoch = n_epoch
-            for n_iter in range(num_iter_per_epoch):
+            iter_range = range(num_iter_per_epoch)
+            if self.use_tqdm:
+                iter_range = tqdm(iter_range)
+            for n_iter in iter_range:
                 self._step()
                 # Maybe print training loss
+               
                 if (n_all_iter + 1) % self.print_every_iter == 0:
                     msg = '(Iteration {}/{}) loss: {}'.format(n_all_iter + 1, num_all_iterations, 
                                                               self.loss_history[-1])

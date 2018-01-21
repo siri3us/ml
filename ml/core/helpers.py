@@ -44,6 +44,7 @@ class Checker(Printer):
         if not n == int(n):
             raise TypeError('Param "{}" must be an integer number'.format(name))
         return True
+        
     def _check_positive(self, n, name):
         self._check_numeric(n, name)
         if n <= 0:
@@ -54,6 +55,17 @@ class Checker(Printer):
         if n < 0:
             raise ValueError("Param \"{}\" must be nonegative".format(name))
         return True   
+        
+    def _check_int_positive(self, n, name):
+        self._check_int(n, name)
+        self._check_positive(n, name)
+        return True
+    def _check_int_nonnegative(self, n, name):
+        self._check_int(n, name)
+        self._check_nonnegative(n, name)
+        return True
+    
+        
     def _check_proba(self, n, name):
         self._check_numeric(n, name)
         if (n <= 1) & (n >= 0):
@@ -65,6 +77,7 @@ class Checker(Printer):
         if not np.allclose(np.sum(distr), 1, self._distr_sum_error):
             raise ValueError("Distribution \"{}\" is not normed: sum equals {}".format(name, np.sum(distr)))
         return True
+        
     def _check_array_range(self, arr, range, arr_name):
         self._check_type(arr, arr_name, np.ndarray)
         if not ((np.min(arr) >= range[0]) & (np.max(arr) <= range[1])):

@@ -85,7 +85,7 @@ class GradientsChecker:
         return X
     def _get_y(self, model, X, y):
         batch_size = X.shape[0]
-        if y is not None:
+        if y is None:
             if isinstance(model.criterion, MSECriterion):
                 y = self.gen.normal(size=batch_size)
             elif isinstance(model.criterion, MulticlassLogLoss):
