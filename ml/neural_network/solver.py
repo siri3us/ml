@@ -10,7 +10,7 @@ from .optimizers import *
 
 class Solver:
     def __init__(self, model, data, model_config=None, optim_config=None, batch_size=100, n_epochs=10, 
-                 verbose=False, print_every_iter=None, print_every_epoch=None, use_tqdm=False,
+                 verbose=False, print_every_iter=None, print_every_epoch=None, use_tqdm=False, update_history=True,
                  checkpoint_name=None, seed=0):
         """
         Construct a new Solver instance.
@@ -45,6 +45,7 @@ class Solver:
 
         self.verbose = verbose
         self.use_tqdm = use_tqdm
+        self.update_history = update_history
         if print_every_iter is None: 
             self.print_every_iter = 1000000000
         else: 
@@ -195,6 +196,8 @@ class Solver:
         return np.mean(y_pred == y_true)
     
     def _update_history(self):
+        if not self.update_history:
+            return
         train_acc  = self.eval(self.X_train, self.y_train, eval_func=self._accuracy)
         train_loss = self.eval(self.X_train, self.y_train, eval_func=self._logloss)
         val_acc    = self.eval(self.X_val, self.y_val, eval_func=self._accuracy)
@@ -234,15 +237,16 @@ class Solver:
             self._update_history()
             
             # Keep track of the best model
-            val_acc = self.val_acc_history[-1]
-            if val_acc > self.best_val_acc:
-                self.best_val_acc = val_acc
-                self.best_params  = OrderedDict()
-                for param_name, param_value in self.model.get_params().items():
-                    self.best_params[param_name] = param_value.copy()
+            if self.update_history:
+                val_acc = self.val_acc_history[-1]
+                if val_acc > self.best_val_acc:
+                    self.best_val_acc = val_acc
+                    self.best_params  = OrderedDict()
+                    for param_name, param_value in self.model.get_params().items():
+                        self.best_params[param_name] = param_value.copy()
 
             # Maybe print training loss
-            if (n_epoch + 1) % self.print_every_epoch == 0:
+            if ((n_epoch + 1) % self.print_every_epoch == 0) & self.update_history:
                 msg = '(Epoch {}/{}) train acc: {:.2}; val acc: {:.2}, train loss: {:.4}; val loss: {:.4}'.format(
                     self.n_epoch + 1, self.num_epochs, 
                     self.train_acc_history[-1],  self.val_acc_history[-1],
@@ -259,5 +263,6 @@ class Solver:
                 optim_config['learning_rate'] *= lr_decay
 
         # At the end of training swap the best params into the model
-        self.model.set_params(self.best_params)
+        if self.update_history:
+            self.model.set_params(self.best_params)
         return self.model
