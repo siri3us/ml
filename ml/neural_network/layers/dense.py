@@ -1,51 +1,121 @@
 # -*- coding: utf-8 -*-
-import random
+
 import numpy as np
-from ..sequential import Layer
+from collections import OrderedDict
+from ..layer import Layer
+from ..initializers import *
+from ..regularizers import *
+from ..decorators import *
 
 class Dense(Layer):
-    def __init__(self, input_size, output_size, l2_W_reg=0, bias=True):
-        super().__init__()
-        self.input_size = input_size
-        self.output_size = output_size
-        self.l2_W_reg = l2_W_reg
-        self.bias = bias
+    def __init__(self, units, use_bias=True, W_init=None, b_init=None, W_reg=None, b_reg=None, name=None):
+        """
+        Inputs:
+        - units - Integer or Long, dimensionality of the output space.
+        - W_initializer
+        - b_initializer
+        - seed - used for initializers!!!
+        """
+        super().__init__(name=name)
+        self.units = units
+        self.use_bias = use_bias
+        self.W_init = W_init
+        self.b_init = b_init
+        self.W_reg  = W_reg
+        self.b_reg  = b_reg
         
-        stdv = 1. / np.sqrt(input_size)
-        self.W = np.random.uniform(-stdv, stdv, size=(input_size, output_size))
-        self.grad_W = np.zeros_like(self.W)
-        self.b = np.random.uniform(-stdv, stdv, size=output_size)
-        self.grad_b = np.zeros_like(self.b)
-            
-    def update_output(self, X_input):
-        self.assert_nans(X_input)
-        self.output = np.dot(X_input, self.W)  # [B x I] x [I x O] = [B x O]
-        if self.bias:
+    def __repr__(self):
+        if hasattr(self, 'W'):
+            input_size, output_size = self.W.shape
+        else:
+            input_size = '?'
+            output_size = self.units
+        return 'Dense({}->{})'.format(input_size, output_size)   
+   
+    # INITIALIZATION
+    def _initialize_seed(self, params):
+        self.seed = params.setdefault('seed', 0)
+        self.generator = np.random.RandomState(self.seed)
+        params['seed'] += 1
+        return params
+
+    def _initialize_input_shape(self, params):
+        assert 'input_shape' in params, '"input_shape" is not provided though must be.'
+        input_shape = params['input_shape']
+        assert len(input_shape) == 2, 'input to Dense layer must be a 2-dim tensor.'
+        self.input_shape = input_shape
+        return params
+    
+    def _initialize_params(self, params):
+        self._initialize_W(params)
+        self._initialize_b(params)
+        self._initializer_regularization(params)
+        return params
+    def _initialize_W(self, params):
+        n_features = self.input_shape[1]
+        W_shape = (n_features, self.units)
+        self.W_initializer = get_kernel_initializer(init=self.W_init, generator=self.generator, dtype=self.dtype)
+        self.W = self.W_initializer(W_shape)
+        self.grad_W = np.zeros_like(self.W, dtype=self.dtype)
+        return params
+    def _initialize_b(self, params):
+        self.b_initializer = get_bias_initializer(init=self.b_init, dtype=self.dtype)
+        self.b = self.b_initializer((self.units,))
+        self.grad_b = np.zeros_like(self.b, dtype=self.dtype)
+        return params
+    def _initializer_regularization(self, params):
+        if self.W_reg is None:
+            self.W_reg = EmptyRegularizer()
+        if self.b_reg is None:
+            self.b_reg = EmptyRegularizer()
+        return params
+    
+    def _initialize_output_shape(self, params):
+        self.output_shape = (self.input_shape[0], self.units) # Input shape for the next layer
+        params['input_shape'] = self.output_shape
+        return params
+    
+    # PROPAGATION
+    # Forward propagation
+    def update_output(self, input):
+        self.output = np.dot(input, self.W)  # [N x D] x [D x H] = [N x H]
+        if self.use_bias:
             self.output += self.b[None, :]
         return self.output
     
-    def update_grad_input(self, X_input, grad_output):
-        self.assert_nans(grad_output)
-        self.grad_input = np.dot(grad_output, self.W.T)         # [B x O] x [O x I] = [B x I]
+    # Backward propagation
+    def update_grad_input(self, input, grad_output):
+        self.grad_input = np.dot(grad_output, self.W.T)         # [N x H] x [H x D] = [N x D]
         return self.grad_input
-    
-    def update_grad_param(self, X_input, grad_output):
-        self.assert_nans(grad_output)
-        assert X_input.shape[0] == grad_output.shape[0]
-        batch_size = X_input.shape[0]
-        self.grad_W = np.dot(X_input.T, grad_output) / batch_size + self.l2_W_reg * self.W # ([I x B] x [B x O]).T = [I, O]
-        if self.bias:
-            self.grad_b = np.mean(grad_output, axis=0)
+    def update_grad_param(self, input, grad_output):
+        self.grad_W = np.dot(input.T, grad_output)               # ([D x N] x [N x H]).T = [D, H]
+        if self.W_reg: self.grad_W += self.W_reg.grad(self.W)
+        if self.use_bias:
+            self.grad_b = np.sum(grad_output, axis=0)
+            if self.b_reg: self.grad_b += self.b_reg.grad(self.b)
         
-    def get_params(self):
-        return [self.W, self.b]
-    
-    def get_grad_params(self):
-        return [self.grad_W, self.grad_b]
 
+    @check_initialized
+    def get_regularization_loss(self):
+        loss = 0.0
+        if self.W_reg: loss += self.W_reg.loss(self.W)
+        if self.use_bias:
+            if self.b_reg: loss += self.b_reg.loss(self.b)  
+        return loss
+    
+    @check_initialized
+    def get_params(self, copy=False):
+        if copy:
+            return OrderedDict([(self.name + ':W', self.W.copy()), (self.name + ':b', self.b.copy())])
+        return OrderedDict([(self.name + ':W', self.W), (self.name + ':b', self.b)])
+        
+    @check_initialized
+    def get_grad_params(self, copy=False):
+        if copy:
+            return OrderedDict([(self.name + ':W', self.grad_W.copy()), (self.name + ':b', self.grad_b.copy())])
+        return OrderedDict([(self.name + ':W', self.grad_W), (self.name + ':b', self.grad_b)])
+    
+    @check_initialized
     def zero_grad_params(self):
         self.grad_W.fill(0)
         self.grad_b.fill(0)
-    
-    def __repr__(self):
-        return 'Dense({}->{})'.format(self.input_size, self.output_size)

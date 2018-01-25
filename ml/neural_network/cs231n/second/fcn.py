@@ -21,7 +21,7 @@ class FullyConnectedNet:
 
     def __init__(self, hidden_dims, input_dim=3*32*32, num_classes=10,
                  use_relu=True, dropout=0, use_batchnorm=False, reg=0.0,
-                 weight_scale=1e-2, dtype=np.float64, seed=None, debug=False):
+                 weight_scale=1e-2, dtype=np.float64, seed=None, debug=False, keep_seed=False):
         """
         Initialize a new FullyConnectedNet.
 
@@ -77,7 +77,8 @@ class FullyConnectedNet:
         self.dropout_param = {}
         if self.use_dropout:
             self.dropout_param = {'mode': 'train', 'p': dropout, 'gen': self.random}
-
+            if keep_seed:
+                self.dropout_param['seed'] = seed
         self.bn_params = []
         if self.use_batchnorm:
             self.bn_params = [{'mode': 'train'} for i in range(self.num_layers - 1)]

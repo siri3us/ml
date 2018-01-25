@@ -89,8 +89,8 @@ def relu_backward(dout, cache):
     dx = dout.copy()
     dx[x < 0] = 0
     return dx
-    
-    
+
+
 def affine_relu_forward(x, w, b):
     """
     Convenience layer that perorms an affine transform followed by a ReLU
@@ -117,8 +117,8 @@ def affine_relu_backward(dout, cache):
     da = relu_backward(dout, relu_cache)
     dx, dw, db = affine_backward(da, fc_cache)
     return dx, dw, db
-    
-    
+
+
 def svm_loss(x, y):
     """
     Computes the loss and gradient using for multiclass SVM classification.
@@ -178,7 +178,6 @@ def softmax_loss(x, y, debug=False):
     return loss, dx
     
     
-    
 def batchnorm_forward(X, gamma, beta, bn_param, debug=False):
     """
     Forward pass for batch normalization.
@@ -235,14 +234,14 @@ def batchnorm_forward(X, gamma, beta, bn_param, debug=False):
         running_mean = momentum * running_mean + (1 - momentum) * sample_mean
         running_var = momentum * running_var + (1 - momentum) * sample_var
         
-        X_norm = (X - sample_mean[None, :]) / (np.sqrt(sample_var)[None, :] + eps)
+        X_norm = (X - sample_mean[None, :]) / np.sqrt(sample_var + eps)[None, :]
         out = gamma[None, :] * X_norm + beta[None, :]
         cache = X, X_norm, sample_mean, sample_var, gamma, beta, eps
         if debug:
             assert isinstance(X_norm, np.ndarray)
             assert isinstance(sample_var, np.ndarray)
     elif mode == 'test':
-        out = gamma[None, :] * ((X - running_mean[None, :]) / (np.sqrt(running_var[None, :]) + eps)) + beta[None, :]
+        out = gamma[None, :] * ((X - running_mean[None, :]) / (np.sqrt(running_var[None, :]+ eps) )) + beta[None, :]
     else:
         raise ValueError('Invalid forward batchnorm mode "%s"' % mode)
 
@@ -278,7 +277,7 @@ def batchnorm_backward(dout, cache, debug=False):
     assert dout.ndim == 2
     assert dout.shape == X_norm.shape
     
-    std_inv = 1.0 / (np.sqrt(var) + eps)
+    std_inv = 1.0 / (np.sqrt(var + eps))
     X_mu = X - mean[None, :]
     
     dLY = dout
@@ -310,8 +309,7 @@ def batchnorm_backward(dout, cache, debug=False):
         assert dx.shape == (B, D)
     return dx, dgamma, dbeta
 
-
-def batchnorm_backward_alt(dout, cache):
+def batchnorm_backward_alt(output_grad, cache):
     """
     Alternative backward pass for batch normalization.
 
@@ -324,21 +322,12 @@ def batchnorm_backward_alt(dout, cache):
 
     Inputs / outputs: Same as batchnorm_backward
     """
-    dx, dgamma, dbeta = None, None, None
-    ###########################################################################
-    # TODO: Implement the backward pass for batch normalization. Store the    #
-    # results in the dx, dgamma, and dbeta variables.                         #
-    #                                                                         #
-    # After computing the gradient with respect to the centered inputs, you   #
-    # should be able to compute gradients with respect to the inputs in a     #
-    # single statement; our implementation fits on a single 80-character line.#
-    ###########################################################################
-    pass
-    ###########################################################################
-    #                             END OF YOUR CODE                            #
-    ###########################################################################
-
-    return dx, dgamma, dbeta
+    X, X_norm, sample_mean, sample_var, gamma, beta, eps = cache
+    N, D = X.shape
+    X_grad = gamma / np.sqrt(sample_var + eps)[None, :] * ((output_grad - np.mean(output_grad, axis=0)[None, :]) - X_norm * np.mean(np.multiply(X_norm, output_grad), axis=0)[None, :]) 
+    beta_grad = np.sum(output_grad, axis=0)
+    gamma_grad = np.sum(np.multiply(X_norm, output_grad), axis=0)
+    return X_grad, gamma_grad, beta_grad
 
 
 def dropout_forward(x, dropout_param):
@@ -365,7 +354,7 @@ def dropout_forward(x, dropout_param):
     gen = dropout_param['gen']
     seed = dropout_param.get('seed', None)
     if seed is not None:
-        gen.seed(seed)
+        gen = np.random.RandomState(seed)
     mask = None
     out = None
 

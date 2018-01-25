@@ -1,4 +1,4 @@
-\documentclass{book}
+\documentclass{report}
 \usepackage[english, russian]{babel}
 \usepackage[utf8]{inputenc}
 \usepackage[margin=0.75in]{geometry}
@@ -6,6 +6,7 @@
 \usepackage{amsthm, amsmath, amsfonts, amssymb}
 %\usepackage{bbold}
 \usepackage{dsfont}
+\usepackage{xspace}
 \usepackage{mathtools}
 \usepackage{hyperref}
 \usepackage{graphicx}
@@ -23,6 +24,36 @@
 \usetikzlibrary{positioning}
 \usepackage{pgf}
 \usepackage{pgfplots}
+
+
+% Python style for highlighting
+\usepackage{listings}
+\definecolor{deepblue}{rgb}{0,0,0.5}
+\definecolor{deepred}{rgb}{0.6,0,0}
+\definecolor{deepgreen}{rgb}{0,0.5,0}
+\DeclareFixedFont{\ttb}{T1}{txtt}{bx}{n}{8} % for bold
+\DeclareFixedFont{\ttm}{T1}{txtt}{m}{n}{8}  % for normal
+\newcommand\pythonstyle{\lstset{
+		language=Python,
+		basicstyle=\ttm,
+		otherkeywords={self},             % Add keywords here
+		keywordstyle=\ttb\color{deepblue},
+		emph={MyClass,__init__},          % Custom highlighting
+		emphstyle=\ttb\color{deepred},    % Custom highlighting style
+		stringstyle=\color{deepgreen},
+		frame=tb,                         % Any extra options here
+		showstringspaces=false            % 
+	}}
+
+	
+% Python environment
+\lstnewenvironment{python}[1][]
+{
+	\pythonstyle
+	\lstset{#1}
+}
+{}
+	
 
 \definecolor{grey1}{RGB}{192,192,192}
 \definecolor{lemonchiffon}{RGB}{255,250,205}
@@ -93,12 +124,180 @@
 \author{Иванов Александр \\ ИППИ РАН}
 \date{}
 \maketitle
-	
 \tableofcontents
 	
 \include{commands}
 
 \chapter{Полносвязные Сети}
+
+\begin{itemize}
+	\item $\NumOfSamples$ --- размер батча
+	\item $\NumOfDims$ --- размерность вектора признаков
+\end{itemize}
+
+\section{Dense Layer}
+
+\paragraph{Векторный вид}
+
+\begin{gather}
+\boldy^T = \boldx^T \boldW + \boldb^T \\
+\boldy = \boldW^T \boldx + \boldb
+\end{gather}
+
+\begin{gather}
+\partder{\Loss}{\boldx} = \partder{\boldy}{\boldx} \partder{\Loss}{\boldy} = \boldW \partder{\Loss}{\boldy}
+\end{gather}
+
+\begin{gather*}
+\partder{\Loss}{\boldw_i} = \partder{\boldy}{\boldw_i} \partder{\Loss}{\boldy} = \partder{y_i}{\boldw_i} \partder{\Loss}{y_i} = \boldx \cdot \partder{\Loss}{y_i} \Rightarrow \partder{\Loss}{\boldW} = \boldx \left(\partder{\Loss}{\boldy}\right)^T
+\end{gather*}
+
+\begin{gather*}
+\partder{\Loss}{\boldb} = \partder{\boldy}{\boldb} \partder{\Loss}{\boldy} = \partder{\Loss}{\boldy}.
+\end{gather*}
+
+
+\paragraph{Матричный вид}
+
+\begin{gather*}
+\boldY = \boldX \boldW + \boldB, 
+\end{gather*}
+где 
+$$\boldB = [\underbrace{\boldb, \boldb, \dots, \boldb}_{\NumOfSamples}]^T \in \mathbb{R}^{\NumOfSamples \times \NumOfDims}.$$
+В таком случае 
+\begin{gather*}
+\partder{\Loss}{\boldX} = [\partder{\Loss}{\boldx_1}, \dots, \partder{\Loss}{\boldx_\NumOfSamples}]^T = [\boldW  \partder{\Loss}{\boldy_1}, \dots,  \boldW \partder{\Loss}{\boldy_{\NumOfSamples}}]^T =  [\partder{\Loss}{\boldy_1}, \dots,  \partder{\Loss}{\boldy_{\NumOfSamples}}]^T \boldW^T =  \partder{\Loss}{\boldY} \boldW^T.
+\end{gather*}
+
+\begin{gather*}
+\partder{\Loss}{\boldw_i} = \Sum_{k=1}^{\NumOfSamples} \partder{y_i^{(k)}}{\boldw_i} \partder{\Loss}{y_i^{(k)}} = \Sum_{k=1}^{\NumOfSamples} \boldx^{(k)} \partder{\Loss}{y_i^{(k)}} \Rightarrow \partder{\Loss}{\boldW} = \Sum_{k=1}^{\NumOfSamples} \boldx^{(k)} \left(\partder{\Loss}{\boldy^{(k)}}\right)^T = \boldX^T \partder{\Loss}{\boldY}.
+\end{gather*}
+
+\begin{gather*}
+\partder{\Loss}{\boldb} = \Sum_{k=1}^{\NumOfSamples} \partder{\boldy^{(k)}}{\boldb} \partder{\Loss}{\boldy^{(k)}} = \Sum_{k=1}^{\NumOfSamples} \partder{\Loss}{\boldy^{(k)}}
+\end{gather*}
+
+\section{SoftMax}
+
+\subsection{Forward propagation}
+
+\subsection{Backward propagation}
+
+\begin{gather*}
+\partder{\Loss}{\boldx} = \partder{\boldy}{\boldx} \partder{\Loss}{\boldy}
+\end{gather*}
+
+\begin{gather*}
+\partder{y_i}{x_j} = \partial \left(\frac{e^{x_j}}{\Sum_d e^{x_d}}\right) / \partial x_j = \frac{1}{\Sum_{d=1}^{\NumOfDims} e^{x_d}} \partder{e^{x_i}}{x_j} - \frac{e^{x_i}}{\left(\Sum_{d=1}^{\NumOfDims} e^{x_d}\right)^2} \partder{\left(\Sum_{d=1}^{\NumOfDims} e^{x_d}\right)}{x_j} = \frac{e^{x_i}\delta_{ij}}{\Sum_{d=1}^{\NumOfDims} e^{x_d}} - \frac{e^{x_i}}{\Sum_{d=1}^{\NumOfDims} e^{x_d}} \cdot \frac{e^{x_j}}{\Sum_{d=1}^{\NumOfDims} e^{x_d}} = y_j \delta_{ij} - y_i y_j.
+\end{gather*}
+Таким образом,
+\begin{gather*}
+\partder{\boldy}{\boldx} = \diag[y_1, y_2, \dots, y_\NumOfDims] - \boldy \boldy^T
+\end{gather*}
+\begin{gather*}
+\partder{\Loss}{\boldx} = \partder{\boldy}{\boldx} \partder{\Loss}{\boldy} = \left(\diag[y_1, y_2, \dots, y_\NumOfDims] - \boldy \boldy^T\right) \partder{\Loss}{\boldy} = \diag[y_1, y_2, \dots, y_\NumOfDims] \partder{\Loss}{\boldy} - \boldy \cdot \left\langle \boldy, \partder{\Loss}{\boldy} \right\rangle = \\
+= \boldy \otimes \partder{\Loss}{\boldy} - \boldy \left\langle \boldy, \partder{\Loss}{\boldy} \right\rangle
+\end{gather*}
+
+\section{Batch Normalization}
+
+Пусть $\boldx$ --- это вектор на входе слоя ($x \in \mathbb{R}^{\NumOfSamples}$). Тогда вектор $\boldy$ на выходе слоя есть
+$$
+\boldy = \gamma \cdot \frac{\boldx - \mu}{\sqrt{\sigma^2 + \eps}} + \boldbeta,
+$$
+где $$\mu = \frac{1}{\NumOfSamples}\Sum_{i=1}^\NumOfSamples x_i, \qquad \sigma^2 = \frac{1}{\NumOfSamples}\Sum_{i = 1}^\NumOfSamples (x_i - \mu)^2 = \frac{1}{\NumOfSamples} x_i^2 - \left(\frac{1}{\NumOfSamples} x_i \right)^2.$$
+
+Пусть дана производная функции потерь по $\boldy$, т.е. $\partial \Loss / \partial \boldy$. Найдем производные функции потерь по $\boldx$, $\boldbeta$, $\gamma$.
+Сначала найдем $\partial \Loss / \partial \boldx$:
+\begin{gather}
+\partder{\Loss}{\boldx} = \underbrace{\partder{\boldy}{\boldx}}_{\mathbb{R}^{\NumOfSamples \times \NumOfSamples}} \cdot \underbrace{\frac{\Loss}{\boldy}}_{\mathbb{R}^{\NumOfSamples}},
+\end{gather}
+где 
+\begin{equation}
+\partder{\boldy}{\boldx} = 
+\begin{pmatrix}
+\partder{y_1}{x_1} &\partder{y_2}{x_1} &\dots &\partder{y_\NumOfSamples}{x_1} \\
+\partder{y_1}{x_2} &\partder{y_2}{x_2} &\dots &\partder{y_\NumOfSamples}{x_2} \\
+\vdots 			   &\vdots 			   &\ddots &\vdots                        \\
+\partder{y_1}{x_\NumOfSamples} &\partder{y_2}{x_\NumOfSamples} &\dots &\partder{y_\NumOfSamples}{x_\NumOfSamples} \\
+\end{pmatrix}
+\end{equation}
+
+\begin{gather*}
+\partder{\boldy}{\boldx} = \gamma \partder{\left(\frac{\boldx - \mu}{\sqrt{\sigma^2 + \eps}}\right)}{\boldx}.
+\end{gather*}
+Рассмотрим производную 
+\begin{gather*}
+\partder{y_i}{x_j} = \gamma \partial\left(\frac{x_i - \mu}{\sqrt{\sigma^2 + \eps}}\right)/\partial x_j = 
+\gamma \partder{(x_i - \mu)}{x_j} \frac{1}{\sqrt{\sigma^2 + \eps}} - \frac{\gamma}{2} \frac{x_i - \mu}{(\sigma^2 + \eps)^{3/2}} \partder{(\sigma^2 + \eps)}{x_j} = \\
+= \gamma \left(\delta_{ij} - \frac{1}{\NumOfSamples}\right) \frac{1}{\sqrt{\sigma^2 + \eps}} - \frac{\gamma}{2} \frac{x_i - \mu}{(\sigma^2 + \eps)^{3/2}} \cdot 2 \left(\frac{x_j}{\NumOfSamples} -  \frac{\mu}{\NumOfSamples} \right) =  \gamma \left(\delta_{ij} - \frac{1}{\NumOfSamples}\right) \frac{1}{\sqrt{\sigma^2 + \eps}} - \gamma \frac{(x_i - \mu)(x_j - \mu)}{\NumOfSamples(\sigma^2 + \eps)^{3/2}}.
+\end{gather*}
+Таким образом
+\begin{gather*}
+\partder{\boldy}{\boldx} = \frac{\gamma}{\sqrt{\sigma^2 + \eps}} \left(\left(\boldI - \frac{1}{\NumOfSamples}\boldE\right) -  \frac{\boldC}{\sigma^2 + \eps}\right),
+\end{gather*}
+где $\boldC = \frac{1}{\NumOfSamples}(\boldx - \boldmu)(\boldx - \boldmu)^T$, $\boldI$ --- единичная матрица размера $\NumOfSamples \times \NumOfSamples$, $\boldE$ --- матрица, полностью состящая из единиц, размера $\NumOfSamples \times \NumOfSamples$. Тогда
+\begin{gather*}
+\partder{\Loss}{\boldx} = \frac{\gamma}{\sqrt{\sigma^2 + \eps}} \left(  \left(\boldI - \frac{1}{\NumOfSamples}\boldE\right) -  \frac{\boldC}{\sigma^2 + \eps}\right) \partder{\Loss}{\boldy} = 
+\frac{\gamma}{\sqrt{\sigma^2 + \eps}} \left(\partder{\Loss}{\boldy} - \bolde \cdot \overline{\partder{\Loss}{\boldy}} - \frac{\boldx - \mu}{\NumOfSamples(\sigma^2 + \eps)} \cdot \langle \boldx - \mu, \frac{\Loss}{\boldy}\rangle \right),
+\end{gather*}
+где $\bolde$ --- столбец из единиц размерности $\NumOfSamples$, $\overline{\partder{\Loss}{\boldy}}$ --- среднее значение элементов вектора $\partder{\Loss}{\boldy}$. Обозначив через $\boldz$ ``стандартизованный'' вектор $\boldx$ ($\boldz = (\boldx - \mu) / \sigma$), получим
+\begin{gather*}
+\partder{\Loss}{\boldx} =\frac{\gamma}{\sqrt{\sigma^2 + \eps}} \left(\partder{\Loss}{\boldy} - \bolde \cdot \overline{\partder{\Loss}{\boldy}} - \frac{\boldx - \mu}{\NumOfSamples(\sigma^2 + \eps)} \cdot \langle \boldx - \mu, \frac{\Loss}{\boldy}\rangle \right) = 
+\frac{\gamma}{\sqrt{\sigma^2 + \eps}} \left(\partder{\Loss}{\boldy} - \bolde \cdot \overline{\partder{\Loss}{\boldy}}  - \frac{\boldz}{\NumOfSamples} \cdot \langle \boldz, \frac{\Loss}{\boldy}\rangle \right).
+\end{gather*}
+
+Теперь найдем производные $\partial \Loss / \partial \boldbeta$ и $\partial \Loss / \partial \gamma$:
+\begin{gather*}
+\partder{\Loss}{\boldbeta} = \partder{\boldy}{\boldbeta} \partder{\Loss}{\boldy} = \boldI \partder{\Loss}{\boldy} = \partder{\Loss}{\boldy}, \\
+\partder{\Loss}{\gamma} = \left(\partder{\boldy}{\gamma}\right)^T \partder{\Loss}{\boldy} = \frac{\boldx - \mu}{\sqrt{\sigma + \eps}}
+\end{gather*}
+
+\subsection{Реализация в Python}
+
+Представленная ниже реализация предполагает, что 
+\begin{itemize}
+	\item $\boldX \in \mathbb{R}^{\NumOfSamples \times \NumOfDims}$ --- матрица объектов-признаков
+	\item $\boldZ \in \mathbb{R}^{\NumOfSamples \times \NumOfDims}$ --- ``стандартизованная'' вдоль оси 0 матрица $\boldX$, т.е. выход слоя \texttt{BatchNormalization}
+	\item $\boldmu \in \mathbb{R}^{\NumOfSamples}$ --- средние значения для признаков
+	\item $\boldsigma \in \mathbb{R}^{\NumOfSamples}$ --- стандартные отклонения для признаков
+\end{itemize}
+
+\begin{python}
+def batchnorm_backward_alt(output_grad, cache):
+  X, Z, mu, sigma, gamma, beta, eps = cache
+  N, D = X.shape
+  X_grad = gamma / np.sqrt(sample_var + eps)[None, :] *\ 
+           ((output_grad - np.mean(output_grad, axis=0)[None, :]) -\
+           Z * np.mean(np.multiply(Z, output_grad), axis=0)[None, :]) 
+  beta_grad = np.sum(output_grad, axis=0)
+  gamma_grad = np.sum(np.multiply(X_norm, output_grad), axis=0)
+  return X_grad, gamma_grad, beta_grad
+\end{python}
+
+\section{MulticlassLogLoss}
+На вход данного уровня поступает вектор $\boldp \in \mathbb{R}^{\NumOfDims}$ или же в случае использования батчей матрица $\boldP \in \mathbb{R}^{\NumOfSamples \times \NumOfDims}$. Данный уровень обычно является последним уровнем нейронной сети и используется для оценки вероятностей принадлежности объектов к классам. Поэтому далее будем считать, что $\NumOfDims = \NumOfClasses$, где $\NumOfClasses$ --- количество классов в выборке.
+
+\begin{gather*}
+\Loss = \frac{1}{\NumOfSamples} \Sum_{n = 1}^{\NumOfSamples} \Sum_{k = 1}^{\NumOfClasses} y_k^{(n)} \log p_n^{(k)} = \frac{1}{\NumOfSamples} \Sum_{n=1}^{\NumOfSamples} \Loss_n.
+\end{gather*}
+
+\begin{gather*}
+\partder{\Loss}{p_n^{(k)}} = \frac{1}{\NumOfSamples} \frac{y_n^{(k)}}{p_n^{(k)}}
+\end{gather*}
+\begin{gather*}
+\partder{\Loss}{\boldp_n} = [0, \dots,  \frac{1}{\NumOfSamples} \frac{y_n^{(k_n^*)}}{p_n^{(k_n*)}}, \dots, 0], 
+\end{gather*}
+где $k_n^*$ --- это истинный класс объекта $n$. Таким образом $\partder{\Loss}{\boldP}$ --- это матрица размера $\NumOfSamples \times \NumOfClasses$, имеющая вид
+\begin{gather*}
+\partder{\Loss}{\boldP} = \frac{1}{\NumOfSamples}
+\begin{bmatrix}
+\frac{y_{1, k^*_1}}{p_{1, k^*_1}} &\dots  &0 &\dots  &0 \\
+0 &\dots  &\frac{y_{2, k^*_2}}{p_{2, k^*_2}} &\dots  &0 \\
+\vdots &\vdots  &\vdots &\ddots  &\vdots \\
+0 &\dots  &0 &\dots  &\frac{y_{\NumOfSamples, k^*_\NumOfSamples}}{p_{\NumOfSamples, k^*_\NumOfSamples}} \\
+\end{bmatrix}
+\end{gather*}
 
 \chapter{Сверточные Сети}
 
@@ -107,25 +306,42 @@
 \subsection{Случай $\text{stride} = 1$}
 
 \begin{equation}
-\partder{\Loss}{\Input[c, h, w]}= \Sum_{(i, j) \in \FilterCoverageSet(h, w)} 
+\partder{\Loss}{\Input[c, h, w]}= \Sum_{(i, j) \in \AffectField(h, w)} 
 \partder{\Output[c, i, j]}{\Input[c, h, w]} \cdot \partder{\Loss}{\Output[c, i, j]}
 \end{equation}
 
+Введем вспомогательные термины. 
+
+\paragraph{Область действия.}
+Рассмотрим элемент $\Input[h, w]$ входа сверточного слоя ($h \in [0, H - 1]$, $w \in [0, W - 1]$). \textbf{Областью действия} $\AffectField(h, w)$ элемента $\Input[h, w]$ называется множество координат элементов матрицы $\Output$, которые зависят от элемента $I[h, w]$:
+\begin{equation}
+\AffectField(h, w) \triangleq \{(i, j)\colon i \in \AffectField(h), j\in \AffectField(w)\},
+\end{equation}
+где
 \begin{align}
-\FilterCoverageSet(h)& = \{i \colon \max\{0, h - \FilterSize[h]\} \le i \le \min\{h, H - \FilterSize[h]\}\}, \\
-\FilterCoverageSet(w)& = \{j \colon \min\{0, w - \FilterSize[w]\} \le j \le \max\{w, W - \FilterSize[w]\}\}.
+\AffectField(h)& = \{i \colon \max\{0, h - \FilterSize[h]\} \le i \le \min\{h, H - \FilterSize[h]\}\}, \\
+\AffectField(w)& = \{j \colon \min\{0, w - \FilterSize[w]\} \le j \le \max\{w, W - \FilterSize[w]\}\}.
 \end{align}
 
+\paragraph{Область восприимчивости.}
+Теперь рассмотрим элемент $\Output[i, j]$ выхода сверточного слоя ($i \in [0, H - \FilterSize_h]$, $j \in [0, W - \FilterSize_w]$). \textbf{Областью восприимчивости} $\ReceptiveField(h, w)$ элемента $\Output[i, j]$ называется множество координат элементов матрицы $\Input$, от которых зависит значение элемента $\Output[i, j]$:
 \begin{equation}
-\FilterCoverageSet(h, w) \triangleq \{(i, j)\colon i \in \FilterCoverageSet(h), j\in \FilterCoverageSet(w)\}.
+\label{eq:receptive_field}
+\ReceptiveField(i, j) = \{(h, w) \colon h \in \ReceptiveField(i), w \in \ReceptiveField(j)\},
 \end{equation}
+где
+\begin{align}
+\label{eq:receptive_field:add}
+\ReceptiveField(i) &= \{h \colon i \le h \le \min\{i + \FilterSize_h - 1, H - 1\}\}, \\
+\ReceptiveField(j) &= \{w \colon j \le w \le \min\{j + \FilterSize_w - 1, W - 1\}\}.
+\end{align}
 
 
 \begin{equation}
 \label{eq:conv:backprop:1}
-\partder{\Loss}{\Input[c, h, w]}= \Sum_{(i, j) \in \FilterCoverageSet(h, w)} 
+\partder{\Loss}{\Input[c, h, w]}= \Sum_{(i, j) \in \AffectField(h, w)} 
 \partder{\Output[c, i, j]}{\Input[c, h, w]} \cdot \partder{\Loss}{\Output[c, i, j]} = 
-\Sum_{(i, j) \in \FilterCoverageSet(h, w)} W[c, h - i, w - j] \partder{\Loss}{\Output[c, i, j]}
+\Sum_{(i, j) \in \AffectField(h, w)} W[c, h - i, w - j] \partder{\Loss}{\Output[c, i, j]}
 \end{equation}
 Уже здесь можно заметить, что нахождение производных по $\Input$ напоминает свертку производных по выходу $\partder{\Loss}{\Output}$
 с транспонированной (вдоль второго и третьего измерений) матрицей весов $W$.
@@ -150,13 +366,126 @@ W'[i, j] = W[c, \FilterSize[h] - 1 - i, \FilterSize[w] - 1 - j], \quad c \in [0,
 \end{equation}
 Фактически это эквивалентно тому, что матрица $\partder{\Loss}{\Output[c, i, j]}$ дополняется $\FilterSize[h] - 1$ вдоль второго измерения и $\FilterSize[w] - 1$ вдоль третьего измерения с каждой стороны. Полученная матрица имеет размер $(H + \FilterSize[h] - 1) \times (W + \FilterSize[w] - 1)$. 
 
-\subsection{Случай $\text{stride} = 2$}
-
+\subsection{Общий случай $\text{stride} \ge 1$}
+В данном случае размер матрицы $\Input$ как и ранее есть $H \times W$. В общем случае $\StrideSize_h \ge 1$ и/или $\StrideSize_w \ge 1$ для размеры $H' $ и $W'$ матрицы $\Output$ равны
 \begin{equation}
-\partder{\Loss}{\Input[c, h, w]}= \Sum_{(i, j) \in \FilterCoverageSet(h, w)} 
-\partder{\Output[c, i, j]}{\Input[c, h, w]} \cdot \partder{\Loss}{\Output[c, i, j]}
+H' = \frac{H - \FilterSize_h}{\StrideSize_h} + 1, \qquad W' = \frac{W - \FilterSize_w}{\StrideSize_w} + 1.
+\end{equation}
+Здесь как и ранее полагаем, что значения $H$, $W$, $\StrideSize$, $\FilterSize$ согласованы путем, например, предварительного дополнения входа сверточного слоя нулями, так что $H'$  и $W'$ --- целые числа.
+
+В данном случае требуется скорректировать ранее введенные области действия и восприимчивости.
+
+\paragraph{Область восприимчивости $\ReceptiveField(i, j)$}
+Рассмотрим элемент $\Output[i, j]$ ($i \in [0, H'- 1]$, $j \in [0, W' - 1]$). Этот элемент зависит от элементов матрицы $\Input$, расположенных по следующим координатам $\{(h, w)\}$:
+\begin{gather*}
+h \in [i \cdot \StrideSize_h, i \cdot \StrideSize_h + \FilterSize_h - 1], \\
+w \in [j \cdot \StrideSize_w, j \cdot \StrideSize_w + \FilterSize_w - 1].
+\end{gather*}
+Заметим, что при всех допустимых $i \in [0, H'- 1]$ и $j \in [0, W' - 1]$ значения $h$ и $w$ лежат в допустимых множествах $[0, H - 1]$ и $[0, W - 1]$. Таким образом, область восприимчивости имеет вид:
+\begin{equation}
+\ReceptiveField(i, j) = \{(h, w)\colon h \in [i \cdot \StrideSize_h, i \cdot \StrideSize_h + \FilterSize_h - 1], w \in [j \cdot \StrideSize_w, j \cdot \StrideSize_w + \FilterSize_w - 1]\}, \quad i \in [0, H'- 1], j \in [0, W' - 1].
 \end{equation}
 
+\paragraph{Область влияния (действия) $\AffectField(h, w)$.}
+Рассмотрим, на какие элементы матрицы $\Output$ влияет элемент $\Input[h, w]$. Чтобы элемент $\Input[h, w]$ влиял на $\Output[i, j]$, нужно, чтобы $(h, w) \in \ReceptiveField(i, j)$, т.е.
+\begin{equation}
+i \cdot \StrideSize_h \le h \le i \cdot \StrideSize_h + \FilterSize_h - 1, \qquad j \cdot \StrideSize_w \le w \le j \cdot \StrideSize_w + \FilterSize_w - 1.
+\end{equation}
+Осталось лишь определить все те пары $(i, j)$, для которых данное условие выполнено. 
+Из условий выше следует, что
+\begin{equation}
+\frac{h - \FilterSize_h + 1}{\StrideSize_h} \le i \le \frac{h}{\StrideSize_h}, \qquad \frac{w - \FilterSize_w + 1}{\StrideSize_w} \le j \le \frac{w}{\StrideSize_w}. 
+\end{equation}
+С граничными условиями, данные неравенства для определения области влияния $\AffectField(h, w)$ переходят в
+
+С учетом граничных условий, области влияния $\AffectField(h)$ и $\AffectField(w)$ вдоль высоты и ширины определяются как
+\begin{gather*}
+\AffectField(h; \StrideSize_h) = \left\{i \in \mathbb{Z} \colon \max\{\frac{h - \FilterSize_h + 1}{\StrideSize_h}, 0\} \le i \le \min\{\frac{h}{\StrideSize_h}, \frac{H - \FilterSize_h}{\StrideSize_h}\}\right\},\\
+\AffectField(w; \StrideSize_w) = \left\{j \in \mathbb{Z} \colon \max\{\frac{w - \FilterSize_w + 1}{\StrideSize_w}, 0\} \le j \le \min\{\frac{w}{\StrideSize_w}, \frac{W - \FilterSize_w}{\StrideSize_w}\}\right\}.\\
+\end{gather*}
+%Граничные условия активируются при следующих значениях $h$ и $w$ соответственно
+%\begin{gather*}
+%h \in [0, \FilterSize_h - 1) \cup [H - \FilterSize_h + 1, H),\\
+%w \in [0, \FilterSize_w - 1) \cup [W - \FilterSize_w + 1, W).
+%\end{gather*}
+
+Пусть $h = q_h\StrideSize_h + r_h$, $q_h \in \mathbb{Z}$, $r_h \in [0, \StrideSize_h - 1]$.
+\begin{equation*}
+\frac{h - \FilterSize_h + 1}{\StrideSize_h} = q_h + \frac{r_h}{\StrideSize_h} -\frac{\FilterSize_h - 1}{\StrideSize_h} \le i \le q_h + \frac{r_h}{\StrideSize_h} = \frac{h}{\StrideSize_h}.
+\end{equation*}
+
+\subsubsection{Производные функции потерь $\Loss$}
+\paragraph{Производная по входу $\Input$.}
+%\substack{i \in \AffectField(h; \StrideSize_h) \\ j \in \AffectField(w; \StrideSize_w)}}
+\begin{equation}
+\partder{\Loss}{\Input[h, w]}= \Sum_{(i, j) \in \AffectField(h, w; \StrideSize)} 
+\partder{\Output[i, j]}{\Input[h, w]} \cdot \partder{\Loss}{\Output[i, j]} =
+\Sum_{(i, j) \in \AffectField(h, w; \StrideSize)} \Weights[h - i \cdot \StrideSize_h, w - j \cdot \StrideSize_w] \cdot \partder{\Loss}{\Output[i, j]}.
+\end{equation}
+Так как множество $\AffectField(h, w; \StrideSize)$ уже найдено, то поточечное вычисление данной производной не представляет проблем.
+
+В случае наличия нескольких каналов производная по входу $\Input[c, h, w]$ вычисляется следующим образом:
+\begin{equation}
+\partder{\Loss}{\Input[c, h, w]}= \Sum_{l=0}^{\NumOfChannels' - 1}\Sum_{(i, j) \in \AffectField(h, w; \StrideSize)} 
+\partder{\Output[l, i, j]}{\Input[c, h, w]} \cdot \partder{\Loss}{\Output[i, j]} =
+\Sum_{(i, j) \in \AffectField(h, w; \StrideSize)} \Weights[c, h - i \cdot \StrideSize_h, w - j \cdot \StrideSize_w] \cdot \partder{\Loss}{\Output[l, i, j]}.
+\end{equation}
+
+\paragraph{Производная по весам $\Weights$.}
+В случае одного входного и выходного каналов производная по весу имеет вид:
+\begin{equation}
+\partder{\Loss}{\Weights[h, w]} = \Sum_{\substack{0 \le i' < H' \\ 0 \le j' < W'}} \partder{\Output[i', j']}{\Weights[h, w]} \cdot  \partder{\Loss}{\Output[i', j']} =  \Sum_{\substack{0 \le i' < H' \\ 0 \le j' < W'}} \Input[i' \cdot \StrideSizeH + h, j' \cdot \StrideSizeW + w] \cdot \partder{\Loss}{\Output[i', j']}.
+\end{equation}
+
+В случае наличия $\NumOfChannels\ge 1$ входных каналов и одного выходного производная принимает вид
+\begin{equation}
+\partder{\Loss}{\Weights[c, h, w]} = \Sum_{\substack{0 \le i' < H' \\ 0 \le j' < W'}} \partder{\Output[i', j']}{\Weights[c, h, w]} \cdot  \partder{\Loss}{\Output[i', j']} =  \Sum_{\substack{0 \le i' < H' \\ 0 \le j' < W'}} \Input[c, i' \cdot \StrideSizeH + h, j' \cdot \StrideSizeW + w] \cdot \partder{\Loss}{\Output[i', j']}.
+\end{equation}
+
+В наиболее общем случае $\NumOfChannels\ge 1$ входных каналов и одного выходного производная принимает вид
+\begin{gather}
+\partder{\Loss}{\Weights[c', c, h, w]} = \Sum_{\substack{0 \le i' < H' \\ 0 \le j' < W'}} \partder{\Output[c', i', j']}{\Weights[c', c, h, w]} \cdot  \partder{\Loss}{\Output[c', i', j']} = \Sum_{\substack{0 \le i' < H' \\ 0 \le j' < W'}} \Input[c, i' \cdot \StrideSizeH + h, j' \cdot \StrideSizeW + w] \cdot \partder{\Loss}{\Output[c', i', j']}.
+\end{gather}
+
+\paragraph{Производная по смещению $\Biases$.}
+Каждому каналу на выходе соответствует свое значение смещения.
+
+\begin{equation}
+\partder{\Loss}{\Bias} = \Sum_{\substack{0 \le i' < H' \\ 0 \le j' < W'}} \partder{\Output[i', j']}{\Bias} \cdot \partder{\Loss}{\Output[i', j']} = \Sum_{\substack{0 \le i' < H' \\ 0 \le j' < W'}} \partder{\Loss}{\Output[i', j']}.
+\end{equation}
+
+\begin{equation}
+\partder{\Loss}{\Biases[c']} = \Sum_{\substack{0 \le i' < H' \\ 0 \le j' < W'}} \partder{\Output[c', i', j']}{\Biases[c']} \cdot \partder{\Loss}{\Output[c', i', j']} = \Sum_{\substack{0 \le i' < H' \\ 0 \le j' < W'}} \partder{\Loss}{\Output[c', i', j']}.
+\end{equation}
+
+\subsection{Альтернативная реализация}
+Пусть 
+\begin{itemize}
+	\item $\boldX$ --- входной тензор сверточного слоя
+	\item $\boldY$ --- тензор на выходе сверточного слоя
+	\item Свертка считается в режиме \texttt{VALID}
+\end{itemize}
+
+Для начала рассмотрим случай двумерного входного тензора, т.е.
+\begin{itemize}
+	\item $\boldX$ имеет размер $\InputH \times \InputW$
+	\item $\boldY$ имеет размер $\OutputH \times \OutputW$
+\end{itemize}
+
+Пусть сначала считается полная свертка с $\StrideSizeH = \StrideSizeW = 1$, тогда на выходе сначала получим тензор $\boldZ$ размера $(\InputH - \FilterSizeH + 1) \times (\InputW - \FilterSizeW + 1)$. Однако не все его значения нам нужны
+
+
+\section{Слой Max Pooling}
+
+\subsection{Прямое распространение}
+
+\subsection{Обратное распространение}
+
+\chapter{TensorFlow}
+
+\begin{itemize}
+	\item Device placement - изучить достоинства размещения переменных вручную
+\end{itemize}
 
 \bibliographystyle{ugost2008}
 \bibliography{../bib/phy.bib}

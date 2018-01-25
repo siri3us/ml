@@ -50,8 +50,8 @@ def load_CIFAR10(ROOT):
 
 def get_CIFAR10_data(train_size=49000, test_size=1000, val_size=1000, ordered=True, 
                      substract_mean=False, image_data_format='channels_last',
-                     ravel=False, bias_trick=False, random_state=1, 
-                     cifar10_dir='/datasets/CIFAR10', scaler=None):
+                     ravel=False, bias_trick=False, random_state=0, verbose=False, normalize_by=None,
+                     cifar10_dir='datasets/CIFAR10', scaler=None):
     """
     Load the CIFAR-10 dataset from disk and perform preprocessing to prepare it for classifiers.
     Inputs:
@@ -65,6 +65,8 @@ def get_CIFAR10_data(train_size=49000, test_size=1000, val_size=1000, ordered=Tr
         bias_trick        - add dimenston 3073 to each image with value 1
         random_state      - random_state
         cifar10_dir       - CIFAR10 dataset batch directory
+        verobse
+        normalize_by
     Returns: 
         if val_size=0 returns a tuple with the following elements
             X_train, y_train, X_test, y_test
@@ -106,10 +108,12 @@ def get_CIFAR10_data(train_size=49000, test_size=1000, val_size=1000, ordered=Tr
     else:
         if val_size > 0:
             X_train, X_tr, y_train, y_tr = train_test_split(X_tr, y_tr, train_size=train_size, stratify=y_tr, random_state=random_state)
-            X_val, y_val = resample(X_tr, y_tr, n_samples=val_size, replace=False, random_state=random_state + 1)
+            random_state += 1
+            X_val, y_val = resample(X_tr, y_tr, n_samples=val_size, replace=False, random_state=random_state)
         else:
             X_train, y_train = resample(X_tr, y_tr, n_samples=train_size, replace=False, random_state=random_state)
-        X_test,  y_test = resample(X_ts, y_ts, n_samples=test_size, replace=False, random_state=random_state + 1)
+            random_state += 1
+        X_test,  y_test = resample(X_ts, y_ts, n_samples=test_size, replace=False, random_state=random_state)
     
     assert X_train.shape[0] == train_size
     assert y_train.shape[0] == train_size
@@ -147,7 +151,21 @@ def get_CIFAR10_data(train_size=49000, test_size=1000, val_size=1000, ordered=Tr
             X_test = np.hstack([X_test, np.ones((X_test.shape[0], 1))])
             if val_size > 0:
                 X_val = np.hstack([X_val, np.ones((X_val.shape[0], 1))])
-                
+    if verbose:
+        print('Training data shape: ', X_train.shape)
+        print('Training labels shape: ', y_train.shape)
+        if val_size > 0:
+            print('Validation data shape: ', X_val.shape)
+            print('Validation labels shape: ', y_val.shape)
+        print('Test data shape: ',   X_test.shape)
+        print('Test labels shape: ', y_test.shape)
+           
+    if normalize_by is not None:
+        X_train /= normalize_by
+        X_test /= normalize_by
+        if val_size > 0:
+            X_val /= normalize_by
+                    
     if val_size > 0:
         return {'X_train': X_train, 'y_train': y_train, 
                 'X_val':   X_val,   'y_val':   y_val, 
@@ -155,6 +173,52 @@ def get_CIFAR10_data(train_size=49000, test_size=1000, val_size=1000, ordered=Tr
     return {'X_train': X_train, 'y_train': y_train, 
             'X_test':  X_test,  'y_test':  y_test}
 
+
+def get_MNIST_data(train_size=69000, val_size=1000,  
+                   substract_mean=False, normalize_by=None, 
+                   mnist_dir='datasets/MNIST', random_state=1, verbose=False, dtype=np.float64):
+    """
+    
+    """
+    filename = mnist_dir + 'mnist.npz'
+    if os.path.exists(filename):
+        with np.load(filename, 'r') as data:
+            X = data['X']
+            y = data['y']
+    else:
+        from sklearn.datasets import fetch_mldata
+        mnist = fetch_mldata("mnist-original")
+        X, y = mnist.data, mnist.target
+        np.savez(filename, X=X, y=y)
+        
+    # splitting
+    assert train_size + val_size <= X.shape[0]
+    from sklearn.utils import resample
+    X, y = resample(X, y, n_samples=train_size + val_size, replace=False, random_state=random_state)
+    X_train, X_val, y_train, y_val = train_test_split(X, y, train_size=train_size, random_state=random_state + 1)
+    
+    # Conversions
+    X_train = X_train.astype(dtype, copy=False)
+    X_val = X_val.astype(dtype, copy=False)
+    y_train = y_train.astype(np.int32)
+    y_val = y_val.astype(np.int32)
+    
+    # centering
+    if substract_mean:
+        mean_image = X_train.mean(axis=0, keepdims=True)
+        X_train -= mean_image
+        X_val -= mean_image
+
+    # normalizing  
+    if normalize_by is not None:
+        X_train /= normalize_by
+        X_val /= normalize_by
+    if verbose:
+        print('X_train.shape = {}, y_train.shape = {}'.format(X_train.shape, y_train.shape))
+        print('X_val.shape = {},   y_val.shape = {}'.format(X_val.shape, y_val.shape))
+    return {'X_train': X_train, 'y_train': y_train,
+            'X_val': X_val, 'y_val': y_val}
+            
 
 def load_tiny_imagenet(path, dtype=np.float32, subtract_mean=True):
     """
