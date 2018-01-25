@@ -18,13 +18,13 @@ class Printer:
 
 class Checker(Printer):
     def _error_msg(self, error_msg):
-        return type(self).__name__ + ': ' + error_msg
+        return 'ERROR: ' + type(self).__name__ + ': ' + error_msg
     def _info_msg(self, info_msg):
-        return type(self).__name__ + ': ' + info_msg
+        return 'INFO: ' + type(self).__name__ + ': ' + info_msg
     def _warning_msg(self, warning_msg):
         return 'WARNING: ' + type(self).__name__ + ': ' + warning_msg
-    def _method_msg(self, method_msg):
-        return type(self).__name__ + '.' + method_msg
+    def _method_msg(self, method_name, method_msg):
+        return type(self).__name__ + '.' + method_name + '(): ' + method_msg
 
     def __init__(self, distr_sum_error=1e-8):
         self._distr_sum_error = distr_sum_error
@@ -33,32 +33,39 @@ class Checker(Printer):
             self._printers[v] = Printer(v, self)
     def _check_type(self, n, name, *types):
         if not isinstance(n, tuple(types)):
-            raise TypeError('Param "{}" must have one of the types "{}", not "{}".'.format(name, *types, type(n)))
+            type_names = [t.__name__ for t in types]
+            raise TypeError('Param "{}" must have one of the types "{}", not "{}".'.format(
+                name, type_names, type(n).__name__))
         return True
-    def _check_numeric(self, n, name):
+    def _check_numeric(self, n, name, msg=None):
         if not isinstance(n, numbers.Number):
-            raise TypeError('Param "{}" must be a number'.format(name))
+            if msg is None: msg = 'Param "{}" must be a number'.format(name)
+            raise TypeError(msg)
         return True 
-    def _check_int(self, n, name):
-        self._check_numeric(n, name)
+    def _check_int(self, n, name, msg=None):
+        self._check_numeric(n, name, msg=msg)
         if not n == int(n):
-            raise TypeError('Param "{}" must be an integer number'.format(name))
+            if msg is None: msg = 'Param "{}" must be an integer number'.format(name)
+            raise TypeError(msg)
         return True
-    def _check_positive(self, n, name):
-        self._check_numeric(n, name)
+    def _check_positive(self, n, name, msg=None):
+        self._check_numeric(n, name, msg=msg)
         if n <= 0:
-            raise ValueError("Param \"{}\" must be positive".format(name))
+            if msg is None: msg = 'Param "{}" must be positive'.format(name)
+            raise ValueError(msg)
         return True
-    def _check_nonnegative(self, n, name):
-        self._check_numeric(n, name)
+    def _check_nonnegative(self, n, name, msg=None):
+        self._check_numeric(n, name, msg=msg)
         if n < 0:
-            raise ValueError("Param \"{}\" must be nonegative".format(name))
+            if msg is None: msg = 'Param "{}" must be nonegative'.format(name)
+            raise ValueError(msg)
         return True   
-    def _check_proba(self, n, name):
-        self._check_numeric(n, name)
+    def _check_proba(self, n, name, msg=None):
+        self._check_numeric(n, name, msg=msg)
         if (n <= 1) & (n >= 0):
             return True
-        raise ValueError("Param \"{}\" is not proba though it must be".format(name))
+        if msg is None: msg = 'Param "{}" is not proba though it must be'.format(name)
+        raise ValueError(msg)
     def _check_distr(self, distr, name):
         for i in range(len(distr)):
             self._check_proba(distr[i], name + '[{}]'.format(i))
@@ -70,6 +77,11 @@ class Checker(Printer):
         if not ((np.min(arr) >= range[0]) & (np.max(arr) <= range[1])):
             raise ValueError("All elements of the array \"{}\" must be in the range [{}, {}]".format(arr_name, range[0], range[1]))
         return True
+        
+    # Класс Checker обладает специальными методами, позволяющими не только проводить проверку некоторого 
+    # значения, но и сохранять это значение в качестве аттрибута. Так как данная возможность операется на 
+    # использвание метода __setattr__, то требуется соблюдать особую осторожность, если данный метода 
+    # переопределен в наследнике класса Checker.
         
     def _set_number(self, value, name):
         self._check_numeric(value, name)
