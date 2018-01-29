@@ -38,18 +38,14 @@ class Dense(Layer):
         self.generator = np.random.RandomState(self.seed)
         params['seed'] += 1
         return params
-
     def _initialize_input_shape(self, params):
-        assert 'input_shape' in params, '"input_shape" is not provided though must be.'
-        input_shape = params['input_shape']
-        assert len(input_shape) == 2, 'input to Dense layer must be a 2-dim tensor.'
-        self.input_shape = input_shape
+        super()._initialize_input_shape(params)
+        assert len(self.input_shape) == 2, 'input to Dense layer must be a 2-dim tensor.'
         return params
-    
     def _initialize_params(self, params):
         self._initialize_W(params)
         self._initialize_b(params)
-        self._initializer_regularization(params)
+        self._initialize_regularization(params)
         return params
     def _initialize_W(self, params):
         n_features = self.input_shape[1]
@@ -63,7 +59,7 @@ class Dense(Layer):
         self.b = self.b_initializer((self.units,))
         self.grad_b = np.zeros_like(self.b, dtype=self.dtype)
         return params
-    def _initializer_regularization(self, params):
+    def _initialize_regularization(self, params):
         if self.W_reg is None:
             self.W_reg = EmptyRegularizer()
         if self.b_reg is None:

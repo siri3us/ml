@@ -7,6 +7,12 @@ from .model import Model
 from .criterions import *
 
 
+def rel_error(x, y, eps=1e-8):
+    """ returns relative error """
+    return np.max(np.abs(x - y) / (np.maximum(eps, np.abs(x) + np.abs(y))))
+
+
+
 def eval_numerical_gradient(f, x, h=1e-5):
     """
     a naive implementation of numerical gradient of f at x

@@ -1,6 +1,7 @@
 import numpy as np
 from random import randrange
 
+
 def eval_numerical_gradient(f, x, verbose=True, h=0.00001):
     """
     a naive implementation of numerical gradient of f at x

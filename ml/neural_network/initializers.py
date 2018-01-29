@@ -37,11 +37,30 @@ class NormalInitializer(Initializer):
         return self.generator.normal(loc=0.0, scale=stddev, size=shape).astype(self.dtype, copy=False)
 
 def get_kernel_initializer(init=None, dtype=None, generator=None):
+    """
+    Возвращает инициализатор для 
+    -init: задает начальное значение инициализируемой переменной
+        None:        используется нормальная инициализация
+        np.ndarray:  константная инициализация заданным значением
+        Initializer: передан custom-мный иницализатор
+    -dtype
+    -generator
+    """
     if init is None:
         return NormalInitializer(generator=generator, dtype=dtype)
     if isinstance(init, np.ndarray):
         return ConstInitializer(value=init, dtype=dtype)
+    assert isinstance(init, Initializer), '"init" must be of type "Initializer"'
     return init
 
 def get_bias_initializer(init=None, dtype=None, **kwargs):
+    """
+    Возвращает константный инициализатор для значения вектора смещения
+    -init
+    -dtype
+    -kwargs
+    """
     return ConstInitializer(value=init, dtype=dtype)
+
+
+

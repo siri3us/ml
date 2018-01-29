@@ -48,6 +48,12 @@ class Checker(Printer):
             if msg is None: msg = 'Param "{}" must be an integer number'.format(name)
             raise TypeError(msg)
         return True
+    def _check_boolean(self, n, name, msg=None):
+        if not isinstance(n, bool):
+            if msg is None: msg = 'Param "{}" must be a boolean'.format(name)
+            raise TypeError(msg)
+        return True
+        
     def _check_positive(self, n, name, msg=None):
         self._check_numeric(n, name, msg=msg)
         if n <= 0:

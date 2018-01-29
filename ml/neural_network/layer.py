@@ -56,7 +56,21 @@ class Layer(Checker):
         assert hasattr(self, 'input_shape')
         assert hasattr(self, 'output_shape')
     def initialize(self, params):
-        """This function is called during compilation process to initialize layer"""
+        """Данная функция вызывается в процессе компиляции модели (метод Model.compile). Только позле инициализация уровень становится готов к работе.
+        Аргументы:
+        -params: словарь, содержащий параметры сети:
+            debug       - 
+            seed        - 
+            dtype       - тип данных; все данные сети, включая входы и переменные, будут представлены в данном формате
+            input_shape - размер входного массива данных
+        
+        Возвращаемое значение:
+        -params: возвращает тот же самый словарь params; однако часть его значений меняется в процессе инициализации (см. 'Замечания для разработчиков')
+        
+        Замечания для разработчиков:
+            Словарь params передается по ссылке. Внимание: процессе инициализации уровней сети данный словарь изменяется;
+                если исходный словарь параметров не должен изменяться, то в метод initialize следует передавать копию словаря.
+            С точки зрения архитектуры, реализация данной функции относится к парадигме PIMPL: вся действительная работа выполнеяется в методе _initialize"""
         self._initialize(params)
         self._check_initialized()
         self.initialized = True
@@ -109,10 +123,11 @@ class Layer(Checker):
         self.grad_clip = params.setdefault('grad_clip', np.inf)
         assert self.grad_clip > 0, '"grad_clip" must be higher than 0.'
         return params
-        
-    # Forward propagation
+       
+    ################################## 
+    ###     Forward propagation    ###
+    ##################################
     @check_initialized
-    @dtype_conversion
     def forward(self, input):
         self._forward_enter_callback()
         input = self._forward_preprocess(input)
@@ -122,16 +137,19 @@ class Layer(Checker):
         return self.output
     def update_output(self, input):
         self.output = input
-   
+    # Предобработка прямого распространения
     def _forward_preprocess(self, input):
-        self._check_arrays(input)        # Check
-        input = self._convert_to_dtype(input)
+        self._check_arrays(input)             # Проверка входного массива данных
+        input = self._convert_to_dtype(input) # Приведение данных к требуемому типу
         return input
+    # Постобработка обратного распространения
     def _forward_postprocess(self):
         return
         
         
-    # Backward propagation
+    ################################## 
+    ###    Backward propagation    ###
+    ##################################
     @check_initialized
     def backward(self, input, grad_output):
         self._backward_enter_callback()
@@ -146,13 +164,14 @@ class Layer(Checker):
         self.grad_input = grad_output
     def update_grad_param(self, input, grad_output):
         pass
-        
+    # Предобработка обратного распространения
     def _backward_preprocess(self, input, grad_output):
         self._check_arrays(input, grad_output)         # Checks and transformations
         input, grad_output = self._convert_to_dtype(input, grad_output)
         return input, grad_output
+    # Постобработка обратного распространения
     def _backward_postprocess(self):
-        self._clip_gradients()                         # Gradients clipping
+        self._clip_gradients()                         # Gradients clipping; ограничение градиентов
         
     def _convert_to_dtype(self, *args):
         args = tuple([arg.astype(self.dtype, copy=False) for arg in args])

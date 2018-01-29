@@ -4,6 +4,43 @@ import numpy as np
 from .layer import Layer
 from scipy.special import expit, logit
 
+# TODO: возможно имеет смысл реализовать все activatoins через callable nonlinearities
+
+class Nonlinearity:
+    pass
+
+class tanh(Nonlinearity):
+    def forward(self, input):
+        output = np.tanh(input)
+        return output, output
+    def backward(self, grad_output, cache):
+        output = cache
+        return np.multiply((1 - output ** 2), grad_output)
+
+class relu(Nonlinearity):
+    def forward(self, input):
+        assert False
+    def backward(self, grad_output, cache):
+        assert False
+
+class leaky_relu(Nonlinearity):
+    def forward(self, input):
+        assert False
+    def backward(self, grad_output, cache):
+        assert False
+        
+class elu(Nonlinearity):
+    def forward(self, input):
+        assert False
+    def backward(self, grad_output, cache):
+        assert False
+        
+class softplus(Nonlinearity):
+    def forward(self, input):
+        assert False
+    def backward(self, grad_output, cache):
+        assert False    
+
 
 class Tanh(Layer):
     def __init__(self, name=None):
