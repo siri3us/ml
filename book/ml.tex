@@ -481,6 +481,46 @@ i \cdot \StrideSize_h \le h \le i \cdot \StrideSize_h + \FilterSize_h - 1, \qqua
 
 \subsection{Обратное распространение}
 
+\chapter{Рекуррентные сети (Recurrent neural networks)}
+
+
+\begin{equation*}
+\boldy = f(\boldV \boldh + \boldW \boldx + \boldb)
+\end{equation*}
+
+\begin{eqnarray*}
+\boldh_1 &= &f(\boldV \boldh_0 + \boldW \boldx_0 + \boldb)\\
+\boldh_2 &= &f(\boldV \boldh_1 + \boldW \boldx_1 + \boldb)\\
+\boldh_3 &= &f(\boldV \boldh_2 + \boldW \boldx_2 + \boldb)\\
+\dots \\
+\boldh_k &= &f(\boldV \boldh_{k-1} + \boldW \boldx_{k-1} + \boldb)\\
+\end{eqnarray*}
+
+Если формулы прямого распространения не вызывают особых сложностей, то обратное распространение требует значительно большего количества выкладок.
+
+Выход рекуррентной сети по факту имеет вид
+\begin{gather*}
+\boldy = f(\boldV f(\boldV f( \dots (\boldV f(\boldV \boldh_0 + \boldW \boldx_0 + \boldb) + \boldW \boldx_1 + \boldb) \dots) +  \boldW \boldx_{k-2} + \boldb ) + \boldW \boldx_{k-1} + \boldb)
+\end{gather*}
+
+Посмотрим на некоторый уровень рекуррентной сети. Этот уровень осуществляет преобразование вида
+\begin{equation*}
+\boldy = f(\boldV \boldh + \boldW \boldx + \boldb)
+\end{equation*}
+Далее за этим уровнем следует еще какое-то число точно таких же уровней. Далее допустим, что 
+\begin{itemize}
+	\item нам известна производная функции потерь $\partial \Loss / \partial \boldy$ по выходу конкретно данного уровня 
+	\item нам известны производная функции потерь $\partial \Loss / \partial \boldW$,$\partial \Loss / \partial \boldW$ 
+\end{itemize}
+Иными словами, функция потерь представляется как функция от выхода данного слоя, и параметров
+$$
+\Loss = \Loss(\boldy, \boldV, \boldW, \boldb),
+$$
+где параметры $\boldV, \boldW, \boldb$ оказывают влияние только через последующие слои. Чтобы включить сюда влияние через текущий слой, заметим, что это влияние осуществляется через выход $\boldy$ текущего слоя. Иными словами
+\begin{gather*}
+\frac{d\Loss}{d\boldW_{i,j}} = \frac{d\Loss(\boldy, \boldV, \boldW, \boldb)}{d\boldW_{i,j}} = \partder{\Loss}{\boldW_{i, j}} + \left(\partder{\boldy}{\boldW_{i,j}}\right)^T \partder{\Loss}{\boldy}
+\end{gather*}
+
 \chapter{TensorFlow}
 
 \begin{itemize}
