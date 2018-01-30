@@ -65,7 +65,7 @@
 %\subsectionfont{\color{blue}}
 \subsubsectionfont{\color{red}}  % sets colour of sections
 
-\usepackage{caption,subcaption}
+%\usepackage{caption,subcaption}
 
 \usepackage{bm}
 
@@ -498,10 +498,24 @@ i \cdot \StrideSize_h \le h \le i \cdot \StrideSize_h + \FilterSize_h - 1, \qqua
 
 Если формулы прямого распространения не вызывают особых сложностей, то обратное распространение требует значительно большего количества выкладок.
 
-Выход рекуррентной сети по факту имеет вид
+\section{Обратное распространение ошибки}
+
+$$
+\boldy = \boldW \boldx + \boldb
+$$
+\begin{table}
+	\centering
+	\begin{tabular}{lllclll}
+		$\frac{d \Loss}{d \boldx}$ &$=$ &$\boldW^T \frac{d \Loss}{d \boldy}$ & & $\frac{d \Loss}{d \boldX}$ &$=$ &$\boldW^T \frac{d \Loss}{d \boldY}$ \\
+		$\frac{d \Loss}{d \boldW}$ &$=$ &$\frac{d \Loss}{d \boldy} \boldx^T$ & & $\frac{d \Loss}{d \boldW}$ &$=$ &$\frac{d \Loss}{d \boldY} \boldX^T$ \\
+		$\frac{d \Loss}{d \boldb}$ &$=$ &$\frac{d \Loss}{d \boldy}$          & & $\frac{d \Loss}{d \boldb}$ &$=$ &$\Sum_{i=1}^{\NumOfSamples}\frac{d \Loss}{d \boldY_i}$
+	\end{tabular}
+\end{table}
+
 \begin{gather*}
 \boldy = f(\boldV f(\boldV f( \dots (\boldV f(\boldV \boldh_0 + \boldW \boldx_0 + \boldb) + \boldW \boldx_1 + \boldb) \dots) +  \boldW \boldx_{k-2} + \boldb ) + \boldW \boldx_{k-1} + \boldb)
 \end{gather*}
+Требуется найти частные производные $\partial \Loss / \partial \boldW$, $\partial \Loss / \partial \boldV$, $\partial \Loss / \partial \boldb$ при заданной производной $\partial \Loss / \partial \boldy$.
 
 Посмотрим на некоторый уровень рекуррентной сети. Этот уровень осуществляет преобразование вида
 \begin{equation*}
@@ -509,17 +523,59 @@ i \cdot \StrideSize_h \le h \le i \cdot \StrideSize_h + \FilterSize_h - 1, \qqua
 \end{equation*}
 Далее за этим уровнем следует еще какое-то число точно таких же уровней. Далее допустим, что 
 \begin{itemize}
-	\item нам известна производная функции потерь $\partial \Loss / \partial \boldy$ по выходу конкретно данного уровня 
-	\item нам известны производная функции потерь $\partial \Loss / \partial \boldW$,$\partial \Loss / \partial \boldW$ 
+	\item Нам известна производная функции потерь $\partial \Loss / \partial \boldy$ по выходу конкретно данного уровня
+	\item Нам известны производные функции потерь $\Loss$ по $\boldW$, $\boldV$, $\boldb$ как параметрам последующих уровней.
 \end{itemize}
-Иными словами, функция потерь представляется как функция от выхода данного слоя, и параметров
+Иными словами, функция потерь $\Loss$ представляется как функция от выхода данного слоя $\boldy$, и параметров $\boldW$, $\boldV$, $\boldb$:
 $$
 \Loss = \Loss(\boldy, \boldV, \boldW, \boldb),
 $$
-где параметры $\boldV, \boldW, \boldb$ оказывают влияние только через последующие слои. Чтобы включить сюда влияние через текущий слой, заметим, что это влияние осуществляется через выход $\boldy$ текущего слоя. Иными словами
+причем известны частные производные $\partial \Loss / \partial \boldy$, $\partial \Loss/ \partial \boldW$, $\partial \Loss / \partial \boldV$, $\partial \Loss / \partial \boldb$. Тогда полные производные по $\boldW$, $\boldV$, $\boldb$, которые учитывают зависимость $\boldy$ от $\boldW$, $\boldV$, $\boldb$ имеют вид:
 \begin{gather*}
-\frac{d\Loss}{d\boldW_{i,j}} = \frac{d\Loss(\boldy, \boldV, \boldW, \boldb)}{d\boldW_{i,j}} = \partder{\Loss}{\boldW_{i, j}} + \left(\partder{\boldy}{\boldW_{i,j}}\right)^T \partder{\Loss}{\boldy}
+\boldy = \boldy(\boldx, \boldh, \boldW, \boldV, \boldb)
 \end{gather*}
+
+
+\subsubsection{Покомпонентные производные}
+\begin{align}
+\frac{d\Loss}{d\boldW_{i,j}} & = \frac{d\Loss(\boldy, \boldV, \boldW, \boldb)}{d\boldW_{i,j}} = \partder{\Loss}{\boldW_{i, j}} + \left(\partder{\boldy}{\boldW_{i,j}}\right)^T \partder{\Loss}{\boldy} =  \partder{\Loss}{\boldW_{i, j}} + \boldx_j f'(\boldz_i) \partder{\Loss}{\boldy_i} \\ 
+\frac{d\Loss}{d\boldV_{i,j}} & = \frac{d\Loss(\boldy, \boldV, \boldW, \boldb)}{d\boldV_{i,j}} = \partder{\Loss}{\boldV_{i, j}} + \left(\partder{\boldy}{\boldV_{i,j}}\right)^T \partder{\Loss}{\boldy} = \partder{\Loss}{\boldV_{i, j}} + \boldh_j f'(\boldz_i) \partder{\Loss}{\boldy_i} \\\
+\frac{d\Loss}{d\boldb_{i}} & = \frac{d\Loss(\boldy, \boldV, \boldW, \boldb)}{d\boldb_{i}} = \partder{\Loss}{\boldb_i} + \left(\partder{\boldy}{\boldb_i}\right)^T \partder{\Loss}{\boldy} = \partder{\Loss}{\boldb_i} + f'(\boldz_i)\partder{\Loss}{\boldy_i} \ \\
+\frac{d\Loss}{d\boldx_{i}} & = \frac{d\Loss(\boldy, \boldV, \boldW, \boldb)}{d\boldx_{i}} = \left(\partder{\boldy}{\boldx_i}\right)^T\partder{\Loss}{\boldy} =
+(\boldW^i)^T \diag (f'(\boldz)) \partder{\Loss}{\boldy} \\
+\frac{d\Loss}{d\boldh_{i}} & = \frac{d\Loss(\boldy, \boldV, \boldW, \boldb)}{d\boldh_{i}} = \left(\partder{\boldy}{\boldh_i}\right)^T\partder{\Loss}{\boldy} =
+(\boldV^i)^T \diag (f'(\boldz))  \partder{\Loss}{\boldy} \\
+\end{align}
+Таким образом, требуется найти частные производные $\partder{\boldy}{\boldW_{i,j}}$, $\partder{\boldy}{\boldV_{i,j}}$, $\partder{\boldy}{\boldb_{i}}$
+\begin{align*}
+\partder{\boldy}{\boldW_{i,j}} &= \left(\frac{d\boldy}{d\boldz}\right)^T \frac{\partial\boldz}{\partial\boldW_{i, j}} =  \boldx_j \diag(f'(\boldz))\bolde_i =  \boldx_j  f'(\boldz_i) \bolde_i. \\
+\frac{\partial \boldy}{\partial \boldV_{i, j}} &= \left(\frac{d\boldy}{d\boldz}\right)^T \frac{\partial\boldz}{\partial\boldV_{i, j}}  = \boldh_j \diag(f'(\boldz))  \bolde_i= \boldh_j f'(\boldz_i) \bolde_i.\\ 
+\frac{\partial \boldy}{\partial \boldx_{i}} &= \left(\frac{d\boldy}{d\boldz}\right)^T \frac{\partial\boldz}{\partial\boldx_{i}} = \diag(f'(\boldz)) \boldW^i\\
+\frac{\partial \boldy}{\partial \boldh_{i}} &= \left(\frac{d\boldy}{d\boldz}\right)^T \frac{\partial\boldz}{\partial\boldh_{i}} = \diag(f'(\boldz)) \boldV^i\\
+\frac{\partial \boldy}{\partial \boldb_{i}} &= f'(\boldz_i)\bolde_i   \\
+\end{align*}
+
+%\begin{gather*}
+%\left(}\right)^T \partder{\Loss}{\boldy} = 
+%\end{gather*}
+
+\subsubsection{Производные по матрицам и векторам}
+\begin{align*}
+\frac{d\Loss}{d\boldW} & = \partder{\Loss}{\boldW} + \diag(f'(\boldz))  \partder{\Loss}{\boldy} \boldx^T \\ 
+\frac{d\Loss}{d\boldV} & = \partder{\Loss}{\boldV} + \diag(f'(\boldz))  \partder{\Loss}{\boldy} \boldh^T \\
+\frac{d\Loss}{d\boldb} & = \partder{\Loss}{\boldb} + \diag(f'(\boldz))  \partder{\Loss}{\boldy} \\ 
+\frac{d\Loss}{d\boldx} & = \boldW^T \diag (f'(\boldz)) \partder{\Loss}{\boldy}  \\
+\frac{d\Loss}{d\boldh} & = \boldV^T \diag (f'(\boldz)) \partder{\Loss}{\boldy} 
+\end{align*}
+
+\subsubsection{Minibatch-производные}
+\begin{align*}
+\frac{d\Loss}{d\boldW} & = \partder{\Loss}{\boldW} + f'(\boldZ) \odot \partder{\Loss}{\boldy} \boldX^T \\ 
+\frac{d\Loss}{d\boldV} & = \partder{\Loss}{\boldV} + f'(\boldZ) \odot \partder{\Loss}{\boldy} \boldH^T \\
+\frac{d\Loss}{d\boldb} & = \partder{\Loss}{\boldb} + \sum_{i=1}^{\NumOfSamples} f'(\boldZ^i) \odot \partder{\Loss}{\boldY^i} \\ 
+\frac{d\Loss}{d\boldX} & = \boldW^T \left(f'(\boldZ) \odot \partder{\Loss}{\boldY}\right)  \\
+\frac{d\Loss}{d\boldH} & = \boldV^T \left(f'(\boldZ) \odot \partder{\Loss}{\boldY}\right) 
+\end{align*}
 
 \chapter{TensorFlow}
 
