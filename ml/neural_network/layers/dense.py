@@ -25,19 +25,12 @@ class Dense(Layer):
         self.b_reg  = b_reg
         
     def __repr__(self):
+        input_size = -1
         if hasattr(self, 'W'):
-            input_size, output_size = self.W.shape
-        else:
-            input_size = '?'
-            output_size = self.units
-        return 'Dense({}->{})'.format(input_size, output_size)   
+            input_size = self.W.shape[0]
+        return 'Dense({}->{})'.format(input_size, self.units)   
    
     # INITIALIZATION
-    def _initialize_seed(self, params):
-        self.seed = params.setdefault('seed', 0)
-        self.generator = np.random.RandomState(self.seed)
-        params['seed'] += 1
-        return params
     def _initialize_input_shape(self, params):
         super()._initialize_input_shape(params)
         assert len(self.input_shape) == 2, 'input to Dense layer must be a 2-dim tensor.'
@@ -45,7 +38,6 @@ class Dense(Layer):
     def _initialize_params(self, params):
         self._initialize_W(params)
         self._initialize_b(params)
-        self._initialize_regularization(params)
         return params
     def _initialize_W(self, params):
         n_features = self.input_shape[1]
@@ -53,33 +45,36 @@ class Dense(Layer):
         self.W_initializer = get_kernel_initializer(init=self.W_init, generator=self.generator, dtype=self.dtype)
         self.W = self.W_initializer(W_shape)
         self.grad_W = np.zeros_like(self.W, dtype=self.dtype)
+        if self.W_reg is None:
+            self.W_reg = EmptyRegularizer()
         return params
     def _initialize_b(self, params):
         self.b_initializer = get_bias_initializer(init=self.b_init, dtype=self.dtype)
         self.b = self.b_initializer((self.units,))
         self.grad_b = np.zeros_like(self.b, dtype=self.dtype)
-        return params
-    def _initialize_regularization(self, params):
-        if self.W_reg is None:
-            self.W_reg = EmptyRegularizer()
         if self.b_reg is None:
             self.b_reg = EmptyRegularizer()
-        return params
-    
+        return params    
     def _initialize_output_shape(self, params):
         self.output_shape = (self.input_shape[0], self.units) # Input shape for the next layer
         params['input_shape'] = self.output_shape
         return params
     
-    # PROPAGATION
-    # Forward propagation
+    ################################## 
+    ###     Forward propagation    ###
+    ##################################
     def update_output(self, input):
         self.output = np.dot(input, self.W)  # [N x D] x [D x H] = [N x H]
         if self.use_bias:
             self.output += self.b[None, :]
         return self.output
+    def _check_input_shape(self, input):
+        assert input.ndim == 2, 'Input to layer "{}" must be 2-dim numpy array'.format(self.name)
+        assert input.shape[1] == self.W.shape[0], 'Expected input shape (-1, {}) but received (-1, {})'.format(self.W.shape[0], input.shape[1])
     
-    # Backward propagation
+    ################################## 
+    ###    Backward propagation    ###
+    ##################################
     def update_grad_input(self, input, grad_output):
         self.grad_input = np.dot(grad_output, self.W.T)         # [N x H] x [H x D] = [N x D]
         return self.grad_input
@@ -89,7 +84,12 @@ class Dense(Layer):
         if self.use_bias:
             self.grad_b = np.sum(grad_output, axis=0)
             if self.b_reg: self.grad_b += self.b_reg.grad(self.b)
-        
+    def _check_input_grad_output_shape(self, input, grad_output):
+        assert input.ndim == 2
+        assert grad_output.ndim == 2
+        assert input.shape[1] == self.W.shape[0]
+        assert input.shape[0] == grad_output.shape[0]
+        assert grad_output.shape[1] == self.W.shape[1]
 
     @check_initialized
     def get_regularization_loss(self):
@@ -101,16 +101,12 @@ class Dense(Layer):
     
     @check_initialized
     def get_params(self, copy=False):
-        if copy:
-            return OrderedDict([(self.name + ':W', self.W.copy()), (self.name + ':b', self.b.copy())])
-        return OrderedDict([(self.name + ':W', self.W), (self.name + ':b', self.b)])
-        
+        params = OrderedDict([(self.name + ':W', self.W), (self.name + ':b', self.b)])
+        return self._make_dict_copy(params, copy=copy)
     @check_initialized
     def get_grad_params(self, copy=False):
-        if copy:
-            return OrderedDict([(self.name + ':W', self.grad_W.copy()), (self.name + ':b', self.grad_b.copy())])
-        return OrderedDict([(self.name + ':W', self.grad_W), (self.name + ':b', self.grad_b)])
-    
+        grad_params = OrderedDict([(self.name + ':W', self.grad_W), (self.name + ':b', self.grad_b)])
+        return self._make_dict_copy(grad_params, copy=copy)
     @check_initialized
     def zero_grad_params(self):
         self.grad_W.fill(0)

@@ -12,10 +12,11 @@ class Layer(Checker):
     def _assert_infs(self, arr):
         assert not np.any(np.isinf(arr)), 'Infs detected {}!'.format(self)
     def _check_arrays(self, *arrays):
-        if not self.debug: return
         for arr in arrays:
+            assert isinstance(arr, np.ndarray)
             self._assert_nans(arr)
             self._assert_infs(arr)
+    
     
     def __init__(self, name=None):
         self.output = None       # Output of the layer is always kept for backpropagatoin
@@ -130,49 +131,68 @@ class Layer(Checker):
     @check_initialized
     def forward(self, input):
         self._forward_enter_callback()
+        self._check_forward_input(input)
         input = self._forward_preprocess(input)
-        self.update_output(input)        # Finding output tensor; self.output
+        self._forward(input)            # Finding output tensor; self.output
         self._forward_postprocess()
         self._forward_exit_callback()   # Callback during forward propagation
         return self.output
+    def _check_forward_input(self, input):        #### Проверка входного массива
+        if self.debug:
+            self._check_arrays(input)             # Проверка входного массива данных на наличие nans и infs
+            self._check_input_shape(input)        # Проверка правильности размера входного массива данных
+    def _forward_preprocess(self, input):         #### Предобработка прямого распространения
+        return self._convert_to_dtype(input)      # Приведение данных к требуемому типу    
+    def _forward(self, input):
+        self.update_output(input)                 
     def update_output(self, input):
         self.output = input
-    # Предобработка прямого распространения
-    def _forward_preprocess(self, input):
-        self._check_arrays(input)             # Проверка входного массива данных
-        input = self._convert_to_dtype(input) # Приведение данных к требуемому типу
-        return input
-    # Постобработка обратного распространения
-    def _forward_postprocess(self):
+    def _forward_postprocess(self):               #### Постобработка прямого распространения
         return
-        
+    def _check_input_shape(self, input):
+        pass
         
     ################################## 
     ###    Backward propagation    ###
     ##################################
     @check_initialized
     def backward(self, input, grad_output):
+        """
+        Внимание: данную функцию нельзя переопределять. 
+            Для изменения поведения уровния при forward propagation следует переопределить 
+            методы update_grad_input и update_grad_param, либо метод _backward
+        """
         self._backward_enter_callback()
-        input, grad_output = self._backward_preprocess(input, grad_output) 
-        self.update_grad_input(input, grad_output)     # This updates self.grad_input
-        self.update_grad_param(input, grad_output)     # This updates all grad params
+        self._check_backward_input(input, grad_output)
+        input, grad_output = self._backward_preprocess(input, grad_output)
+        self._backward(input, grad_output)
         self._backward_postprocess()
         self._backward_exit_callback()
         return self.grad_input
+    def _check_backward_input(self, input, grad_output):
+        if self.debug:
+            self._check_arrays(input, grad_output)                   # Проверка входных массива данных на наличие nans и infs
+            self._check_input_grad_output_shape(input, grad_output)  # Проверка правильности размеров входных массивов данных
+    def _backward_preprocess(self, input, grad_output):          # Предобработка обратного распространения
+        return self._convert_to_dtype(input, grad_output)        
+    def _backward(self, input, grad_output):
+        # Идиома PIMPL
+        self.update_grad_input(input, grad_output)               # This updates self.grad_input
+        self.update_grad_param(input, grad_output)               # This updates all grad params  
     def update_grad_input(self, input, grad_output):
-        assert input.shape == grad_output.shape
         self.grad_input = grad_output
     def update_grad_param(self, input, grad_output):
         pass
-    # Предобработка обратного распространения
-    def _backward_preprocess(self, input, grad_output):
-        self._check_arrays(input, grad_output)         # Checks and transformations
-        input, grad_output = self._convert_to_dtype(input, grad_output)
-        return input, grad_output
-    # Постобработка обратного распространения
-    def _backward_postprocess(self):
-        self._clip_gradients()                         # Gradients clipping; ограничение градиентов
+    def _backward_postprocess(self):                             # Постобработка обратного распространения
+        self._clip_gradients()                                   # Gradients clipping; ограничение градиентов
+    def _check_input_grad_output_shape(self, input, grad_output):
+        # Поведение по умолчанию предполагает, что слой сети не изменяет размер входа TODODO
+        # assert input.shape == grad_output.shape, 'input.shape({}) != grad_output.shape({}) for layer "{}".'.format(input.shape, grad_output.shape, self.name)
+        pass
         
+    ################################## 
+    ###   Pre- & post- processors  ###
+    ##################################
     def _convert_to_dtype(self, *args):
         args = tuple([arg.astype(self.dtype, copy=False) for arg in args])
         if len(args) == 1:
@@ -183,6 +203,7 @@ class Layer(Checker):
         grad_params = self.get_grad_params()
         for param_name, param_value in grad_params.items():
             np.clip(param_value, -self.grad_clip, self.grad_clip, param_value)
+    
     
     # Regulariation
     @check_initialized
@@ -197,18 +218,29 @@ class Layer(Checker):
     def get_grad_params(self, copy=False):
         return OrderedDict()
     @check_initialized
+    def get_regularizers(self):
+        return OrderedDict()    
+    def _make_dict_copy(self, d, copy=False):
+        if copy:
+            return OrderedDict([(k, v.copy()) for k, v in d.items()])
+        return d
+      
+    @check_initialized
     def zero_grad_params(self):
+        """
+        Данная функция обнуляет текущие значения градиентов
+        """
         pass
     
     @check_initialized
     def set_params(self, new_params):
-        params = self.get_params()
+        params = self.get_params(copy=False)
         for param_name in new_params:
             assert param_name in params, 'Layer "{}" does not have a parameter with name "{}".'.format(self, param_name)
             np.copyto(params[param_name], new_params[param_name]) 
     @check_initialized
     def set_grad_params(self, new_grad_params):
-        grad_params = self.get_grad_params() # Getting references to current gradients
+        grad_params = self.get_grad_params(copy=False) # Getting references to current gradients
         for param_name in new_grad_params:
             assert param_name in grad_params, 'Layer "{}" does not have a parameter with name "{}".'.format(self, param_name)
             np.copyto(grad_params[param_name], new_grad_params[param_name])

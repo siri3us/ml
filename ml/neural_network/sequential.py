@@ -37,7 +37,7 @@ class Sequential(Layer):
         return self.output
         
     # Backward propagation
-    def backward(self, input, grad_output):
+    def _backward(self, input, grad_output):
         """This function backpropagates though all layers"""
         n_layers = len(self.layers)
         for n_layer in reversed(list(range(1, n_layers))):
@@ -50,16 +50,29 @@ class Sequential(Layer):
     def get_params(self, copy=False):
         params = OrderedDict()
         for layer in self.layers:
-            for param_name, param_value in layer.get_params(copy=copy).items():
-                params[param_name] = param_value
+            params.update(layer.get_params(copy=copy))
         return params
     @check_initialized
     def get_grad_params(self, copy=False):
         grad_params = OrderedDict()
         for layer in self.layers:
-            for grad_name, grad_value in layer.get_grad_params(copy=copy).items():
-                grad_params[grad_name] = grad_value
+            grad_params.update(layer.get_grad_params(copy=copy))
         return grad_params
+    @check_initialized
+    def get_regularizers(self):
+        regularizers = OrderedDict()
+        for layer in self.layers:
+            regularizers.update(layer.get_regularizers())
+        return regularizers
+            
+    @check_initialized
+    def set_params(self, params):
+        for layer in self.layers:
+            layer.set_params(params)
+    @check_initialized
+    def set_grad_params(self, grad_params):
+        for layer in self.layers:
+            layer.set_grad_params(grad_params)
     
     @check_initialized
     def zero_grad_params(self):

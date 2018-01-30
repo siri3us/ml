@@ -67,6 +67,12 @@ class Model(Layer):
     @check_compiled
     def set_params(self, params):
         self.sequential.set_params(params)
+    @check_compiled
+    def set_grad_params(self, grad_params):
+        self.sequential.set_grad_params(grad_params)
+    @check_compiled
+    def zero_grad_params(self):
+        self.sequential.zero_grad_params()
         
     @check_compiled
     def get_regularization_loss(self):

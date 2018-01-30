@@ -115,15 +115,13 @@ class BatchNormalization(Layer):
     # Get params and grad_params
     @check_initialized
     def get_params(self, copy=False):
-        if copy:
-            return OrderedDict([(self.name + ':gamma', self.gamma.copy()), (self.name + ':beta', self.beta.copy())])
-        return OrderedDict([(self.name + ':gamma', self.gamma), (self.name + ':beta', self.beta)])
+        params = OrderedDict([(self.name + ':gamma', self.gamma), (self.name + ':beta', self.beta)])
+        return self._make_dict_copy(params, copy=copy)
     @check_initialized
     def get_grad_params(self, copy=False):
-        if copy:
-            return OrderedDict([(self.name + ':gamma', self.grad_gamma.copy()), (self.name + ':beta', self.grad_beta.copy())])
-        return OrderedDict([(self.name + ':gamma', self.grad_gamma), (self.name + ':beta', self.grad_beta)])
+        grad_params = OrderedDict([(self.name + ':gamma', self.grad_gamma), (self.name + ':beta', self.grad_beta)])
+        return self._make_dict_copy(grad_params, copy=copy)
     @check_initialized
     def zero_grad_params(self):
-        self.grad_gamma = np.zeros_like(self.gamma).astype(self.dtype, copy=False)
-        self.grad_beta = np.zeros_like(self.beta).astype(self.dtype, copy=False)
+        self.grad_gamma = np.zeros_like(self.gamma, dtype=self.dtype)
+        self.grad_beta = np.zeros_like(self.beta, dtype=self.dtype)

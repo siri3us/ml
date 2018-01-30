@@ -304,16 +304,12 @@ class Convolution(ConvolutionKernel):
     
     @check_initialized
     def get_params(self, copy=False):
-        if copy:
-            return OrderedDict([(self.name + ':W', self.W.copy()), (self.name + ':b', self.b.copy())])
-        return OrderedDict([(self.name + ':W', self.W), (self.name + ':b', self.b)])
-        
+        params = OrderedDict([(self.name + ':W', self.W), (self.name + ':b', self.b)])
+        return self._make_dict_copy(params, copy=copy)
     @check_initialized
     def get_grad_params(self, copy=False):
-        if copy:
-            return OrderedDict([(self.name + ':W', self.grad_W.copy()), (self.name + ':b', self.grad_b.copy())])
-        return OrderedDict([(self.name + ':W', self.grad_W), (self.name + ':b', self.grad_b)])
-    
+        grad_params = OrderedDict([(self.name + ':W', self.grad_W), (self.name + ':b', self.grad_b)])
+        return self._make_dict_copy(grad_params, copy=copy)
     @check_initialized
     def zero_grad_params(self):
         self.grad_W.fill(0)

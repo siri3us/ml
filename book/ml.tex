@@ -570,8 +570,8 @@ $$
 
 \subsubsection{Minibatch-производные}
 \begin{align*}
-\frac{d\Loss}{d\boldW} & = \partder{\Loss}{\boldW} + f'(\boldZ) \odot \partder{\Loss}{\boldy} \boldX^T \\ 
-\frac{d\Loss}{d\boldV} & = \partder{\Loss}{\boldV} + f'(\boldZ) \odot \partder{\Loss}{\boldy} \boldH^T \\
+\frac{d\Loss}{d\boldW} & = \partder{\Loss}{\boldW} + \left(f'(\boldZ) \odot \partder{\Loss}{\boldY}\right) \boldX^T \\ 
+\frac{d\Loss}{d\boldV} & = \partder{\Loss}{\boldV} + \left(f'(\boldZ) \odot \partder{\Loss}{\boldY}\right) \boldH^T \\
 \frac{d\Loss}{d\boldb} & = \partder{\Loss}{\boldb} + \sum_{i=1}^{\NumOfSamples} f'(\boldZ^i) \odot \partder{\Loss}{\boldY^i} \\ 
 \frac{d\Loss}{d\boldX} & = \boldW^T \left(f'(\boldZ) \odot \partder{\Loss}{\boldY}\right)  \\
 \frac{d\Loss}{d\boldH} & = \boldV^T \left(f'(\boldZ) \odot \partder{\Loss}{\boldY}\right) 
