@@ -48,35 +48,47 @@ class BatchNormalization(Layer):
         self.momentum = momentum
         self.eps = eps
         self._is_NCHW_input = False
-
+        # Препроцессинг прямого распространения
+        self._forward_preprocessors.append(self._forward_preprocess_shape)
+        # Постпроцессинг прямого распространения
+        self._forward_postprocessors.append(self._forward_postprocess_shape)
+        # Препроцессинг обратного распространения
+        self._backward_preprocessors.append(self._backward_preprocess_shape)
+        # Постпроцессинг обратного распространения
+        self._backward_postprocessors.append(self._backward_postprocess_shape)
+        
+    ################################## 
+    ###       Initialization       ###
+    ##################################
     def _initialize_params(self, params):
         self.n_features = self.input_shape[1]
         self.running_mean = np.zeros(self.n_features, dtype=self.dtype)
         self.running_var = np.zeros(self.n_features, dtype=self.dtype)
         self.gamma = np.ones(self.n_features, dtype=self.dtype)
         self.beta = np.zeros(self.n_features, dtype=self.dtype)
-       
-    # Forward propagation
+        self.grad_gamma = np.zeros_like(self.gamma, dtype=self.dtype)
+        self.grad_beta = np.zeros_like(self.beta, dtype=self.dtype)
+        return params
+        
     def _NCHW_to_ND(self, X):
         X = np.transpose(X, [0, 2, 3, 1])
         self._NHWC_shape = X.shape
         return X.reshape((-1, X.shape[3]))
     def _ND_to_NCHW(self, X):
         return X.reshape(self._NHWC_shape).transpose(0, 3, 1, 2)
-
-    def _forward_preprocess(self, input):
-        input = super()._forward_preprocess(input)
+        
+        
+    ################################## 
+    ###     Forward propagation    ###
+    ##################################
+    def _forward_preprocess_shape(self, input, target=None):
         self._is_NCHW_input = False
         if input.ndim == 4:
             self._is_NCHW_input = True
             input = self._NCHW_to_ND(input)
-        return input
-    def _forward_postprocess(self):
-        super()._forward_postprocess()
-        if self._is_NCHW_input:
-            self.output = self._ND_to_NCHW(self.output)
-
-    def update_output(self, input):
+        return input, target
+    # Прямое распространение
+    def _forward(self, input, target=None):
         if self.training:
             self.sample_mean = np.mean(input, axis=0)
             self.sample_var  = np.var(input, axis=0)
@@ -87,20 +99,20 @@ class BatchNormalization(Layer):
         else:
             normed_input = (input - self.running_mean[None, :]) / (np.sqrt(self.running_var[None, :] + self.eps))
             self.output = self.gamma[None, :] * normed_input + self.beta[None, :]
-
-    def _backward_preprocess(self, input, grad_output):
-        input, grad_output = super()._backward_preprocess(input, grad_output)
+    def _forward_postprocess_shape(self):
+        if self._is_NCHW_input:
+            self.output = self._ND_to_NCHW(self.output)
+            
+    ################################## 
+    ###    Backward propagation    ###
+    ##################################
+    def _backward_preprocess_shape(self, input, grad_output):
         if self._is_NCHW_input:
             input = self._NCHW_to_ND(input)
             grad_output = self._NCHW_to_ND(grad_output)
         return input, grad_output
-    def _backward_postprocess(self):
-        super()._backward_postprocess()
-        if self._is_NCHW_input:
-            self.grad_input = self._ND_to_NCHW(self.grad_input) 
-
-    # Backward propagation
-    def update_grad_input(self, input, grad_output):
+    # Прямое распространение
+    def _backward(self, input, grad_output):
         if self.training:
             var = self.sample_var
         else:
@@ -108,20 +120,22 @@ class BatchNormalization(Layer):
         self.grad_input = self.gamma / np.sqrt(var + self.eps)[None, :] *\
                 ((grad_output - np.mean(grad_output, axis=0)[None, :]) -\
                  self.normed_input * np.mean(np.multiply(self.normed_input, grad_output), axis=0)[None, :]) 
-    def update_grad_param(self, input, grad_output):
         self.grad_gamma = np.sum(np.multiply(self.normed_input, grad_output), axis=0)
         self.grad_beta = np.sum(grad_output, axis=0)
-          
+    def _backward_postprocess_shape(self):
+        if self._is_NCHW_input:
+            self.grad_input = self._ND_to_NCHW(self.grad_input) 
+            
     # Get params and grad_params
     @check_initialized
     def get_params(self, copy=False):
-        params = OrderedDict([(self.name + ':gamma', self.gamma), (self.name + ':beta', self.beta)])
+        params = OrderedDict()
+        params[self.name + ':gamma'] = self.gamma
+        params[self.name + ':beta'] = self.beta
         return self._make_dict_copy(params, copy=copy)
     @check_initialized
     def get_grad_params(self, copy=False):
-        grad_params = OrderedDict([(self.name + ':gamma', self.grad_gamma), (self.name + ':beta', self.grad_beta)])
-        return self._make_dict_copy(grad_params, copy=copy)
-    @check_initialized
-    def zero_grad_params(self):
-        self.grad_gamma = np.zeros_like(self.gamma, dtype=self.dtype)
-        self.grad_beta = np.zeros_like(self.beta, dtype=self.dtype)
+        grad_params = OrderedDict()
+        grad_params[self.name + ':gamma'] = self.grad_gamma
+        grad_params[self.name + ':beta'] = self.grad_beta
+        return self._make_dict_copy(grad_params, copy=copy) 

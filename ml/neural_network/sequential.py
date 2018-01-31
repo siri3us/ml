@@ -57,42 +57,30 @@ class Sequential(Layer):
     def get_params(self, copy=False):
         params = OrderedDict()
         for layer in self.layers:
-            params.update(layer.get_params(copy=copy))
+            for param_name, param_value in layer.get_params(copy=copy):
+                assert param_name not in params, 'Parameters name clash!'
+                params[param_name] = param_value
         return params
     @check_initialized
     def get_grad_params(self, copy=False):
         grad_params = OrderedDict()
         for layer in self.layers:
-            grad_params.update(layer.get_grad_params(copy=copy))
+            for param_name, grad_param_value in layer.get_grad_params(copy=copy):
+                assert param_name not in grad_param, 'Parameters name clash!'
+                grad_params[param_name] = grad_param_value
         return grad_params
-    # Выставление параметров и градиентов        
-    @check_initialized
-    def set_params(self, params):
-        for layer in self.layers:
-            layer.set_params(params)
-    @check_initialized
-    def set_grad_params(self, grad_params):
-        for layer in self.layers:
-            layer.set_grad_params(grad_params)
-    @check_initialized
-    def zero_grad_params(self):
-        for layer in self.layers:
-            layer.zero_grad_params()
-            
+
     ################################## 
     ###       Regularization       ###
     ##################################
     @check_initialized
-    def get_regularization_loss(self):
-        loss = 0.0
-        for layer in self.layers:
-            loss += layer.get_regularization_loss()
-        return loss
-    @check_initialized
     def get_regularizers(self):
         regularizers = OrderedDict()
+        n_regularizers = 0
         for layer in self.layers:
-            regularizers.update(layer.get_regularizers())
+            for param_name, reg in layer.get_regularizers():
+                assert param_name not in regularizers, 'Parameters name clash!'
+                regularizers[param_name] = reg
         return regularizers
         
     ################################## 
@@ -101,10 +89,12 @@ class Sequential(Layer):
     @check_initialized
     def train(self):
         """Sets all layers to training mode"""
+        self.training = True
         for layer in self.layers:
             layer.train()
     @check_initialized
     def evaluate(self):
         """Sets all layers to evaluation mode"""
+        self.training = False
         for layer in self.layers:
             layer.evaluate()

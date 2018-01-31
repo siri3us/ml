@@ -195,6 +195,7 @@ class Layer(Checker):
     def _forward_postprocess(self):               #### Постобработка прямого распространения
         for postprocessor in self._forward_postprocessors:
             preprocessor()
+            
     ################################## 
     ###    Backward propagation    ###
     ##################################
@@ -276,6 +277,7 @@ class Layer(Checker):
     # Выставление параметров и градиентов
     @check_initialized
     def set_params(self, new_params):
+        # Для работы данного метода в классах-потомках достаточно корректной работы метода get_params в этих классах
         params = self.get_params(copy=False)
         for param_name in params:
             if param_name in new_params:
@@ -289,7 +291,8 @@ class Layer(Checker):
                 pass
     @check_initialized
     def set_grad_params(self, new_grad_params):
-        grad_params = self.get_grad_params(copy=False) # Getting references to current gradients
+        # Для работы данного метода в классах-потомках достаточно корректной работы метода get_grad_params в этих классах 
+        grad_params = self.get_grad_params(copy=False)
         for param_name in grad_params:
             if param_name in new_grad_params:
                 param_shape = grad_params[param_name].shape
@@ -302,10 +305,10 @@ class Layer(Checker):
                 pass
     @check_initialized
     def zero_grad_params(self):
-        """
-        Данная функция обнуляет текущие значения градиентов
-        """
-        pass
+        # Для работы данного метода в классах-потомках достаточно корректной работы метода get_grad_params в этих классах
+        grad_params = self.get_grad_params(copy=False):
+        for param_name, grad_param_value in grad_params.items():
+            grad_param_value.fill(0)
                  
     ################################## 
     ###       Regularization       ###
@@ -315,12 +318,13 @@ class Layer(Checker):
         return OrderedDict()
     @check_initialized
     def get_regularization_loss(self):
+        # Для работы данного метода в классах-потомках достаточно корректной работы метода get_regularizers в этих классах
         regularizers = self.get_regularizers()
         params = self.get_params()
         loss = 0.0
         for param_name, regularizer in regularizers.items():
             assert param_name in params, 'Regularization for unknown parameter "{}" in layer "{}".'.format(param_name, self.name)
-            loss += regularizer.get_loss()
+            loss += regularizer.get_loss(params[param_name])
         return loss
         
     ################################## 

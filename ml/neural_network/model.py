@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
+from copy import deepcopy
 from .layer import Layer
 from .sequential import Sequential
 from .criterions import Criterion
 from .decorators import *
 
+
 class Model(Layer):
-    def __init__(self, sequential, criterion):
-        super().__init__()
+    def __init__(self, sequential, criterion, name=None):
+        super().__init__(name=name)
         if isinstance(sequential, list):
             sequential = Sequential(sequential)
         assert isinstance(sequential, Sequential)
@@ -38,55 +40,46 @@ class Model(Layer):
         self._initialize(config)
         self.sequential.initialize(config)
         self.criterion.initialize(config)
-        from copy import deepcopy
         self.config = deepcopy(config)
-        self.compiled = True
+        self.initialized = True
         return self
         
     ################################## 
     ###     Forward propagation    ###
     ##################################
-    @check_compiled
-    def forward(self, X, y=None):
-        self.sequential_output = self.sequential.forward(X) # X will be automatically converted to dtype during this call
-        if y is None:
+    def _forward(self, input, target=None):
+        self.sequential_output = self.sequential.forward(input)
+        if target is None:
             return self.sequential_output
-        self.main_loss = self.criterion.forward(self.sequential_output, y)
+        self.main_loss = self.criterion.forward(self.sequential_output, target)
         self.reg_loss  = self.get_regularization_loss()
         self.output    = self.main_loss + self.reg_loss
-        return self.output
-        
+
     ################################## 
     ###    Backward propagation    ###
     ##################################
-    @check_compiled
-    def backward(self, X, y):
-        grad_output = self.criterion.backward(self.sequential_output, y)
-        self.grad_input = self.sequential.backward(X, grad_output)
-        np.clip(self.grad_input, -self.grad_clip, self.grad_clip, self.grad_input)
-        return self.grad_input
+    def _backward(self, input, target):
+        grad_output = self.criterion.backward(self.sequential_output, target)
+        self.grad_input = self.sequential.backward(input, grad_output)
         
     ################################## 
     ###         Parameters         ###
     ##################################
     # Получение параметров и градиентов
-    @check_compiled
+    @check_initialized
     def get_params(self, copy=False):
         return self.sequential.get_params(copy=copy)
-    @check_compiled
+    @check_initialized
     def get_grad_params(self, copy=False):
         return self.sequential.get_grad_params(copy=copy)
     # Выставление параметров и градиентов   
-    @check_compiled
+    @check_initialized
     def set_params(self, params):
         self.sequential.set_params(params)
-    @check_compiled
+    @check_initialized
     def set_grad_params(self, grad_params):
         self.sequential.set_grad_params(grad_params)
-    @check_compiled
-    def zero_grad_params(self):
-        self.sequential.zero_grad_params()
-        
+   
     ################################## 
     ###       Regularization       ###
     ##################################

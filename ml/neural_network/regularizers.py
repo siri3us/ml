@@ -30,5 +30,5 @@ class L2Regularizer(Regularizer):
         return 0.5 * self.l2 * np.sum(param ** 2)
     def get_grad(self, param):
         return self.l2 * param
-    def update_grad(self, grad_param):
-        grad_param += self.get_grad(grad_param)
+    def update_grad(self, param, grad_param):
+        grad_param += self.get_grad(param)
