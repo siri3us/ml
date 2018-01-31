@@ -544,7 +544,7 @@ $$
 \frac{d\Loss}{d\boldx_{i}} & = \frac{d\Loss(\boldy, \boldV, \boldW, \boldb)}{d\boldx_{i}} = \left(\partder{\boldy}{\boldx_i}\right)^T\partder{\Loss}{\boldy} =
 (\boldW^i)^T \diag (f'(\boldz)) \partder{\Loss}{\boldy} \\
 \frac{d\Loss}{d\boldh_{i}} & = \frac{d\Loss(\boldy, \boldV, \boldW, \boldb)}{d\boldh_{i}} = \left(\partder{\boldy}{\boldh_i}\right)^T\partder{\Loss}{\boldy} =
-(\boldV^i)^T \diag (f'(\boldz))  \partder{\Loss}{\boldy} \\
+(\boldV^i)^T \diag (f'(\boldz))  \partder{\Loss}{\boldy}
 \end{align}
 Таким образом, требуется найти частные производные $\partder{\boldy}{\boldW_{i,j}}$, $\partder{\boldy}{\boldV_{i,j}}$, $\partder{\boldy}{\boldb_{i}}$
 \begin{align*}
@@ -552,7 +552,7 @@ $$
 \frac{\partial \boldy}{\partial \boldV_{i, j}} &= \left(\frac{d\boldy}{d\boldz}\right)^T \frac{\partial\boldz}{\partial\boldV_{i, j}}  = \boldh_j \diag(f'(\boldz))  \bolde_i= \boldh_j f'(\boldz_i) \bolde_i.\\ 
 \frac{\partial \boldy}{\partial \boldx_{i}} &= \left(\frac{d\boldy}{d\boldz}\right)^T \frac{\partial\boldz}{\partial\boldx_{i}} = \diag(f'(\boldz)) \boldW^i\\
 \frac{\partial \boldy}{\partial \boldh_{i}} &= \left(\frac{d\boldy}{d\boldz}\right)^T \frac{\partial\boldz}{\partial\boldh_{i}} = \diag(f'(\boldz)) \boldV^i\\
-\frac{\partial \boldy}{\partial \boldb_{i}} &= f'(\boldz_i)\bolde_i   \\
+\frac{\partial \boldy}{\partial \boldb_{i}} &= f'(\boldz_i)\bolde_i 
 \end{align*}
 
 %\begin{gather*}

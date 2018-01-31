@@ -20,7 +20,10 @@ class Model(Layer):
         return str(self.sequential) + '->[' + str(self.criterion) + ']'
     def __getitem__(self, n_layer):
         return self.sequential[n_layer]
-    # Initialization
+        
+    ################################## 
+    ###       Initialization       ###
+    ##################################
     def initialize(self):
         assert False, '"initialize" method is not defined for Model'
         
@@ -39,31 +42,41 @@ class Model(Layer):
         self.config = deepcopy(config)
         self.compiled = True
         return self
-    
+        
+    ################################## 
+    ###     Forward propagation    ###
+    ##################################
     @check_compiled
     def forward(self, X, y=None):
         self.sequential_output = self.sequential.forward(X) # X will be automatically converted to dtype during this call
         if y is None:
             return self.sequential_output
         self.main_loss = self.criterion.forward(self.sequential_output, y)
-        self.reg_loss  = self.sequential.get_regularization_loss()
-        self.output = self.main_loss + self.reg_loss
+        self.reg_loss  = self.get_regularization_loss()
+        self.output    = self.main_loss + self.reg_loss
         return self.output
-
+        
+    ################################## 
+    ###    Backward propagation    ###
+    ##################################
     @check_compiled
     def backward(self, X, y):
         grad_output = self.criterion.backward(self.sequential_output, y)
-        np.clip(grad_output, -self.grad_clip, self.grad_clip, grad_output)
         self.grad_input = self.sequential.backward(X, grad_output)
         np.clip(self.grad_input, -self.grad_clip, self.grad_clip, self.grad_input)
         return self.grad_input
         
+    ################################## 
+    ###         Parameters         ###
+    ##################################
+    # Получение параметров и градиентов
     @check_compiled
     def get_params(self, copy=False):
         return self.sequential.get_params(copy=copy)
     @check_compiled
     def get_grad_params(self, copy=False):
         return self.sequential.get_grad_params(copy=copy)
+    # Выставление параметров и градиентов   
     @check_compiled
     def set_params(self, params):
         self.sequential.set_params(params)
@@ -74,10 +87,16 @@ class Model(Layer):
     def zero_grad_params(self):
         self.sequential.zero_grad_params()
         
+    ################################## 
+    ###       Regularization       ###
+    ##################################
     @check_compiled
     def get_regularization_loss(self):
         return self.sequential.get_regularization_loss()
-    
+        
+    ################################## 
+    ###   Changing operation mode  ###
+    ##################################
     @check_compiled
     def train(self):
         self.training = True

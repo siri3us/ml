@@ -18,8 +18,8 @@ class ConstInitializer(Initializer):
         value = np.array(self.value, dtype=self.dtype)
         if shape is None:
             return value
-        assert value.shape == shape, 'Passed shape = {} does not match init value shape = {}.'.format(
-            shape, value.shape)
+        assert value.shape == shape, '"{}" object was initialized with value having shape {}. But a value of shape = {} is requested.'.format(
+            type(self).__name__, value.shape, shape)
         return value
 
 class NormalInitializer(Initializer):

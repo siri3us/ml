@@ -31,6 +31,10 @@ class Checker(Printer):
         self._printers = {}
         for v in range(20):
             self._printers[v] = Printer(v, self)
+            
+    ################################## 
+    ###        Type checks         ###
+    ##################################
     def _check_type(self, n, name, *types):
         if not isinstance(n, tuple(types)):
             type_names = [t.__name__ for t in types]
@@ -54,6 +58,9 @@ class Checker(Printer):
             raise TypeError(msg)
         return True
         
+    ################################## 
+    ###        Value checks        ###
+    ##################################
     def _check_positive(self, n, name, msg=None):
         self._check_numeric(n, name, msg=msg)
         if n <= 0:
@@ -67,6 +74,9 @@ class Checker(Printer):
             raise ValueError(msg)
         return True
         
+    ################################## 
+    ###    Type + value checks     ###
+    ##################################
     def _check_int_positive(self, n, name):
         self._check_int(n, name)
         self._check_positive(n, name)
@@ -95,11 +105,13 @@ class Checker(Printer):
             raise ValueError("All elements of the array \"{}\" must be in the range [{}, {}]".format(arr_name, range[0], range[1]))
         return True
         
+    ################################## 
+    ###          Setters           ###
+    ##################################  
     # Класс Checker обладает специальными методами, позволяющими не только проводить проверку некоторого 
     # значения, но и сохранять это значение в качестве аттрибута. Так как данная возможность операется на 
     # использвание метода __setattr__, то требуется соблюдать особую осторожность, если данный метода 
     # переопределен в наследнике класса Checker.
-        
     def _set_number(self, value, name):
         self._check_numeric(value, name)
         self.__setattr__(name, value)

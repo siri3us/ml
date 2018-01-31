@@ -7,15 +7,15 @@ from .decorators import *
 
 class Layer(Checker):
     # Checks
-    def _assert_nans(self, arr):
-        assert not np.any(np.isnan(arr)), 'NaNs etected: {}!'.format(self)
-    def _assert_infs(self, arr):
-        assert not np.any(np.isinf(arr)), 'Infs detected {}!'.format(self)
-    def _check_arrays(self, *arrays):
-        for arr in arrays:
-            assert isinstance(arr, np.ndarray)
-            self._assert_nans(arr)
-            self._assert_infs(arr)
+    # def _assert_nans(self, arr):
+    #    assert not np.any(np.isnan(arr)), 'NaNs etected: {}!'.format(self)
+    #  def _assert_infs(self, arr):
+    #     assert not np.any(np.isinf(arr)), 'Infs detected {}!'.format(self)
+    # def _check_arrays(self, *arrays):   #### Проверка входных массива данных на наличие nans и infs
+    #     for arr in arrays:
+    #         assert isinstance(arr, np.ndarray)
+    #         self._assert_nans(arr)
+    #         self._assert_infs(arr)
     
     
     def __init__(self, name=None):
@@ -27,6 +27,29 @@ class Layer(Checker):
         self._forward_exit_callback   = lambda: None
         self._backward_enter_callback = lambda: None
         self._backward_exit_callback  = lambda: None
+        
+        # Проверки прямого распространения
+        self._forward_checkers = []
+        self._forward_checkers.append(self._forward_check_type)
+        self._forward_checkers.append(self._forward_check_shape)
+        self._forward_checkers.append(self._forward_check_value)
+        # Препроцессинг прямого распространения
+        self._forward_preprocessors = []
+        self._forward_preprocessors.append(self._forward_preprocess_dtype)
+        # Постпроцессинг прямого распространения
+        self._forward_postprocessors = []
+       
+        # Проверки обратного распространения
+        self._backward_checkers = []
+        self._backward_checkers.append(self._backward_check_type)
+        self._backward_checkers.append(self._backward_check_shape)
+        self._backward_checkers.append(self._backward_check_value)
+        # Препроцессинг прямого распространения
+        self._backward_preprocessors = []
+        self._backward_preprocessors.append(self._backward_preprocess_dtype)
+        # Постпроцессинг прямого распространения
+        self._backward_postprocessors = []
+        self._backward_postprocessors.append(self._backward_postprocess_clip)
         
         self.name = name
         #self.dtype = None         # Must be set during initialization
@@ -49,7 +72,10 @@ class Layer(Checker):
     def set_backward_exit_call(self, callback=lambda: None):
         self._backward_exit_callback = callback
     
-    # Initialization
+       
+    ################################## 
+    ###       Initialization       ###
+    ##################################
     def _check_initialized(self):
         assert hasattr(self, 'debug')
         assert hasattr(self, 'seed')
@@ -129,29 +155,46 @@ class Layer(Checker):
     ###     Forward propagation    ###
     ##################################
     @check_initialized
-    def forward(self, input):
-        self._forward_enter_callback()
-        self._check_forward_input(input)
-        input = self._forward_preprocess(input)
-        self._forward(input)            # Finding output tensor; self.output
-        self._forward_postprocess()
-        self._forward_exit_callback()   # Callback during forward propagation
+    def forward(self, input, target=None):
+        self._forward_enter_callback()            # Вызов начального callback-а прямого распространения
+        self._forward_check(input, target)        # Проверка корректности входа слоя (типа, формы, значений)
+        input, target = self._forward_preprocess(input, target) # Обработка входа слоя
+        self._forward(input, target)              # Обновление выхода слоя (аттрибута self.output)
+        self._forward_postprocess()               # Обработка выхода слоя (аттрибута self.output)
+        self._forward_exit_callback()             # Вызов финального callback-а прямого распространения
         return self.output
-    def _check_forward_input(self, input):        #### Проверка входного массива
-        if self.debug:
-            self._check_arrays(input)             # Проверка входного массива данных на наличие nans и infs
-            self._check_input_shape(input)        # Проверка правильности размера входного массива данных
-    def _forward_preprocess(self, input):         #### Предобработка прямого распространения
-        return self._convert_to_dtype(input)      # Приведение данных к требуемому типу    
-    def _forward(self, input):
-        self.update_output(input)                 
-    def update_output(self, input):
+    def _forward(self, input, target=None):
         self.output = input
-    def _forward_postprocess(self):               #### Постобработка прямого распространения
-        return
-    def _check_input_shape(self, input):
+    # Проверки прямого распространения    
+    def _forward_check(self, input, target=None):   #### Проверка входного массива
+        if self.debug:
+            for checker in self.forward_checkers:
+                checker(input, target)
+    def _forward_check_type(self, input, target=None):
+        assert isinstance(input, np.ndarray)
+        if target is not None:
+            assert isinstance(target, np.ndarray)
+    def _forward_check_shape(self, input, target=None):          #### Проверка правильности размера входного массива данных
         pass
-        
+    def _forward_check_value(self, input, target=None)           #### Проверка корректности значений входных массивов данных при прямом распространении ошибки
+        assert not np.any(np.isnan(input)), 'NaNs detected in "input" of forward propagation of layer "{}"'.format(self.name)
+        assert not np.any(np.isinf(input)), 'Infs detected in "input" of forward propagation of layer "{}"'.format(self.name)
+        if target is not None:
+            assert not np.any(np.isnan(target)), 'NaNs detected in "target" of forward propagation of layer "{}"'.format(self.name)
+            assert not np.any(np.isinf(target)), 'Infs detected in "target" of forward propagation of layer "{}"'.format(self.name)
+    # Препроцессинг прямого распространения
+    def _forward_preprocess(self, input, target=None):       #### Предобработка прямого распространения
+        for preprocessor in self._forward_preprocessors:
+            input, target = preprocessor(input, target)
+        return input, target
+    def _forward_preprocess_dtype(self, input, target=None): #### Приведение данных к требуемому типу  
+        input  = self._convert_to_dtype(input)        
+        target = self._convert_to_dtype(target)
+        return input, target
+    # Постпроцессинг прямого распространения
+    def _forward_postprocess(self):               #### Постобработка прямого распространения
+        for postprocessor in self._forward_postprocessors:
+            preprocessor()
     ################################## 
     ###    Backward propagation    ###
     ##################################
@@ -163,89 +206,126 @@ class Layer(Checker):
             методы update_grad_input и update_grad_param, либо метод _backward
         """
         self._backward_enter_callback()
-        self._check_backward_input(input, grad_output)
+        self._backward_check(input, grad_output)
         input, grad_output = self._backward_preprocess(input, grad_output)
         self._backward(input, grad_output)
         self._backward_postprocess()
         self._backward_exit_callback()
         return self.grad_input
-    def _check_backward_input(self, input, grad_output):
-        if self.debug:
-            self._check_arrays(input, grad_output)                   # Проверка входных массива данных на наличие nans и infs
-            self._check_input_grad_output_shape(input, grad_output)  # Проверка правильности размеров входных массивов данных
-    def _backward_preprocess(self, input, grad_output):          # Предобработка обратного распространения
-        return self._convert_to_dtype(input, grad_output)        
     def _backward(self, input, grad_output):
         # Идиома PIMPL
-        self.update_grad_input(input, grad_output)               # This updates self.grad_input
-        self.update_grad_param(input, grad_output)               # This updates all grad params  
-    def update_grad_input(self, input, grad_output):
         self.grad_input = grad_output
-    def update_grad_param(self, input, grad_output):
+    # Проверки для обратного распространения
+    def _backward_check(self, input, grad_output):
+        if self.debug:
+            for checker in self.backward_checkers:
+                checker(input, grad_output)        
+    def _backward_check_type(self, input, grad_output):
+        assert isinstance(input, np.ndarray)
+        assert isinstance(grad_output, np.ndarray)
+    def _backward_check_shape(self, input, grad_output): #### Проверка правильности размеров входных массивов данных при обратном распространении ошибки
         pass
-    def _backward_postprocess(self):                             # Постобработка обратного распространения
-        self._clip_gradients()                                   # Gradients clipping; ограничение градиентов
-    def _check_input_grad_output_shape(self, input, grad_output):
-        # Поведение по умолчанию предполагает, что слой сети не изменяет размер входа TODODO
-        # assert input.shape == grad_output.shape, 'input.shape({}) != grad_output.shape({}) for layer "{}".'.format(input.shape, grad_output.shape, self.name)
-        pass
-        
+    def _backward_check_value(self, input, grad_output): #### Проверка корректности значений входных массивов данных при обратном распространении ошибки
+        assert not np.any(np.isnan(input)), 'NaNs detected in "input" of backward propagation of layer "{}"'.format(self.name)
+        assert not np.any(np.isinf(input)), 'Infs detected in "input" of backward propagation of layer "{}"'.format(self.name)
+        assert not np.any(np.isnan(grad_output)), 'NaNs detected in "grad_output" of backward propagation of layer "{}"'.format(self.name)
+        assert not np.any(np.isinf(grad_output)), 'Infs detected in "grad_output" of backward propagation of layer "{}"'.format(self.name)
+    # Препроцессинг обратного распространения 
+    def _backward_preprocess(self, input, grad_output):           # Предобработка обратного распространения
+        for preprocessor in self._backward_preprocessors:
+            input, grad_output = preprocessor(input, grad_output)
+        return input, grad_output 
+    def _backward_preprocess_dtype(self, input, grad_output):
+        input = self._convert_to_dtype(input)
+        grad_output = self._convert_to_dtype(grad_output)
+        return input, grad_output
+    # Постпроцессинг обратного распространения 
+    def _backward_postprocess(self):                              # Постобработка обратного распространения
+        for postprocessor in self._backward_postprocessors:
+            postprocessor()                                   
+    def _backward_postprocess_clip(self):  ### Gradients clipping; ограничение градиентов
+        np.clip(self.grad_input, -self.grad_clip, self.grad_clip, self.grad_input)
+        grad_params = self.get_grad_params(copy=False)
+        for param_name, param_value in grad_params.items():
+            np.clip(param_value, -self.grad_clip, self.grad_clip, param_value)
+            
     ################################## 
     ###   Pre- & post- processors  ###
     ##################################
-    def _convert_to_dtype(self, *args):
-        args = tuple([arg.astype(self.dtype, copy=False) for arg in args])
-        if len(args) == 1:
-            return args[0]
-        return args
-    def _clip_gradients(self):
-        np.clip(self.grad_input, -self.grad_clip, self.grad_clip, self.grad_input)
-        grad_params = self.get_grad_params()
-        for param_name, param_value in grad_params.items():
-            np.clip(param_value, -self.grad_clip, self.grad_clip, param_value)
-    
-    
-    # Regulariation
-    @check_initialized
-    def get_regularization_loss(self):
-        return 0.0
-    
-    # Getting params and gradients
+    def _convert_to_dtype(self, v):
+        if v is None:
+            return v
+        if isinstance(v, np.ndarray):
+            return v.astype(self.dtype, copy=False) 
+        return v
+
+    ################################## 
+    ###         Parameters         ###
+    ##################################
+    # Получение параметров и градиентов
     @check_initialized
     def get_params(self, copy=False):
         return OrderedDict()
     @check_initialized
     def get_grad_params(self, copy=False):
-        return OrderedDict()
-    @check_initialized
-    def get_regularizers(self):
         return OrderedDict()    
     def _make_dict_copy(self, d, copy=False):
         if copy:
             return OrderedDict([(k, v.copy()) for k, v in d.items()])
         return d
-      
+    # Выставление параметров и градиентов
+    @check_initialized
+    def set_params(self, new_params):
+        params = self.get_params(copy=False)
+        for param_name in params:
+            if param_name in new_params:
+                param_shape = params[param_name].shape
+                new_param_shape = new_params[param_name].shape
+                assert param_shape == new_param_shape, 'Attempt to write a value with shape {} into parameter "{}" with shape {}'.format(
+                    new_param_shape, param_name, param_shape)
+                np.copyto(params[param_name], new_params[param_name]) 
+            else:
+                # TODO: create warning
+                pass
+    @check_initialized
+    def set_grad_params(self, new_grad_params):
+        grad_params = self.get_grad_params(copy=False) # Getting references to current gradients
+        for param_name in grad_params:
+            if param_name in new_grad_params:
+                param_shape = grad_params[param_name].shape
+                new_param_shape = new_grad_params[param_name].shape
+                assert param_shape == new_param_shape, 'Attempt to write a value with shape {} into gradient of parameter "{}" with shape {}'.format(
+                    new_param_shape, param_name, param_shape)
+                np.copyto(grad_params[param_name], new_grad_params[param_name])      
+            else:
+                # TODO: create warning
+                pass
     @check_initialized
     def zero_grad_params(self):
         """
         Данная функция обнуляет текущие значения градиентов
         """
         pass
-    
+                 
+    ################################## 
+    ###       Regularization       ###
+    ##################################
     @check_initialized
-    def set_params(self, new_params):
-        params = self.get_params(copy=False)
-        for param_name in new_params:
-            assert param_name in params, 'Layer "{}" does not have a parameter with name "{}".'.format(self, param_name)
-            np.copyto(params[param_name], new_params[param_name]) 
+    def get_regularizers(self):
+        return OrderedDict()
     @check_initialized
-    def set_grad_params(self, new_grad_params):
-        grad_params = self.get_grad_params(copy=False) # Getting references to current gradients
-        for param_name in new_grad_params:
-            assert param_name in grad_params, 'Layer "{}" does not have a parameter with name "{}".'.format(self, param_name)
-            np.copyto(grad_params[param_name], new_grad_params[param_name])
-            
-    # Changing network mode
+    def get_regularization_loss(self):
+        regularizers = self.get_regularizers()
+        params = self.get_params()
+        loss = 0.0
+        for param_name, regularizer in regularizers.items():
+            assert param_name in params, 'Regularization for unknown parameter "{}" in layer "{}".'.format(param_name, self.name)
+            loss += regularizer.get_loss()
+        return loss
+        
+    ################################## 
+    ###   Changing operation mode  ###
+    ##################################
     @check_initialized
     def train(self):
         self.training = True
