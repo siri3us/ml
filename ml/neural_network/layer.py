@@ -35,7 +35,7 @@ class Layer(Checker):
         self._forward_checkers.append(self._forward_check_value)
         # Препроцессинг прямого распространения
         self._forward_preprocessors = []
-        self._forward_preprocessors.append(self._forward_preprocess_dtype)
+        self._forward_preprocessors.append(self._forward_preprocess_input_dtype)
         # Постпроцессинг прямого распространения
         self._forward_postprocessors = []
        
@@ -51,7 +51,8 @@ class Layer(Checker):
         self._backward_postprocessors = []
         self._backward_postprocessors.append(self._backward_postprocess_clip)
         
-        self.name = name
+        self.layer_type_name = type(self).__name__
+        #self.name = None
         #self.dtype = None         # Must be set during initialization
         #self.debug = None         # Must be set during initialization
         #self.input_shape = None   # Must be set during initialization
@@ -115,11 +116,9 @@ class Layer(Checker):
         return params
     def _initialize_name(self, params):
         names = params.setdefault('names', {})
-        layer_type_name = type(self).__name__
-        n_layers = names.setdefault(layer_type_name, 0)
-        names[layer_type_name] += 1
-        if self.name is None:
-            self.name = layer_type_name + str(n_layers)
+        n_layers = names.setdefault(self.layer_type_name, 0)
+        names[self.layer_type_name] += 1
+        self.name = self.layer_type_name + str(n_layers)
         return params
     def _initialize_seed(self, params):
         # Предполагается, что каждый уровень сети снабжен собственным случайным генератором (Just in case)
@@ -137,6 +136,7 @@ class Layer(Checker):
         # Empty layer does not have params
         return params
     def _initialize_input_shape(self, params):
+        # TODO: непонятно, какую версию использовать в базовом классе Layer
         assert 'input_shape' in params, '"input_shape" is not provided though must be.'
         input_shape = params['input_shape']
         self.input_shape = tuple([-1] + list(input_shape[1:]))
@@ -144,7 +144,7 @@ class Layer(Checker):
     def _initialize_output_shape(self, params):
         # По умолчанию предполагается, что размер выхода сети совпадает с его входом.
         # Для уровней, изменющих размер входа, следует перегрузить данную функцию.
-        self.output_shape = params['input_shape']
+        self.output_shape = self.input_shape
         return params
     def _initialize_grad_clip(self, params):
         self.grad_clip = params.setdefault('grad_clip', np.inf)
@@ -187,9 +187,8 @@ class Layer(Checker):
         for preprocessor in self._forward_preprocessors:
             input, target = preprocessor(input, target)
         return input, target
-    def _forward_preprocess_dtype(self, input, target=None): #### Приведение данных к требуемому типу  
+    def _forward_preprocess_input_dtype(self, input, target=None): #### Приведение данных к требуемому типу  
         input  = self._convert_to_dtype(input)        
-        target = self._convert_to_dtype(target)
         return input, target
     # Постпроцессинг прямого распространения
     def _forward_postprocess(self):               #### Постобработка прямого распространения

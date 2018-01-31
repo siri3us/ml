@@ -23,7 +23,11 @@ class Sequential(Layer):
     ###       Initialization       ###
     ##################################
     def _initialize(self, params):
+        # Sequential не отображается в общей иерархии уровней
+        names = params['names']
+        params['names'] = {}
         super()._initialize(params)
+        params['names'] = names
         for layer in self.layers:
             params = layer.initialize(params)
         self.output_shape = params['input_shape']

@@ -5,8 +5,8 @@ from .layer import Layer
 from .decorators import *
 
 class Criterion(Layer):
-    def __init__ (self, name=None):
-        super().__init__(name=name)
+    def __init__ (self):
+        super().__init__()
     def _initialize_output_shape(self, params):
         self.output_shape = (1, 1) # It is just a number
         return params
@@ -31,8 +31,8 @@ class MSECriterion(Criterion):
         self.grad_input = 2 * (input - target) / input.shape[0]
         
 class MulticlassLogLoss(Criterion):
-    def __init__(self, proba_clip=1e-20, name=None):
-        super().__init__(name=name)
+    def __init__(self, proba_clip=1e-20):
+        super().__init__()
         self.proba_clip = proba_clip
         assert proba_clip <= 1e-6
         self._forward_preprocessors.append(self._forward_preprocess_input)

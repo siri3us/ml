@@ -9,6 +9,7 @@
 \usepackage{xspace}
 \usepackage{mathtools}
 \usepackage{hyperref}
+\usepackage{tabularx}
 \usepackage{graphicx}
 \usepackage{listings}
 \usepackage{algorithm}
@@ -198,6 +199,49 @@ $$\boldB = [\underbrace{\boldb, \boldb, \dots, \boldb}_{\NumOfSamples}]^T \in \m
 \partder{\Loss}{\boldx} = \partder{\boldy}{\boldx} \partder{\Loss}{\boldy} = \left(\diag[y_1, y_2, \dots, y_\NumOfDims] - \boldy \boldy^T\right) \partder{\Loss}{\boldy} = \diag[y_1, y_2, \dots, y_\NumOfDims] \partder{\Loss}{\boldy} - \boldy \cdot \left\langle \boldy, \partder{\Loss}{\boldy} \right\rangle = \\
 = \boldy \otimes \partder{\Loss}{\boldy} - \boldy \left\langle \boldy, \partder{\Loss}{\boldy} \right\rangle
 \end{gather*}
+
+\section{SoftMax + LogLoss}
+Зачастую полезной оказывается связка сразу двух уровней
+
+\subsection{Forward propagation}
+
+$$
+\Loss = - \frac{1}{\NumOfSamples} \Sum_{n=1}^{\NumOfSamples} \Sum_{c=1}^{\NumOfClasses} \boldY_c^n \log \boldP_c^n
+$$
+
+
+$$
+\Loss = \Sum_{c=1}^{\NumOfClasses} \boldy_c \log \boldp_c,
+$$
+где 
+$$
+\boldp_c = \frac{e^{\boldx_c}}{\Sum_{i=1}^\NumOfSamples e^{\boldx_i}}
+$$
+
+
+\begin{gather*}
+\frac{d\Loss}{d \boldx_i} = \left(\frac{d \boldp}{d \boldx_i}\right)^T \frac{d \Loss}{d \boldp} = 
+\end{gather*}
+
+\begin{gather*}
+\frac{d\boldp_j}{d \boldx_i} = \boldp_j \delta_{ij} - \boldp_i \boldp_j
+\end{gather*}
+\begin{gather*}
+\frac{d \Loss}{d \boldp_j} = -\frac{\boldy_j}{\boldp_j}
+\end{gather*}
+\begin{gather*}
+\frac{d\Loss}{d \boldx_i} = \left(\frac{d \boldp}{d \boldx_i}\right)^T \frac{d \Loss}{d \boldp} = 
+\Sum_{j=1}^{\NumOfClasses} \frac{d \boldp_j}{d \boldx_i} \frac{d \Loss}{d \boldp_j} = - \Sum_{j=1}^{\NumOfClasses}  \left(\boldp_i \delta_{ij} - \boldp_i \boldp_j \right) \frac{\boldy_j}{\boldp_j} = \Sum_{j=1}^{\NumOfClasses}  \left(\boldp_i \boldy_j - \frac{\boldp_i}{\boldp_j} \boldy_j \delta_{ij}\right) = \boldp_i - \boldy_i
+\end{gather*}
+
+\begin{tabularx}{\textwidth}{|p{4cm}|p{4cm}|p{4cm}|p{4cm}|}
+\hline
+Покомпонентные производные                        &Производные по векторам и матрицам          &Minibatch-призводные &Стандартные minibatch-производные \\ \hline
+$\frac{d\Loss}{d \boldx_i} = \boldp_i - \boldy_i$ &$\frac{d\Loss}{d \boldx} = \boldp - \boldy$ &$\frac{d\Loss}{d \boldX} = \boldP - \boldY$ &$\frac{d\Loss}{d \boldX} = \boldP - \boldY$  \\ \hline
+\end{tabularx}
+
+
+\subsection{Backward propagation}
 
 \section{Batch Normalization}
 

@@ -8,7 +8,7 @@ from ..regularizers import *
 from ..decorators import *
 
 class Dense(Layer):
-    def __init__(self, units, use_bias=True, W_init=None, b_init=None, W_reg=None, b_reg=None, name=None):
+    def __init__(self, units, use_bias=True, W_init=None, b_init=None, W_reg=None, b_reg=None):
         """
         Inputs:
         - units - Integer or Long, dimensionality of the output space.
@@ -16,7 +16,7 @@ class Dense(Layer):
         - b_initializer
         - seed - used for initializers!!!
         """
-        super().__init__(name=name)
+        super().__init__()
         self.set_units(units)
         self.set_use_bias(use_bias)
         self.W_init = W_init

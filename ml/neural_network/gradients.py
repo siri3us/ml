@@ -103,7 +103,7 @@ class GradientsChecker:
                 self._print('Generated y with shape = {}'.format(y.shape))
         assert isinstance(X, np.ndarray)
         assert isinstance(y, np.ndarray)
-        assert X.shape[1:] == model.input_shape[1:]
+        #assert X.shape[1:] == model.input_shape[1:] # TODO: нечеткое сопоставление
         assert X.shape[0] == y.shape[0]
         return y
     def _get_grad_Y(self, layer, X, grad_Y):
@@ -137,8 +137,8 @@ class GradientsChecker:
             layer.zero_grad_params() # Обнуление градиентов
             if self.verbose:
                 print('{}.{}(...): setting outer parameters'.format(type(self).__name__, method_name))    
-        if isinstance(layer, Model):
-            self._eval_model_gradients(layer, input, output)
+        if isinstance(layer, (Model, Criterion)):
+            self._eval_model_gradients(layer, input, output, eval_grad_input=eval_grad_input)
         else:
             self._eval_layer_gradients(layer, input, output, eval_grad_input=eval_grad_input)
         if input is None:
@@ -147,7 +147,7 @@ class GradientsChecker:
         if restore_state:
             self._restore_state(layer)
         
-    def _eval_model_gradients(self, model, X=None, y=None):
+    def _eval_model_gradients(self, model, X=None, y=None, eval_grad_input=True):
         """
         Оценивает градиент модели по параметрам.
         
@@ -174,13 +174,16 @@ class GradientsChecker:
             self.num_grad_params[p_name] = eval_numerical_gradient(function, p_value, h=self.step)
         # Аналитическая оценка градиентов
         loss = model.forward(X, y)
-        _    = model.backward(X, y)
+        self.grad_input  = model.backward(X, y)
         self.grad_params = model.get_grad_params(copy=True)
         # Печать относительной ошибки
         for p_name in self.grad_params:
             print('grad_{} error = {}'.format(
                 p_name, rel_error(self.num_grad_params[p_name], self.grad_params[p_name])))    
-
+        if eval_grad_input:
+            self.num_grad_input = eval_numerical_gradient(function, X, h=self.step)
+            print('grad_X error = {}'.format(rel_error(self.num_grad_input, self.grad_input)))
+            
     def _eval_layer_gradients(self, layer, X=None, grad_Y=None, eval_grad_input=True):
         X = self._get_X(layer, X)
         grad_Y = self._get_grad_Y(layer, X, grad_Y)
