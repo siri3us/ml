@@ -70,7 +70,7 @@ class Solver:
         model_config.setdefault('dtype', np.float64)
         model_config.setdefault('seed', seed + 1)
         model_config.setdefault('input_shape', self.X_train.shape)
-        self.model = model.compile(**model_config)
+        self.model = model.initialize(model_config)
         if self.verbose: print(self.model)
 
         # Make sure the update rule exists, then replace the string
@@ -186,6 +186,12 @@ class Solver:
         return eval_func(output, y)
 
     def _logloss(self, probas, y_true):
+        assert isinstance(probas, np.ndarray)
+        assert isinstance(y_true, np.ndarray)
+        assert probas.shape[0] == y_true.shape[0], 'probas.shape = {}, y_true.shape = {}'.format(probas.shape, y_true.shape)
+        assert probas.ndim == 2
+        assert y_true.ndim == 1
+        
         y_true = y_true.astype(np.int32, copy=False)
         n_samples = probas.shape[0]
         probas = np.clip(probas, 1e-18, 1 - 1e-18)

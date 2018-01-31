@@ -24,7 +24,7 @@ class EmptyRegularizer(Regularizer):
     
 class L2Regularizer(Regularizer):
     def __init__(self, l2=0.0):
-        self._check_nonegative(l2, 'l2')
+        self._check_nonnegative(l2, 'l2')
         self.l2 = l2
     def get_loss(self, param):
         return 0.5 * self.l2 * np.sum(param ** 2)

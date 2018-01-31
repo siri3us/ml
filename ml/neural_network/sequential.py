@@ -32,7 +32,7 @@ class Sequential(Layer):
     ################################## 
     ###     Forward propagation    ###
     ##################################
-    def _forward(self, input):
+    def _forward(self, input, target=None):
         """This function passes input through all layers and saves output"""
         for layer in self.layers:
             output = layer.forward(input)
@@ -57,7 +57,7 @@ class Sequential(Layer):
     def get_params(self, copy=False):
         params = OrderedDict()
         for layer in self.layers:
-            for param_name, param_value in layer.get_params(copy=copy):
+            for param_name, param_value in layer.get_params(copy=copy).items():
                 assert param_name not in params, 'Parameters name clash!'
                 params[param_name] = param_value
         return params
@@ -65,8 +65,8 @@ class Sequential(Layer):
     def get_grad_params(self, copy=False):
         grad_params = OrderedDict()
         for layer in self.layers:
-            for param_name, grad_param_value in layer.get_grad_params(copy=copy):
-                assert param_name not in grad_param, 'Parameters name clash!'
+            for param_name, grad_param_value in layer.get_grad_params(copy=copy).items():
+                assert param_name not in grad_params, 'Parameters name clash!'
                 grad_params[param_name] = grad_param_value
         return grad_params
 
@@ -78,7 +78,7 @@ class Sequential(Layer):
         regularizers = OrderedDict()
         n_regularizers = 0
         for layer in self.layers:
-            for param_name, reg in layer.get_regularizers():
+            for param_name, reg in layer.get_regularizers().items():
                 assert param_name not in regularizers, 'Parameters name clash!'
                 regularizers[param_name] = reg
         return regularizers

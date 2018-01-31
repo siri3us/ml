@@ -17,7 +17,6 @@ class Model(Layer):
         assert isinstance(criterion, Criterion)
         self.sequential = sequential
         self.criterion = criterion
-        self.compiled = False
     def __repr__(self):
         return str(self.sequential) + '->[' + str(self.criterion) + ']'
     def __getitem__(self, n_layer):
@@ -26,12 +25,9 @@ class Model(Layer):
     ################################## 
     ###       Initialization       ###
     ##################################
-    def initialize(self):
-        assert False, '"initialize" method is not defined for Model'
-        
-    def compile(self, **config):
+    def initialize(self, config):
         """
-        Compilation stage for all layers in the network:
+        Initialization stage for all layers in the network:
             sets random seeds
             sets dtypes
             sets names
@@ -50,10 +46,11 @@ class Model(Layer):
     def _forward(self, input, target=None):
         self.sequential_output = self.sequential.forward(input)
         if target is None:
-            return self.sequential_output
-        self.main_loss = self.criterion.forward(self.sequential_output, target)
-        self.reg_loss  = self.get_regularization_loss()
-        self.output    = self.main_loss + self.reg_loss
+            self.output = self.sequential_output
+        else:
+            self.main_loss = self.criterion.forward(self.sequential_output, target)
+            self.reg_loss  = self.get_regularization_loss()
+            self.output    = self.main_loss + self.reg_loss
 
     ################################## 
     ###    Backward propagation    ###
@@ -83,18 +80,18 @@ class Model(Layer):
     ################################## 
     ###       Regularization       ###
     ##################################
-    @check_compiled
+    @check_initialized
     def get_regularization_loss(self):
         return self.sequential.get_regularization_loss()
         
     ################################## 
     ###   Changing operation mode  ###
     ##################################
-    @check_compiled
+    @check_initialized
     def train(self):
         self.training = True
         self.sequential.train()
-    @check_compiled
+    @check_initialized
     def evaluate(self):
         self.training = False
         self.sequential.evaluate()

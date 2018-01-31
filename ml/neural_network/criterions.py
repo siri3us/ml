@@ -59,7 +59,7 @@ class MulticlassLogLoss(Criterion):
         if target.ndim == 2:
             assert target.shape[1] == self.n_classes
         else:
-            assert np.max(labels) <= self.n_classes
+            assert np.max(target) <= self.n_classes
             assert np.min(target) >= 0
     # Препроцессинг прямого распространения
     def _forward_preprocess_input(self, input, target):
@@ -73,7 +73,7 @@ class MulticlassLogLoss(Criterion):
         return input, target
     # Прямое распространение
     def _forward(self, input, target):
-        self.output = -np.mean(np.log(input_clamp[np.arange(input.shape[0]), target]))
+        self.output = -np.mean(np.log(input[np.arange(input.shape[0]), target]))
     
     ################################## 
     ###    Backward propagation    ###

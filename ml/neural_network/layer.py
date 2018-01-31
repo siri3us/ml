@@ -168,7 +168,7 @@ class Layer(Checker):
     # Проверки прямого распространения    
     def _forward_check(self, input, target=None):   #### Проверка входного массива
         if self.debug:
-            for checker in self.forward_checkers:
+            for checker in self._forward_checkers:
                 checker(input, target)
     def _forward_check_type(self, input, target=None):
         assert isinstance(input, np.ndarray)
@@ -176,7 +176,7 @@ class Layer(Checker):
             assert isinstance(target, np.ndarray)
     def _forward_check_shape(self, input, target=None):          #### Проверка правильности размера входного массива данных
         pass
-    def _forward_check_value(self, input, target=None)           #### Проверка корректности значений входных массивов данных при прямом распространении ошибки
+    def _forward_check_value(self, input, target=None):          #### Проверка корректности значений входных массивов данных при прямом распространении ошибки
         assert not np.any(np.isnan(input)), 'NaNs detected in "input" of forward propagation of layer "{}"'.format(self.name)
         assert not np.any(np.isinf(input)), 'Infs detected in "input" of forward propagation of layer "{}"'.format(self.name)
         if target is not None:
@@ -194,7 +194,7 @@ class Layer(Checker):
     # Постпроцессинг прямого распространения
     def _forward_postprocess(self):               #### Постобработка прямого распространения
         for postprocessor in self._forward_postprocessors:
-            preprocessor()
+            postprocessor()
             
     ################################## 
     ###    Backward propagation    ###
@@ -219,7 +219,7 @@ class Layer(Checker):
     # Проверки для обратного распространения
     def _backward_check(self, input, grad_output):
         if self.debug:
-            for checker in self.backward_checkers:
+            for checker in self._backward_checkers:
                 checker(input, grad_output)        
     def _backward_check_type(self, input, grad_output):
         assert isinstance(input, np.ndarray)
@@ -306,7 +306,7 @@ class Layer(Checker):
     @check_initialized
     def zero_grad_params(self):
         # Для работы данного метода в классах-потомках достаточно корректной работы метода get_grad_params в этих классах
-        grad_params = self.get_grad_params(copy=False):
+        grad_params = self.get_grad_params(copy=False)
         for param_name, grad_param_value in grad_params.items():
             grad_param_value.fill(0)
                  

@@ -77,14 +77,13 @@ class Checker(Printer):
     ################################## 
     ###    Type + value checks     ###
     ##################################
-    def _check_int_positive(self, n, name):
-        self._check_int(n, name)
-        self._check_positive(n, name)
+    def _check_int_positive(self, n, name, msg=None):
+        self._check_int(n, name, msg)
+        self._check_positive(n, name, msg)
         return True
-    def _check_int_nonnegative(self, n, name):
-        self._check_int(n, name)
-        self._check_nonnegative(n, name)
-        
+    def _check_int_nonnegative(self, n, name, msg=None):
+        self._check_int(n, name, msg)
+        self._check_nonnegative(n, name, msg)
         return True
     def _check_proba(self, n, name):
         self._check_numeric(n, name)
