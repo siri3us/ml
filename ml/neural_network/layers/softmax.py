@@ -10,7 +10,7 @@ class SoftMax(Layer):
     ################################## 
     ###     Forward propagation    ###
     ##################################
-    def _forward(self, input, target):
+    def _forward(self, input, target=None):
         self.output = np.subtract(input, input.max(axis=1, keepdims=True))
         np.exp(self.output, self.output)
         self.output /= np.sum(self.output, axis=1, keepdims=True)

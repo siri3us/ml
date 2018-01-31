@@ -125,7 +125,7 @@ class GradientsChecker:
         layer.set_params(self.saved_params)              # Восстановление параметров слоя
         layer.set_grad_params(self.saved_grad_params)    # Восстановление градиентов слоя
         
-    def eval_gradients(self, layer, input=None, output=None, params=None, restore_state=False):
+    def eval_gradients(self, layer, input=None, output=None, params=None, restore_state=False, eval_grad_input=True):
         method_name = 'eval_gradients'
         assert isinstance(layer, Layer)
         # Сохранение состояния модели в случае использования внешних параметров
@@ -140,7 +140,7 @@ class GradientsChecker:
         if isinstance(layer, Model):
             self._eval_model_gradients(layer, input, output)
         else:
-            self._eval_layer_gradients(layer, input, output)
+            self._eval_layer_gradients(layer, input, output, eval_grad_input=eval_grad_input)
         if input is None:
             output = None
         # Восстановление состояния модели
@@ -181,23 +181,24 @@ class GradientsChecker:
             print('grad_{} error = {}'.format(
                 p_name, rel_error(self.num_grad_params[p_name], self.grad_params[p_name])))    
 
-    def _eval_layer_gradients(self, layer, X=None, grad_Y=None):
+    def _eval_layer_gradients(self, layer, X=None, grad_Y=None, eval_grad_input=True):
         X = self._get_X(layer, X)
         grad_Y = self._get_grad_Y(layer, X, grad_Y)
         # Функция нахождения выхода сети
         def function(self, *args, **kwargs):
             return layer.forward(X)
-        # Численная оценка градиента по входу
-        self.num_grad_input = eval_numerical_gradient_array(function, X, grad_Y, h=self.step)
+        # Аналитическая оценка градиентов по входу и параметрам
+        self.grad_input = layer.backward(X, grad_Y)
         # Численная оценка градиентов по параметрам
         self.num_grad_params = OrderedDict()
-        for p_name, p_value in layer.get_params().items():
-            self.num_grad_params[p_name] = eval_numerical_gradient_array(function, p_value, grad_Y, self.step)
-        # Аналитическая оценка градиентов по входу и параметрам
-        self.grad_input  = layer.backward(X, grad_Y)
+        for p_name, p_value in layer.get_params(copy=False).items():
+            self.num_grad_params[p_name] = eval_numerical_gradient_array(function, p_value, grad_Y, h=self.step)
         self.grad_params = layer.get_grad_params(copy=True)
         # Печать относительной ошибки
         for p_name in self.grad_params:
             print('grad_{} error = {}'.format(
                 p_name, rel_error(self.num_grad_params[p_name], self.grad_params[p_name])))
-        print('grad_X error = {}'.format(rel_error(self.num_grad_input, self.grad_input)))
+        if eval_grad_input:
+            # Численная оценка градиента по входу
+            self.num_grad_input = eval_numerical_gradient_array(function, X, grad_Y, h=self.step)
+            print('grad_X error = {}'.format(rel_error(self.num_grad_input, self.grad_input)))

@@ -41,14 +41,14 @@ class Dense(Layer):
     def _initialize_input_shape(self, params):
         super()._initialize_input_shape(params)
         assert len(self.input_shape) == 2, 'input to Dense layer must be a 2-dim tensor.'
+        self.n_features = self.input_shape[1]
         return params
     def _initialize_params(self, params):
         self._initialize_W(params)
         self._initialize_b(params)
         return params
     def _initialize_W(self, params):
-        n_features = self.input_shape[1]
-        W_shape = (n_features, self.units)
+        W_shape = (self.n_features, self.units)
         self.W_initializer = get_kernel_initializer(init=self.W_init, generator=self.generator, dtype=self.dtype)
         self.W = self.W_initializer(W_shape)
         self.grad_W = np.zeros_like(self.W, dtype=self.dtype)

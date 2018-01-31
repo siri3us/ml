@@ -10,7 +10,7 @@ class ConstInitializer(Initializer):
     def __init__(self, value=None, dtype=np.float64):
         self.value = value
         self.dtype = dtype
-    def __call__(self, shape=None):
+    def __call__(self, shape=None, *args, **kwargs):
         if self.value is None:
             if shape is None:
                 return np.zeros(shape=(1, 1), dtype=self.dtype)[0, 0]
@@ -27,13 +27,13 @@ class NormalInitializer(Initializer):
         assert isinstance(generator, np.random.RandomState)
         self.generator = generator
         self.dtype = dtype
-    def __call__(self, shape):
+    def __call__(self, shape, stddev=None):
         if len(shape) == 2:
             stddev = 1.0 / np.sqrt(shape[0])
         elif len(shape) == 4:
             stddev = 1.0 / np.sqrt(np.prod(shape[1:]))
         else:
-            assert False
+            assert stddev is not None
         return self.generator.normal(loc=0.0, scale=stddev, size=shape).astype(self.dtype, copy=False)
 
 def get_kernel_initializer(init=None, dtype=None, generator=None):
