@@ -52,6 +52,8 @@ class TensorShape:
 class Tensor:
     """
     Прокси класс для передачи доступа к параметрам
+    
+    
     """
     def __init__(self, shape=None, init_value=None, initializer=None, dtype=np.float64, name=None):
         """
@@ -67,8 +69,8 @@ class Tensor:
             init_value_shape = TensorShape(init_value.shape)
             if shape != init_value_shape:
                 raise ValueError('Inconsistent parameters "shape" and "init_value" parameters '\
-                                 'are passed to the constructor of tensor "{}": {} != {}.'.format(
-                                 shape, init_value_shape))
+                                 'are passed to the {} constructor "{}": {} != {}.'.format(
+                                 type(self).__name__, shape, init_value_shape))
             self.shape = init_value_shape  
             self.initializer = ConstantInitializer(value=init_value, dtype=dtype)
         elif shape.is_initialized() & (init_value is None):
@@ -76,15 +78,15 @@ class Tensor:
                 # Используем инициализатор по умолчанию (плохая практика)
                 initializer = NormalInitializer(dtype=dtype)
             if not isinstance(initializer, InitializerBase):
-                raise TypeError('Parameter "initializer" passed to the Tensor constructor '\
-                                'must have type Initializer.')
+                raise TypeError('Parameter "initializer" passed to the {} constructor '\
+                                'must have type Initializer.'.format(type(self).__name__))
             self.shape = shape
             self.initializer = initializer
         elif (not self.shape.is_initialized()) & (init_value is not None):
             self.shape = TensorShape(init_value.shape)
             self.initializer = ConstantInitializer(value=init_value, dtype=dtype)
         else:
-            raise ValueError('Either "shape" or "init_value" must be provided to the Tensor constructor.')
+            raise ValueError('Either "shape" or "init_value" must be provided to the {} constructor.'.format(type(self).__name__))
         self.name = name
         self.dtype = dtype
         assert isinstance(self.initializer, InitializerBase)
@@ -109,6 +111,16 @@ class Tensor:
     def get_value(self):
         return self.value
 
+
+class Placeholder:
+    def __init__(self, shape):
+    
+    def get_value():
+    
+    def set_value(self, value):
+        assert self.shape == TensorShape(value.shape)
+    
+    
         
 class TensorConstantInitializer(ConstantInitializer):
     def __init__(self, name, *args, **kwargs):
