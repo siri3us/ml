@@ -6,36 +6,83 @@ class Initializer:
     def __init__(self):
         pass
     
-class ConstInitializer(Initializer):
-    def __init__(self, value=None, dtype=np.float64):
-        self.value = value
+class InitializerBase:
+    def __init__(self, dtype=np.float64):
         self.dtype = dtype
-    def __call__(self, shape=None, *args, **kwargs):
-        if self.value is None:
-            if shape is None:
-                return np.zeros(shape=(1, 1), dtype=self.dtype)[0, 0]
-            return np.zeros(shape=shape, dtype=self.dtype)
-        value = np.array(self.value, dtype=self.dtype)
-        if shape is None:
-            return value
-        assert value.shape == shape, '"{}" object was initialized with value having shape {}. But a value of shape = {} is requested.'.format(
-            type(self).__name__, value.shape, shape)
-        return value
+    def __call__(self, shape, *args, **kwargs):
+        assert False
+    def _check_shape(self, shape):
+        if not isinstance(shape, tuple):
+            raise TypeError('When provided to initializer "shape" must be a tuple of integers.')
+        # TODO: check positive integers
+            
 
-class NormalInitializer(Initializer):
-    def __init__(self, generator, dtype=np.float64):
-        assert isinstance(generator, np.random.RandomState)
+class RandomInitializerBase(InitializerBase):
+    def __init__(self, generator=None, seed=None, dtype=np.float64):
+        super().__init__(dtype=dtype)
+        self.set_generator(generator=generator, seed=seed)
+    def set_generator(self, generator, seed):
+        if generator is None:
+            generator = np.random.RandomState(seed)
+        assert isinstance(generator, np.random.RandomState)  
         self.generator = generator
-        self.dtype = dtype
-    def __call__(self, shape, stddev=None):
-        if len(shape) == 2:
-            stddev = 1.0 / np.sqrt(shape[0])
-        elif len(shape) == 4:
-            stddev = 1.0 / np.sqrt(np.prod(shape[1:]))
-        else:
-            assert stddev is not None
-        return self.generator.normal(loc=0.0, scale=stddev, size=shape).astype(self.dtype, copy=False)
+        
 
+class ConstantInitializer(InitializerBase):
+    def __init__(self, value=None, dtype=np.float64):
+        super().__init__(dtype=dtype)
+        if value is not None:
+            if not isinstance(value, np.ndarray):
+                raise TypeError('When provided to the ConstantInitializer constructor "value" must be a numpy array.')
+        self.value = value
+    def __call__(self, shape=None, *args, **kwargs):
+        """
+        Либо shape, либо начальное значение value должны быть заданы.
+        """
+        if shape is not None:
+            self._check_shape(shape)
+        if (self.value is None) & (shape is None):
+            raise ValueError('Either "value" or "shape" must be available when calling ConstantInitializer.')
+        if self.value is None:
+            return np.zeros(shape, dtype=self.dtype)
+        if shape is None:
+            return self.value.astype(dtype=self.dtype, copy=False)
+        if shape != self.value.shape:
+            raise ValueError('Inconsistent requested shape and the initial value shape: '\
+                             'requested shape is {} while the initial value shape is {}'.format(shape, self.value.shape))
+        return self.value.astype(dtype=self.dtype, copy=False)
+
+    
+class NormalInitializer(RandomInitializerBase):
+    def __init__(self, generator=None, seed=None, dtype=np.float64, loc=None, scale=None):
+        """
+        - generator: если задан, seed не используется; если не задан, seed используется для создания генератора
+        - loc: среднее значение нормального распределения
+        - scale: стандартное отклонение нормального распределения
+        """
+        super().__init__(generator=generator, seed=seed, dtype=dtype)
+        self.set_loc(loc)
+        self.set_scale(scale)
+    def set_loc(self, loc=None):
+        if loc is None:
+            loc = 0.0
+        self.loc = loc
+    def set_scale(self, scale=None):
+        if scale is None:
+            scale = 1.0
+        self.scale = scale
+    def __call__(self, shape):
+        """
+        Аргументы:
+        - shape
+        
+        Возвращает массив из нормальных случайных значний:
+        """
+        self._check_shape(shape) 
+        return self.generator.normal(loc=self.loc, scale=self.scale, size=shape).astype(self.dtype, copy=False)
+   
+
+# TODO rewrite
 def get_kernel_initializer(init=None, dtype=None, generator=None):
     """
     Возвращает инициализатор для 
