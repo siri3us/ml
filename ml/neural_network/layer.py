@@ -60,6 +60,10 @@ class Layer(Checker):
         #self.grad_clip = None     # Must be set during initialization
         self.initialized = False  # Must be set to True after initialization
         
+        self._params = OrderedDict()
+        self._grad_params = OrderedDict()
+        self._regularizers = OrderedDict()
+        
     def __repr__(self):
         return type(self).__name__
     
@@ -265,10 +269,10 @@ class Layer(Checker):
     # Получение параметров и градиентов
     @check_initialized
     def get_params(self, copy=False):
-        return OrderedDict()
+        return self._params
     @check_initialized
     def get_grad_params(self, copy=False):
-        return OrderedDict()    
+        return self._grad_params
     def _make_dict_copy(self, d, copy=False):
         if copy:
             return OrderedDict([(k, v.copy()) for k, v in d.items()])
@@ -314,7 +318,7 @@ class Layer(Checker):
     ##################################
     @check_initialized
     def get_regularizers(self):
-        return OrderedDict()
+        return self.regularizers
     @check_initialized
     def get_regularization_loss(self):
         # Для работы данного метода в классах-потомках достаточно корректной работы метода get_regularizers в этих классах
