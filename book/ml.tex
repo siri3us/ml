@@ -628,43 +628,9 @@ $$
 \end{itemize}
 
 
-\chapter{Классификация трафика}
-The suite of classifiers includes:
-\begin{itemize}
-	\item the payload-based classifier, crl pay, which has been developed and widely
-	used by the Internet research community
-	\item the graph-based classifiers, BLINC and Traffic Dispersion Graphs
-	\item the CoralReef’s [1] ports-applications matching database (i.e., ports-based classifier)
-	\item the seven most commonly used machine learning algorithms such as C4.5 Decision Tree, Naive Bayes, Naive Bayes Kernel Estimation,
-	Bayesian Networks, k-Nearest Neighbors, Neural Networks and Support Vector Machines
-	\item a combined weight-based classifier which takes classification results from some or all of the aforementioned classifiers and performs a
-	weighted voting process to derive a single best classification result.
-\end{itemize}
+\include{stats}
+\include{traffic}
 
-BLINK
-
-CoralReef
-
-Метрики:
-\begin{itemize}
-	\item per-trace accuracy (Overall Accuracy)
-	\item per-application accuracy (Precision, Recall, and FMeasure)
-	\item computational performance (Learning Time
-	and Classification Time)
-\end{itemize}
-
-Проблемы:
-\begin{itemize}
-	\item Классификатор привязан к точке своего функционирования
-\end{itemize}
-
-Вопросы
-\begin{itemize}
-	\item Is the whole dataset is unlabeled at the beginning? So, to train the classifier we first of all apply DPI to the training dataset to make it labeled?
-	\item Only ``elephant'' flows are considered? What are these flows?
-\end{itemize}
-
-\url{http://mawi.wide.ad.jp/mawi/}
 
 \bibliographystyle{ugost2008}
 \bibliography{../bib/phy.bib}
